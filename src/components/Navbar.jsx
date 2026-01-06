@@ -3,10 +3,12 @@ import { isLoggedIn, logout } from "../utils/auth";
 
 export default function Navbar() {
   return (
-    <nav className="bg-gray-900 text-white px-6 py-4 flex justify-between">
-      <h1 className="text-xl font-bold">RRR ShopKart</h1>
+    <nav className="bg-gray-900 text-white px-6 py-4 flex items-center justify-between">
+      <Link to="/" className="text-2xl font-bold text-green-400">
+        RRR ShopKart
+      </Link>
 
-      <div className="space-x-4">
+      <div className="space-x-6 text-lg">
         <Link to="/" className="hover:text-green-400">Home</Link>
 
         {!isLoggedIn() ? (
@@ -15,7 +17,10 @@ export default function Navbar() {
             <Link to="/signup" className="hover:text-green-400">Signup</Link>
           </>
         ) : (
-          <button onClick={logout} className="text-red-400">
+          <button
+            onClick={logout}
+            className="text-red-400 hover:text-red-500"
+          >
             Logout
           </button>
         )}
