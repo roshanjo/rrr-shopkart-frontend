@@ -1,7 +1,6 @@
 import { requireAuth } from "../utils/auth";
 
 const API = import.meta.env.VITE_API_URL;
-const STRIPE_LINK = import.meta.env.VITE_STRIPE_PAYMENT_LINK;
 
 export default function Cart() {
   requireAuth();
@@ -11,8 +10,8 @@ export default function Cart() {
 
   const total = cart.reduce((sum, item) => sum + item.price, 0);
 
-  const placeOrder = async () => {
-    const res = await fetch(`${API}/api/save-order/`, {
+  const payWithStripe = async () => {
+    const res = await fetch(`${API}/api/create-checkout-session/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -20,15 +19,15 @@ export default function Cart() {
       },
       body: JSON.stringify({
         items: cart,
-        total,
       }),
     });
 
-    if (res.ok) {
-      localStorage.removeItem("cart");
-      window.location.href = STRIPE_LINK;
+    const data = await res.json();
+
+    if (data.url) {
+      window.location.href = data.url; // ✅ Stripe redirect (SAFE)
     } else {
-      alert("Order failed");
+      alert("Stripe session failed");
     }
   };
 
@@ -57,7 +56,7 @@ export default function Cart() {
           </h2>
 
           <button
-            onClick={placeOrder}
+            onClick={payWithStripe}
             className="mt-6 w-full bg-purple-600 text-white py-2 rounded hover:bg-purple-700"
           >
             Pay with Stripe
