@@ -1,41 +1,84 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { setAuth } from "../utils/auth";
+import { saveAuth } from "../utils/auth";
 
-const API = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL;
 
 export default function Signup() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const submit = async (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
+    setError("");
 
-    const res = await fetch(`${API}/api/signup`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password }),
-    });
+    try {
+      const res = await fetch(`${API_URL}/api/signup/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (data.token) {
-      setAuth(data.token);
+      if (!res.ok) {
+        setError(data.error || "Signup failed");
+        return;
+      }
+
+      // ✅ SAVE TOKEN FIRST
+      saveAuth(data.token, data.name);
+
+      // ✅ THEN REDIRECT
       navigate("/products");
-    } else {
-      alert(data.error || "Signup failed");
+    } catch (err) {
+      setError("Network error");
     }
   };
 
   return (
-    <form onSubmit={submit} className="max-w-sm mx-auto mt-20 space-y-4">
-      <h2 className="text-2xl font-bold">Signup</h2>
-      <input className="border p-2 w-full" placeholder="Name" onChange={e => setName(e.target.value)} />
-      <input className="border p-2 w-full" placeholder="Email" onChange={e => setEmail(e.target.value)} />
-      <input className="border p-2 w-full" type="password" placeholder="Password" onChange={e => setPassword(e.target.value)} />
-      <button className="bg-black text-white px-4 py-2 w-full">Signup</button>
-    </form>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <form
+        onSubmit={handleSignup}
+        className="bg-white p-6 rounded shadow w-80"
+      >
+        <h2 className="text-xl font-bold mb-4 text-center">Signup</h2>
+
+        {error && <p className="text-red-500 mb-2">{error}</p>}
+
+        <input
+          className="border p-2 w-full mb-2"
+          placeholder="Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+        />
+
+        <input
+          className="border p-2 w-full mb-2"
+          placeholder="Email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+
+        <input
+          className="border p-2 w-full mb-4"
+          placeholder="Password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+
+        <button className="bg-blue-600 text-white w-full py-2 rounded">
+          Signup
+        </button>
+      </form>
+    </div>
   );
 }
