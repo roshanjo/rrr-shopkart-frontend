@@ -1,10 +1,12 @@
 import { requireAuth } from "../utils/auth";
 
+
 const API = import.meta.env.VITE_API_URL;
 
 export default function Cart() {
   requireAuth();
 
+  console.log("Stripe Link:", import.meta.env.VITE_STRIPE_PAYMENT_LINK);
   const cart = JSON.parse(localStorage.getItem("cart")) || [];
   const token = localStorage.getItem("token");
 
