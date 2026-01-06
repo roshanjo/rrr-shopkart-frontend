@@ -1,25 +1,23 @@
 import { Link } from "react-router-dom";
-import { isLoggedIn, logout } from "../utils/auth";
 
 export default function Navbar() {
+  const token = localStorage.getItem("token");
+
   return (
-    <nav className="bg-gray-900 text-white px-6 py-4 flex items-center justify-between">
-      <Link to="/" className="text-2xl font-bold text-green-400">
-        RRR ShopKart
-      </Link>
+    <nav className="bg-white shadow-md p-4 flex justify-between">
+      <h1 className="text-xl font-bold text-indigo-600">ShopKart</h1>
 
-      <div className="space-x-6 text-lg">
-        <Link to="/" className="hover:text-green-400">Home</Link>
-
-        {!isLoggedIn() ? (
-          <>
-            <Link to="/login" className="hover:text-green-400">Login</Link>
-            <Link to="/signup" className="hover:text-green-400">Signup</Link>
-          </>
-        ) : (
+      <div className="space-x-4">
+        {!token && <Link to="/login">Login</Link>}
+        {!token && <Link to="/signup">Signup</Link>}
+        {token && <Link to="/dashboard">Dashboard</Link>}
+        {token && (
           <button
-            onClick={logout}
-            className="text-red-400 hover:text-red-500"
+            onClick={() => {
+              localStorage.removeItem("token");
+              window.location.href = "/login";
+            }}
+            className="text-red-500"
           >
             Logout
           </button>
