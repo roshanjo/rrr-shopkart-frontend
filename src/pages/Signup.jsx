@@ -5,13 +5,19 @@ import { saveAuth } from "../utils/auth";
 const API_URL = import.meta.env.VITE_API_URL;
 
 export default function Signup() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const navigate = useNavigate();
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
+  const [error, setError] = useState("");
 
-  const handleSignup = async (e) => {
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
@@ -19,7 +25,7 @@ export default function Signup() {
       const res = await fetch(`${API_URL}/api/signup/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify(form),
       });
 
       const data = await res.json();
@@ -29,53 +35,54 @@ export default function Signup() {
         return;
       }
 
-      // ✅ SAVE TOKEN FIRST
-      saveAuth(data.token, data.name);
+      // OPTIONAL AUTO LOGIN IF TOKEN IS RETURNED
+      if (data.token) {
+        saveAuth(data.token, { name: form.name, email: form.email });
+      }
 
-      // ✅ THEN REDIRECT
-      navigate("/products");
+      navigate("/login");
     } catch (err) {
-      setError("Network error");
+      setError("Server error");
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <form
-        onSubmit={handleSignup}
-        className="bg-white p-6 rounded shadow w-80"
+        onSubmit={handleSubmit}
+        className="bg-white p-6 rounded shadow-md w-80"
       >
-        <h2 className="text-xl font-bold mb-4 text-center">Signup</h2>
+        <h2 className="text-2xl font-bold mb-4 text-center">Signup</h2>
 
         {error && <p className="text-red-500 mb-2">{error}</p>}
 
         <input
-          className="border p-2 w-full mb-2"
+          name="name"
           placeholder="Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          className="w-full border p-2 mb-2"
+          onChange={handleChange}
           required
         />
 
         <input
-          className="border p-2 w-full mb-2"
-          placeholder="Email"
+          name="email"
           type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Email"
+          className="w-full border p-2 mb-2"
+          onChange={handleChange}
           required
         />
 
         <input
-          className="border p-2 w-full mb-4"
-          placeholder="Password"
+          name="password"
           type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Password"
+          className="w-full border p-2 mb-4"
+          onChange={handleChange}
           required
         />
 
-        <button className="bg-blue-600 text-white w-full py-2 rounded">
+        <button className="w-full bg-black text-white py-2 rounded">
           Signup
         </button>
       </form>

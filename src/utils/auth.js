@@ -1,17 +1,24 @@
-export const setAuth = (token, name) => {
+// src/utils/auth.js
+
+export function saveAuth(token, user) {
   localStorage.setItem("token", token);
-  localStorage.setItem("name", name);
-};
+  localStorage.setItem("user", JSON.stringify(user));
+}
 
-export const getToken = () => {
+export function getToken() {
   return localStorage.getItem("token");
-};
+}
 
-export const isLoggedIn = () => {
-  return !!localStorage.getItem("token");
-};
+export function getUser() {
+  const user = localStorage.getItem("user");
+  return user ? JSON.parse(user) : null;
+}
 
-export const logout = () => {
+export function logout() {
   localStorage.removeItem("token");
-  localStorage.removeItem("name");
-};
+  localStorage.removeItem("user");
+}
+
+export function isLoggedIn() {
+  return !!localStorage.getItem("token");
+}
