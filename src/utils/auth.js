@@ -1,8 +1,11 @@
-export const isLoggedIn = () => {
-  return localStorage.getItem("token") !== null;
+export const setAuth = (token) => {
+  localStorage.setItem("token", token);
+};
+
+export const getAuth = () => {
+  return localStorage.getItem("token");
 };
 
 export const logout = () => {
   localStorage.removeItem("token");
-  window.location.href = "/login";
 };

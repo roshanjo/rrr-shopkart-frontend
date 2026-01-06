@@ -1,31 +1,13 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { getAuth } from "../utils/auth";
+import { Navigate } from "react-router-dom";
 
-const API = import.meta.env.VITE_API_URL;
-
-export default function Products({ addToCart }) {
-  const [products, setProducts] = useState([]);
-
-  useEffect(() => {
-    axios.get(`${API}/api/products/`).then(res => {
-      setProducts(res.data);
-    });
-  }, []);
+export default function Products() {
+  if (!getAuth()) return <Navigate to="/login" />;
 
   return (
-    <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-      {products.map(p => (
-        <div key={p.id} className="border rounded p-4 shadow">
-          <h2 className="font-bold text-xl">{p.name}</h2>
-          <p className="text-gray-600">₹{p.price}</p>
-          <button
-            onClick={() => addToCart(p)}
-            className="mt-3 bg-green-600 text-white px-4 py-2 rounded"
-          >
-            Add to Cart
-          </button>
-        </div>
-      ))}
+    <div className="p-6">
+      <h1 className="text-3xl font-bold">Products</h1>
+      <p className="mt-4">Welcome 🎉 You are logged in.</p>
     </div>
   );
 }
