@@ -1,35 +1,31 @@
 import { requireAuth } from "../utils/auth";
 
-
 const API = import.meta.env.VITE_API_URL;
 
 export default function Cart() {
   requireAuth();
 
-  console.log("Stripe Link:", import.meta.env.VITE_STRIPE_PAYMENT_LINK);
   const cart = JSON.parse(localStorage.getItem("cart")) || [];
   const token = localStorage.getItem("token");
 
   const total = cart.reduce((sum, item) => sum + item.price, 0);
 
-  const payWithStripe = async () => {
+  const pay = async () => {
     const res = await fetch(`${API}/api/create-checkout-session/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({
-        items: cart,
-      }),
+      body: JSON.stringify({ total }),
     });
 
     const data = await res.json();
 
     if (data.url) {
-      window.location.href = data.url; // ✅ Stripe redirect (SAFE)
+      window.location.href = data.url;
     } else {
-      alert("Stripe session failed");
+      alert("Stripe error");
     }
   };
 
@@ -43,22 +39,17 @@ export default function Cart() {
         <>
           <ul className="space-y-2">
             {cart.map((item, i) => (
-              <li
-                key={i}
-                className="border p-3 rounded flex justify-between"
-              >
+              <li key={i} className="border p-3 rounded flex justify-between">
                 <span>{item.name}</span>
                 <span>₹{item.price}</span>
               </li>
             ))}
           </ul>
 
-          <h2 className="mt-4 font-bold text-lg">
-            Total: ₹{total}
-          </h2>
+          <h2 className="mt-4 font-bold text-lg">Total: ₹{total}</h2>
 
           <button
-            onClick={payWithStripe}
+            onClick={pay}
             className="mt-6 w-full bg-purple-600 text-white py-2 rounded hover:bg-purple-700"
           >
             Pay with Stripe
