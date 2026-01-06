@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Products from "./pages/Products";
 import Cart from "./pages/Cart";
+import AdminOrders from "./pages/AdminOrders";
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/products" element={<Products />} />
         <Route path="/cart" element={<Cart />} />
+        <Route path="/admin/orders" element={<AdminOrders />} />
       </Routes>
     </BrowserRouter>
   );
