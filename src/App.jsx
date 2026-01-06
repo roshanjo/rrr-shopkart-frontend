@@ -1,36 +1,18 @@
-const API_URL = import.meta.env.VITE_API_URL;
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Navbar from "./components/Navbar";
+import Signup from "./pages/Signup";
+import Login from "./pages/Login";
+import Home from "./pages/Home";
 
-function App() {
-  const testBackend = async () => {
-    console.log("API URL:", API_URL);
-
-    try {
-      const response = await fetch(`${API_URL}/api/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: "test@test.com",
-          password: "123456",
-        }),
-      });
-
-      const data = await response.json();
-      console.log("Backend response:", data);
-      alert("Backend connected! Check console.");
-    } catch (error) {
-      console.error("Fetch error:", error);
-      alert("Backend connection failed");
-    }
-  };
-
+export default function App() {
   return (
-    <div style={{ padding: "40px" }}>
-      <h1>RRR ShopKart</h1>
-      <button onClick={testBackend}>Test Backend</button>
-    </div>
+    <BrowserRouter>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/login" element={<Login />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
-
-export default App;
