@@ -1,32 +1,37 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import products from "../data/products";
 import ProductCard from "../components/ProductCard";
+import CartSidebar from "../components/CartSidebar";
 import { requireAuth } from "../utils/auth";
-
-const PRODUCTS = [
-  { id: 1, name: "iPhone 15", price: 79999 },
-  { id: 2, name: "MacBook Air", price: 119999 },
-  { id: 3, name: "AirPods Pro", price: 24999 },
-];
 
 export default function Products() {
   requireAuth();
 
-  const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState(
+    JSON.parse(localStorage.getItem("cart")) || []
+  );
 
   const addToCart = (product) => {
-    setCart([...cart, product]);
-    localStorage.setItem("cart", JSON.stringify([...cart, product]));
+    const updated = [...cart, product];
+    setCart(updated);
+    localStorage.setItem("cart", JSON.stringify(updated));
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Products</h1>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {PRODUCTS.map((p) => (
-          <ProductCard key={p.id} product={p} addToCart={addToCart} />
+    <div className="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
+      {/* Product grid */}
+      <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        {products.map((product) => (
+          <ProductCard
+            key={product.id}
+            product={product}
+            onAdd={addToCart}
+          />
         ))}
       </div>
+
+      {/* Cart sidebar */}
+      <CartSidebar cart={cart} />
     </div>
   );
 }
