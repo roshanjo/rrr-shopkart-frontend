@@ -7,7 +7,7 @@ export default function Home() {
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold text-green-600">
-        Welcome to RRR ShopKart 🎉
+        Welcome to Shopify 🎉
       </h1>
     </div>
   );
