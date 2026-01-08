@@ -1,61 +1,50 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { logout, isLoggedIn } from "../utils/auth";
-import { toggleTheme } from "../utils/theme";
-import logo from "../assets/shopify-logo.png";
+import logo from "../assets/ai-kart-logo.png"; // your LOGO_2 renamed
 
 export default function Navbar() {
-  const location = useLocation();
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
-  const loggedIn = isLoggedIn();
-
-  const hideAuthLinks =
-    location.pathname === "/login" || location.pathname === "/signup";
 
   const handleLogout = () => {
     logout();
+    localStorage.removeItem("user");
     navigate("/login");
   };
 
   return (
-    <nav className="bg-gray-900 dark:bg-black text-white px-4 py-3 flex justify-between items-center">
-      {/* Logo */}
+    <nav className="sticky top-0 z-50 bg-gray-900 text-white px-4 py-3 flex justify-between items-center shadow-lg transition-all">
+      {/* Logo only */}
       <Link to="/" className="flex items-center">
-        <img src={logo} alt="Shopify" className="h-8" />
+        <img
+          src={logo}
+          alt="Ai-Kart Logo"
+          className="h-9 w-auto hover:scale-105 transition-transform"
+        />
       </Link>
 
-      <div className="flex items-center gap-4">
-        {/* Theme toggle always visible */}
-        <button
-          onClick={toggleTheme}
-          className="bg-gray-700 px-3 py-1 rounded hover:bg-gray-600"
-        >
-          🌓
-        </button>
-
-        {/* LOGGED OUT */}
-        {!loggedIn && !hideAuthLinks && (
-          <Link
-            to="/login"
-            className="bg-purple-600 px-4 py-2 rounded hover:bg-purple-700"
-          >
-            Sign In
-          </Link>
-        )}
-
-        {/* LOGGED IN */}
-        {loggedIn && (
+      {/* Right side */}
+      <div className="flex items-center gap-4 text-sm">
+        {isLoggedIn() ? (
           <>
-            <span className="hidden sm:inline text-sm text-gray-300">
+            <span className="hidden sm:block text-gray-300">
               Hi, {user?.name}
             </span>
-
             <button
               onClick={handleLogout}
-              className="bg-red-500 px-3 py-1 rounded"
+              className="bg-red-500 px-3 py-1 rounded hover:bg-red-600"
             >
               Logout
             </button>
+          </>
+        ) : (
+          <>
+            <Link to="/login" className="hover:text-green-400">
+              Login
+            </Link>
+            <Link to="/signup" className="hover:text-green-400">
+              Signup
+            </Link>
           </>
         )}
       </div>
