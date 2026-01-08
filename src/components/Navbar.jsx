@@ -1,11 +1,10 @@
 import { Link, useNavigate } from "react-router-dom";
 import { logout, isLoggedIn } from "../utils/auth";
-import { useTheme } from "../context/ThemeContext";
+import { toggleTheme } from "../utils/theme";
 import logo from "../assets/shopify-logo.png";
 
 export default function Navbar() {
   const navigate = useNavigate();
-  const { theme, toggleTheme } = useTheme();
   const user = JSON.parse(localStorage.getItem("user"));
 
   const handleLogout = () => {
@@ -14,38 +13,33 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="sticky top-0 z-50 bg-white dark:bg-gray-900 px-4 py-3 flex items-center justify-between shadow-md transition-colors">
-      {/* Logo */}
+    <nav className="bg-gray-900 dark:bg-black text-white px-4 py-3 flex justify-between items-center">
+      {/* Logo only */}
       <Link to="/" className="flex items-center">
         <img src={logo} alt="Shopify" className="h-8" />
       </Link>
 
-      {/* Right */}
       <div className="flex items-center gap-4">
         {/* Theme toggle */}
         <button
           onClick={toggleTheme}
-          className="px-2 py-1 rounded border text-sm"
+          className="bg-gray-700 px-3 py-1 rounded hover:bg-gray-600 transition"
         >
-          {theme === "dark" ? "☀️" : "🌙"}
+          🌓
         </button>
 
-        {isLoggedIn() ? (
+        {isLoggedIn() && (
           <>
-            <span className="text-sm font-medium">
-              Hi, {user?.name || "User"}
+            <span className="hidden sm:inline text-sm text-gray-300">
+              Hi, {user?.name}
             </span>
+
             <button
               onClick={handleLogout}
-              className="bg-red-500 text-white px-3 py-1 rounded"
+              className="bg-red-500 px-3 py-1 rounded"
             >
-              Sign out
+              Logout
             </button>
-          </>
-        ) : (
-          <>
-            <Link to="/login">Login</Link>
-            <Link to="/signup">Signup</Link>
           </>
         )}
       </div>
