@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { saveAuth } from "../utils/auth";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -10,7 +9,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleLogin = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
@@ -24,37 +23,42 @@ export default function Login() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Login failed");
-        return;
+        throw new Error(data.error || "Login failed");
       }
 
-      // ✅ SAVE AUTH PROPERLY
-      saveAuth(data.token, {
-        id: data.user_id,
-        name: data.name,
-        email,
-      });
+      // ✅ SAVE TOKEN
+      localStorage.setItem("token", data.token);
+
+      // ✅ SAVE USER NAME (IMPORTANT FIX)
+      localStorage.setItem(
+        "user",
+        JSON.stringify({ name: data.name })
+      );
 
       navigate("/products");
     } catch (err) {
-      setError("Server error");
+      setError(err.message);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
       <form
-        onSubmit={handleLogin}
-        className="bg-white p-6 rounded shadow-md w-80"
+        onSubmit={handleSubmit}
+        className="bg-white dark:bg-gray-800 p-6 rounded shadow w-80"
       >
-        <h2 className="text-2xl font-bold mb-4 text-center">Login</h2>
+        <h2 className="text-2xl font-bold mb-4 text-center text-gray-800 dark:text-white">
+          Sign In
+        </h2>
 
-        {error && <p className="text-red-500 mb-2">{error}</p>}
+        {error && (
+          <p className="text-red-500 text-sm mb-2 text-center">{error}</p>
+        )}
 
         <input
           type="email"
           placeholder="Email"
-          className="w-full border p-2 mb-2"
+          className="w-full mb-3 p-2 border rounded"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -63,13 +67,16 @@ export default function Login() {
         <input
           type="password"
           placeholder="Password"
-          className="w-full border p-2 mb-4"
+          className="w-full mb-4 p-2 border rounded"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
         />
 
-        <button className="w-full bg-black text-white py-2 rounded">
+        <button
+          type="submit"
+          className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
+        >
           Login
         </button>
       </form>

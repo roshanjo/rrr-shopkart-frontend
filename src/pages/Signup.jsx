@@ -1,89 +1,95 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { saveAuth } from "../utils/auth";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API = import.meta.env.VITE_API_URL;
 
 export default function Signup() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    password: "",
-  });
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
     try {
-      const res = await fetch(`${API_URL}/api/signup/`, {
+      const res = await fetch(`${API}/api/signup/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ name, email, password }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Signup failed");
-        return;
+        throw new Error(data.error || "Signup failed");
       }
 
-      // OPTIONAL AUTO LOGIN IF TOKEN IS RETURNED
+      // ✅ SAVE TOKEN (if backend sends it)
       if (data.token) {
-        saveAuth(data.token, { name: form.name, email: form.email });
+        localStorage.setItem("token", data.token);
       }
 
-      navigate("/login");
+      // ✅ SAVE USER NAME (IMPORTANT FIX)
+      localStorage.setItem(
+        "user",
+        JSON.stringify({ name: data.name || name })
+      );
+
+      navigate("/products");
     } catch (err) {
-      setError("Server error");
+      setError(err.message);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
       <form
         onSubmit={handleSubmit}
-        className="bg-white p-6 rounded shadow-md w-80"
+        className="bg-white dark:bg-gray-800 p-6 rounded shadow w-80"
       >
-        <h2 className="text-2xl font-bold mb-4 text-center">Signup</h2>
+        <h2 className="text-2xl font-bold mb-4 text-center text-gray-800 dark:text-white">
+          Create Account
+        </h2>
 
-        {error && <p className="text-red-500 mb-2">{error}</p>}
+        {error && (
+          <p className="text-red-500 text-sm mb-2 text-center">{error}</p>
+        )}
 
         <input
-          name="name"
+          type="text"
           placeholder="Name"
-          className="w-full border p-2 mb-2"
-          onChange={handleChange}
+          className="w-full mb-3 p-2 border rounded"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
           required
         />
 
         <input
-          name="email"
           type="email"
           placeholder="Email"
-          className="w-full border p-2 mb-2"
-          onChange={handleChange}
+          className="w-full mb-3 p-2 border rounded"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           required
         />
 
         <input
-          name="password"
           type="password"
           placeholder="Password"
-          className="w-full border p-2 mb-4"
-          onChange={handleChange}
+          className="w-full mb-4 p-2 border rounded"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
           required
         />
 
-        <button className="w-full bg-black text-white py-2 rounded">
-          Signup
+        <button
+          type="submit"
+          className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
+        >
+          Sign Up
         </button>
       </form>
     </div>

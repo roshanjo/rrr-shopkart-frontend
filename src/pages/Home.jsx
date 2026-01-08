@@ -1,14 +1,22 @@
-import { Navigate } from "react-router-dom";
-import { isLoggedIn } from "../utils/auth";
+import { Link } from "react-router-dom";
 
 export default function Home() {
-  if (!isLoggedIn()) return <Navigate to="/login" />;
-
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold text-green-600">
-        Welcome to Shopify 🎉
-      </h1>
+    <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
+      <div className="text-center space-y-6">
+        <h1 className="text-4xl font-bold text-green-500">
+          Welcome to Shopify
+        </h1>
+        <p className="text-gray-600 dark:text-gray-300">
+          Your one-stop shop for everything
+        </p>
+        <Link
+          to="/login"
+          className="inline-block bg-green-600 text-white px-6 py-3 rounded text-lg hover:bg-green-700"
+        >
+          Sign In
+        </Link>
+      </div>
     </div>
   );
 }
