@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
+
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -7,6 +8,7 @@ import Products from "./pages/Products";
 import Cart from "./pages/Cart";
 import AdminOrders from "./pages/AdminOrders";
 import Success from "./pages/Success";
+import Cancel from "./pages/Cancel";
 
 export default function App() {
   return (
@@ -20,6 +22,7 @@ export default function App() {
         <Route path="/cart" element={<Cart />} />
         <Route path="/admin/orders" element={<AdminOrders />} />
         <Route path="/success" element={<Success />} />
+        <Route path="/cancel" element={<Cancel />} />
       </Routes>
     </BrowserRouter>
   );
