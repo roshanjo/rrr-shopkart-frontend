@@ -1,6 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
 import { logout, isLoggedIn } from "../utils/auth";
-import logo from "../assets/ai-kart-logo.png"; // your LOGO_2 renamed
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -13,17 +12,16 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="sticky top-0 z-50 bg-gray-900 text-white px-4 py-3 flex justify-between items-center shadow-lg transition-all">
+    <nav className="sticky top-0 z-50 bg-gray-900 text-white px-4 py-3 flex justify-between items-center shadow-lg">
       {/* Logo only */}
       <Link to="/" className="flex items-center">
         <img
-          src={logo}
+          src="/logo.png"
           alt="Ai-Kart Logo"
           className="h-9 w-auto hover:scale-105 transition-transform"
         />
       </Link>
 
-      {/* Right side */}
       <div className="flex items-center gap-4 text-sm">
         {isLoggedIn() ? (
           <>
@@ -39,12 +37,8 @@ export default function Navbar() {
           </>
         ) : (
           <>
-            <Link to="/login" className="hover:text-green-400">
-              Login
-            </Link>
-            <Link to="/signup" className="hover:text-green-400">
-              Signup
-            </Link>
+            <Link to="/login">Login</Link>
+            <Link to="/signup">Signup</Link>
           </>
         )}
       </div>
