@@ -1,36 +1,41 @@
 import { Link, useNavigate } from "react-router-dom";
 import { logout, isLoggedIn } from "../utils/auth";
+import { toggleTheme } from "../utils/theme";
 
 export default function Navbar() {
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem("user"));
 
   const handleLogout = () => {
     logout();
-    localStorage.removeItem("user");
     navigate("/login");
   };
 
   return (
-    <nav className="sticky top-0 z-50 bg-gray-900 text-white px-4 py-3 flex justify-between items-center shadow-lg">
+    <nav className="bg-gray-900 dark:bg-black text-white px-6 py-4 flex justify-between items-center transition-colors">
       {/* Logo only */}
-      <Link to="/" className="flex items-center">
+      <Link to="/products" className="flex items-center">
         <img
-          src="/logo.png"
+          src="/ai-kart-logo.png"
           alt="Ai-Kart Logo"
-          className="h-9 w-auto hover:scale-105 transition-transform"
+          className="h-9 w-auto"
         />
       </Link>
 
-      <div className="flex items-center gap-4 text-sm">
+      <div className="flex items-center gap-4">
+        {/* Theme toggle */}
+        <button
+          onClick={toggleTheme}
+          className="border px-3 py-1 rounded hover:bg-gray-700 transition"
+        >
+          🌙 / ☀️
+        </button>
+
         {isLoggedIn() ? (
           <>
-            <span className="hidden sm:block text-gray-300">
-              Hi, {user?.name}
-            </span>
+            <Link to="/cart">Cart</Link>
             <button
               onClick={handleLogout}
-              className="bg-red-500 px-3 py-1 rounded hover:bg-red-600"
+              className="bg-red-500 px-3 py-1 rounded"
             >
               Logout
             </button>
