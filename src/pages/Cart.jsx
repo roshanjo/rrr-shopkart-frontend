@@ -49,7 +49,7 @@ export default function Cart() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ cart }),
+          body: JSON.stringify({ total }),
         }
       );
 
