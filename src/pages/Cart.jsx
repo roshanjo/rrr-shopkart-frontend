@@ -1,116 +1,96 @@
 import { useState } from "react";
-import { requireAuth } from "../utils/auth";
-
-const API = import.meta.env.VITE_API_URL;
+import { useNavigate } from "react-router-dom";
 
 export default function Cart() {
-  requireAuth();
+  const navigate = useNavigate();
 
   const [cart, setCart] = useState(
     JSON.parse(localStorage.getItem("cart")) || []
   );
 
-  const token = localStorage.getItem("token");
-
-  // Group items by id and add quantity
-  const groupedCart = cart.reduce((acc, item) => {
-    const found = acc.find((p) => p.id === item.id);
-    if (found) {
-      found.qty += 1;
-    } else {
-      acc.push({ ...item, qty: 1 });
-    }
-    return acc;
-  }, []);
-
-  const updateCart = (newCart) => {
-    setCart(newCart);
-    localStorage.setItem("cart", JSON.stringify(newCart));
+  const updateCart = (updated) => {
+    setCart(updated);
+    localStorage.setItem("cart", JSON.stringify(updated));
   };
 
-  const increaseQty = (item) => {
-    updateCart([...cart, item]);
+  const increaseQty = (index) => {
+    const updated = [...cart];
+    updated[index].qty = (updated[index].qty || 1) + 1;
+    updateCart(updated);
   };
 
-  const decreaseQty = (item) => {
-    const index = cart.findIndex((i) => i.id === item.id);
-    if (index !== -1) {
-      const updated = [...cart];
-      updated.splice(index, 1);
+  const decreaseQty = (index) => {
+    const updated = [...cart];
+    if ((updated[index].qty || 1) > 1) {
+      updated[index].qty -= 1;
       updateCart(updated);
     }
   };
 
-  const removeItem = (item) => {
-    const updated = cart.filter((i) => i.id !== item.id);
+  const removeItem = (index) => {
+    const updated = cart.filter((_, i) => i !== index);
     updateCart(updated);
   };
 
-  const total = groupedCart.reduce(
-    (sum, item) => sum + item.price * item.qty,
+  const total = cart.reduce(
+    (sum, item) => sum + item.price * (item.qty || 1),
     0
   );
 
-  const pay = async () => {
-    const res = await fetch(`${API}/api/create-checkout-session/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ total }),
-    });
-
-    const data = await res.json();
-
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
-      alert("Stripe error");
-    }
-  };
-
   return (
-    <div className="max-w-3xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Your Cart</h1>
+    <div className="max-w-4xl mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-6">Your Cart</h1>
 
-      {groupedCart.length === 0 ? (
-        <p>Your cart is empty</p>
+      {cart.length === 0 ? (
+        <div className="text-center text-gray-500">
+          <p>Your cart is empty</p>
+          <button
+            onClick={() => navigate("/products")}
+            className="mt-4 bg-green-600 text-white px-6 py-2 rounded"
+          >
+            Continue Shopping
+          </button>
+        </div>
       ) : (
         <>
           <div className="space-y-4">
-            {groupedCart.map((item) => (
+            {cart.map((item, index) => (
               <div
-                key={item.id}
-                className="flex justify-between items-center border p-4 rounded"
+                key={index}
+                className="flex flex-col sm:flex-row justify-between items-center bg-white dark:bg-gray-800 rounded-xl p-4 shadow"
               >
-                <div>
-                  <h2 className="font-semibold">{item.name}</h2>
-                  <p className="text-sm text-gray-500">
-                    ₹{item.price} × {item.qty}
-                  </p>
+                <div className="flex items-center gap-4">
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="h-20 w-20 object-cover rounded"
+                  />
+                  <div>
+                    <h3 className="font-semibold">{item.name}</h3>
+                    <p className="text-gray-500">₹{item.price}</p>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-4 mt-4 sm:mt-0">
                   <button
-                    onClick={() => decreaseQty(item)}
-                    className="px-3 py-1 bg-gray-300 rounded"
+                    onClick={() => decreaseQty(index)}
+                    className="px-3 py-1 bg-gray-300 dark:bg-gray-700 rounded"
                   >
                     −
                   </button>
 
-                  <span>{item.qty}</span>
+                  <span>{item.qty || 1}</span>
 
                   <button
-                    onClick={() => increaseQty(item)}
-                    className="px-3 py-1 bg-gray-300 rounded"
+                    onClick={() => increaseQty(index)}
+                    className="px-3 py-1 bg-gray-300 dark:bg-gray-700 rounded"
                   >
                     +
                   </button>
 
                   <button
-                    onClick={() => removeItem(item)}
-                    className="ml-3 text-red-600"
+                    onClick={() => removeItem(index)}
+                    className="text-red-500 font-semibold"
                   >
                     Remove
                   </button>
@@ -119,16 +99,16 @@ export default function Cart() {
             ))}
           </div>
 
-          <div className="mt-6 text-xl font-bold">
-            Total: ₹{total}
-          </div>
+          <div className="mt-8 flex flex-col sm:flex-row justify-between items-center">
+            <h2 className="text-2xl font-bold">Total: ₹{total}</h2>
 
-          <button
-            onClick={pay}
-            className="mt-6 w-full bg-purple-600 text-white py-3 rounded hover:bg-purple-700"
-          >
-            Pay with Stripe
-          </button>
+            <button
+              onClick={() => navigate("/checkout")}
+              className="mt-4 sm:mt-0 bg-purple-600 text-white px-8 py-3 rounded hover:bg-purple-700"
+            >
+              Proceed to Checkout
+            </button>
+          </div>
         </>
       )}
     </div>
