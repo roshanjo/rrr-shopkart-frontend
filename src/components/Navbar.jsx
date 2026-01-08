@@ -11,16 +11,13 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-gray-900 text-white px-4 sm:px-6 py-4 flex justify-between items-center shadow-md animate-slideDown">
+    <nav className="sticky top-0 z-50 bg-gray-900 text-white px-4 py-3 flex items-center justify-between shadow-md transition-all duration-300">
       {/* Logo only */}
-      <Link
-        to="/products"
-        className="flex items-center hover:opacity-90 transition"
-      >
+      <Link to="/" className="flex items-center">
         <img
           src={logo}
-          alt="Shopify Logo"
-          className="h-9 w-auto"
+          alt="Shopify"
+          className="h-8 w-auto hover:scale-105 transition-transform duration-300"
         />
       </Link>
 
@@ -28,15 +25,15 @@ export default function Navbar() {
       <div className="flex items-center gap-4 text-sm sm:text-base">
         {isLoggedIn() ? (
           <>
-            <Link
-              to="/cart"
-              className="hover:text-green-400 transition"
-            >
+            <Link to="/products" className="hover:text-green-400 transition">
+              Products
+            </Link>
+            <Link to="/cart" className="hover:text-green-400 transition">
               Cart
             </Link>
             <button
               onClick={handleLogout}
-              className="bg-red-500 px-3 py-1 rounded hover:bg-red-600 transition"
+              className="bg-red-500 hover:bg-red-600 px-3 py-1 rounded transition"
             >
               Logout
             </button>
