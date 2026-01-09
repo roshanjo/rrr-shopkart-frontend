@@ -34,7 +34,8 @@ export default function Navbar() {
 
   const hideCart =
     location.pathname === "/cart" ||
-    location.pathname === "/success";
+    location.pathname === "/success" ||
+    location.pathname === "/products";
 
   const handleLogout = () => {
     localStorage.clear();

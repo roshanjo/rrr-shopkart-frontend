@@ -128,6 +128,12 @@ export default function Cart() {
             >
               Proceed to Checkout
             </button>
+            <button
+              onClick={() => window.history.back()}
+              className="bg-gray-400 text-white px-4 py-2 rounded mr-2"
+            >
+              ← Back
+            </button>
           </div>
         </>
       )}
