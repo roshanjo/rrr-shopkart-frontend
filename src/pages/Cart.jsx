@@ -33,6 +33,11 @@ export default function Cart() {
     updateCart(updated);
   };
 
+  const emptyCart = () => {
+    setCart([]);
+    localStorage.removeItem("cart");
+  };
+
   const total = cart.reduce(
     (sum, item) => sum + item.price * (item.qty || 1),
     0
@@ -41,17 +46,14 @@ export default function Cart() {
   // ✅ REAL STRIPE CHECKOUT
   const proceedToCheckout = async () => {
     try {
-      const res = await fetch(
-        `${API}/api/create-checkout-session/`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ total }),
-        }
-      );
+      const res = await fetch(`${API}/api/create-checkout-session/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ total }),
+      });
 
       const data = await res.json();
 
@@ -119,21 +121,32 @@ export default function Cart() {
             ))}
           </div>
 
-          <div className="mt-8 flex flex-col sm:flex-row justify-between items-center">
+          {/* 🔹 BOTTOM BUTTONS */}
+          <div className="mt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
             <h2 className="text-2xl font-bold">Total: ₹{total}</h2>
 
-            <button
-              onClick={proceedToCheckout}
-              className="mt-4 sm:mt-0 bg-purple-600 text-white px-8 py-3 rounded hover:bg-purple-700"
-            >
-              Proceed to Checkout
-            </button>
-            <button
-              onClick={() => window.history.back()}
-              className="bg-gray-400 text-white px-4 py-2 rounded mr-2"
-            >
-              ← Back
-            </button>
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={proceedToCheckout}
+                className="bg-purple-600 text-white px-8 py-3 rounded hover:bg-purple-700"
+              >
+                Proceed to Checkout
+              </button>
+
+              <button
+                onClick={emptyCart}
+                className="bg-red-500 text-white px-6 py-3 rounded hover:bg-red-600"
+              >
+                Empty Cart
+              </button>
+
+              <button
+                onClick={() => window.history.back()}
+                className="bg-gray-400 text-white px-6 py-3 rounded"
+              >
+                ← Back
+              </button>
+            </div>
           </div>
         </>
       )}
