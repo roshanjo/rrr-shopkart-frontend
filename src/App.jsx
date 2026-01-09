@@ -46,6 +46,8 @@ export default function App() {
           <Route path="/admin/orders" element={<AdminOrders />} />
           <Route path="/success" element={<Success />} />
           <Route path="/cancel" element={<Cancel />} />
+          <Route path="/products/page2" element={<Products />} />
+          <Route path="/products/:id" element={<ProductDetail />} />
         </Routes>
       </Layout>
     </BrowserRouter>

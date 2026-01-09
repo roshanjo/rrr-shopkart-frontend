@@ -1,45 +1,52 @@
-import { useEffect, useState } from "react";
-
-const items = [
-  "Smart Phone",
-  "Laptop",
-  "Headphones",
-  "Shoes",
-  "Burger",
-  "Pizza",
-  "Camera",
-  "Watch",
-  "Backpack",
-  "Keyboard",
-];
+import { useState } from "react";
+import { products } from "../data/products";
 
 export default function Products() {
-  const [products, setProducts] = useState([]);
+  const [category, setCategory] = useState("All");
+  const cart = JSON.parse(localStorage.getItem("cart") || "[]");
 
-  useEffect(() => {
-    const randomProducts = Array.from({ length: 6 }).map(() => {
-      const name = items[Math.floor(Math.random() * items.length)];
-      return {
-        name,
-        price: Math.floor(Math.random() * 5000) + 500,
-        image: `https://source.unsplash.com/400x300/?${name}`,
-      };
-    });
-    setProducts(randomProducts);
-  }, []);
+  const filtered =
+    category === "All"
+      ? products
+      : products.filter(p => p.category === category);
+
+  const addToCart = (p) => {
+    localStorage.setItem("cart", JSON.stringify([...cart, p]));
+    alert("Added to cart");
+  };
 
   return (
-    <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-      {products.map((p, i) => (
-        <div key={i} className="bg-white dark:bg-gray-800 p-4 rounded shadow">
-          <img src={p.image} className="h-40 w-full object-cover rounded" />
-          <h3 className="mt-2 font-bold">{p.name}</h3>
-          <p className="text-green-600">₹ {p.price}</p>
-          <button className="mt-2 w-full bg-green-600 text-white py-1 rounded">
-            Add to Cart
+    <div className="flex">
+      {/* FILTER */}
+      <div className="w-1/4 p-4 bg-gray-100 dark:bg-gray-800">
+        <h3 className="font-bold mb-2">Categories</h3>
+        {["All", "Electronics", "Fashion", "Food"].map(c => (
+          <button key={c}
+            className="block mb-2"
+            onClick={() => setCategory(c)}>
+            {c}
           </button>
-        </div>
-      ))}
+        ))}
+
+        <p className="mt-4 text-sm">
+          🛒 Items in Cart: <b>{cart.length}</b>
+        </p>
+      </div>
+
+      {/* PRODUCTS */}
+      <div className="w-3/4 grid grid-cols-1 md:grid-cols-2 gap-4 p-6">
+        {filtered.map(p => (
+          <div key={p.id} className="bg-white dark:bg-gray-800 p-4 rounded shadow">
+            <img src={p.image} className="h-40 w-full object-cover rounded" />
+            <h3 className="font-bold mt-2">{p.name}</h3>
+            <p>₹ {p.price}</p>
+            <button onClick={() => addToCart(p)}
+              className="mt-2 bg-green-600 text-white px-3 py-1 rounded">
+              Add to Cart
+            </button>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
