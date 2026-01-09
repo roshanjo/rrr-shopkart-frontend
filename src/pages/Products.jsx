@@ -12,6 +12,10 @@ export default function Products() {
     JSON.parse(localStorage.getItem("cart")) || []
   );
 
+  const [search, setSearch] = useState(
+    localStorage.getItem("search") || ""
+  );
+
   // 🔹 Fetch LIVE products
   useEffect(() => {
     fetch("https://fakestoreapi.com/products")
@@ -34,10 +38,28 @@ export default function Products() {
     "women's clothing",
   ];
 
-  const filteredProducts =
+  // 🔹 Apply category filter
+  let filtered =
     category === "all"
       ? products
       : products.filter((p) => p.category === category);
+
+  // 🔹 Apply SEARCH filter
+  if (search) {
+    filtered = filtered.filter((p) =>
+      p.title.toLowerCase().includes(search.toLowerCase()) ||
+      p.category.toLowerCase().includes(search.toLowerCase())
+    );
+  }
+
+  // 🔹 AI FALLBACK → GOOGLE SEARCH
+  useEffect(() => {
+    if (search && products.length > 0 && filtered.length === 0) {
+      window.location.href = `https://www.google.com/search?q=${encodeURIComponent(
+        search + " product"
+      )}`;
+    }
+  }, [search, products, filtered]);
 
   // 🔹 Add to cart (SAFE with Cart.jsx)
   const addToCart = (p) => {
@@ -59,12 +81,17 @@ export default function Products() {
 
   return (
     <div className="p-6 space-y-6">
+
       {/* 🔹 CATEGORIES TOP */}
       <div className="flex gap-3 overflow-x-auto">
         {categories.map((c) => (
           <button
             key={c}
-            onClick={() => setCategory(c)}
+            onClick={() => {
+              setCategory(c);
+              localStorage.removeItem("search");
+              setSearch("");
+            }}
             className={`px-4 py-2 rounded-full text-sm font-semibold ${
               category === c
                 ? "bg-green-600 text-white"
@@ -76,10 +103,18 @@ export default function Products() {
         ))}
       </div>
 
+      {/* 🔹 SEARCH INFO */}
+      {search && (
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          Showing results for: <b>{search}</b>
+        </p>
+      )}
+
       <div className="flex gap-6">
+
         {/* 🔹 PRODUCTS GRID */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 flex-1">
-          {filteredProducts.map((p) => (
+          {filtered.map((p) => (
             <div
               key={p.id}
               className="bg-white dark:bg-gray-800 p-5 rounded-xl shadow

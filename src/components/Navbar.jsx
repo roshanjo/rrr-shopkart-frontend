@@ -15,6 +15,7 @@ export default function Navbar() {
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [search, setSearch] = useState("");
 
   const storedUser = JSON.parse(localStorage.getItem("user")) || { name: "User" };
   const [username, setUsername] = useState(storedUser.name);
@@ -46,7 +47,8 @@ export default function Navbar() {
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   /* Hide cart button on these pages */
@@ -72,18 +74,43 @@ export default function Navbar() {
     setMenuOpen(false);
   };
 
+  /* SEARCH SUBMIT */
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (!search.trim()) return;
+
+    localStorage.setItem("search", search);
+    navigate("/products");
+  };
+
   if (!isLoggedIn) return null;
 
   return (
-    <nav className="flex justify-between items-center p-4 bg-gray-900 text-white relative">
-      
+    <nav className="flex items-center p-4 bg-gray-900 text-white relative">
+
       {/* LEFT: LOGO */}
-      <Link to="/products">
+      <Link to="/products" className="shrink-0">
         <img src="/logo.png" alt="Logo" className="h-12 w-auto" />
       </Link>
 
+      {/* CENTER: SEARCH BAR */}
+      <div className="flex-1 mx-6">
+        <form onSubmit={handleSearch}>
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search for products, brands and more..."
+            className="w-full px-5 py-2 rounded-full text-black focus:outline-none"
+          />
+        </form>
+      </div>
+
       {/* RIGHT */}
-      <div className="flex items-center gap-4 relative" ref={dropdownRef}>
+      <div
+        className="flex items-center gap-4 relative shrink-0"
+        ref={dropdownRef}
+      >
         {!hideCart && (
           <Link
             to="/cart"
