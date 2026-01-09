@@ -15,7 +15,6 @@ export default function Signup() {
     e.preventDefault();
     setError("");
 
-    // Frontend validation
     if (!username || !email || !password) {
       setError("All fields are required");
       return;
@@ -28,7 +27,7 @@ export default function Signup() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          username: username.trim(), // ✅ IMPORTANT FIX
+          username: username.trim(),
           email: email.trim(),
           password: password.trim(),
         }),
@@ -40,7 +39,7 @@ export default function Signup() {
         throw new Error(data.error || "Signup failed");
       }
 
-      // Success → go to login
+      // Signup success → go back to auth page (login)
       navigate("/");
     } catch (err) {
       setError(err.message);
@@ -54,7 +53,7 @@ export default function Signup() {
         className="bg-white dark:bg-gray-800 p-6 rounded shadow w-80"
       >
         <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-4">
-          Sign Up
+          Create Account
         </h2>
 
         {error && (
@@ -91,7 +90,7 @@ export default function Signup() {
           type="submit"
           className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
         >
-          Create Account
+          Sign Up
         </button>
       </form>
     </div>
