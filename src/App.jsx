@@ -9,12 +9,13 @@ import Cart from "./pages/Cart";
 import AdminOrders from "./pages/AdminOrders";
 import Success from "./pages/Success";
 import Cancel from "./pages/Cancel";
+import ProductDetail from "./pages/ProductDetail"; // ✅ FIXED IMPORT
 
-/* Controls Navbar visibility */
+/* Layout controls navbar visibility */
 function Layout({ children }) {
   const location = useLocation();
 
-  // Hide Navbar on auth page
+  // Hide navbar only on auth page
   const hideNavbar = location.pathname === "/";
 
   return (
@@ -26,7 +27,7 @@ function Layout({ children }) {
         {children}
       </div>
 
-      {/* Footer always at bottom */}
+      {/* Footer */}
       <Footer />
     </div>
   );
@@ -37,17 +38,19 @@ export default function App() {
     <BrowserRouter>
       <Layout>
         <Routes>
-          {/* AUTH / HOME */}
+          {/* AUTH PAGE */}
           <Route path="/" element={<AuthPage />} />
 
-          {/* MAIN PAGES */}
+          {/* PRODUCT PAGES */}
           <Route path="/products" element={<Products />} />
+          <Route path="/products/:id" element={<ProductDetail />} />
+          <Route path="/products/page2" element={<Products />} />
+
+          {/* OTHER PAGES */}
           <Route path="/cart" element={<Cart />} />
           <Route path="/admin/orders" element={<AdminOrders />} />
           <Route path="/success" element={<Success />} />
           <Route path="/cancel" element={<Cancel />} />
-          <Route path="/products/page2" element={<Products />} />
-          <Route path="/products/:id" element={<ProductDetail />} />
         </Routes>
       </Layout>
     </BrowserRouter>
