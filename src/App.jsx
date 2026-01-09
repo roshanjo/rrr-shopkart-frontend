@@ -9,27 +9,21 @@ import Cart from "./pages/Cart";
 import AdminOrders from "./pages/AdminOrders";
 import Success from "./pages/Success";
 import Cancel from "./pages/Cancel";
-import ProductDetail from "./pages/ProductDetail"; // ✅ FIXED IMPORT
 
-/* Layout controls navbar visibility */
+/* Layout controls Navbar & Footer visibility */
 function Layout({ children }) {
   const location = useLocation();
 
-  // Hide navbar only on auth page
+  // ❌ Hide Navbar & Footer on Home/Auth page
   const hideNavbar = location.pathname === "/";
+  const hideFooter = location.pathname === "/";
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <>
       {!hideNavbar && <Navbar />}
-
-      {/* Main content */}
-      <div className="flex-grow">
-        {children}
-      </div>
-
-      {/* Footer */}
-      <Footer />
-    </div>
+      {children}
+      {!hideFooter && <Footer />}
+    </>
   );
 }
 
@@ -38,15 +32,11 @@ export default function App() {
     <BrowserRouter>
       <Layout>
         <Routes>
-          {/* AUTH PAGE */}
+          {/* AUTH / HOME */}
           <Route path="/" element={<AuthPage />} />
 
-          {/* PRODUCT PAGES */}
+          {/* MAIN APP */}
           <Route path="/products" element={<Products />} />
-          <Route path="/products/:id" element={<ProductDetail />} />
-          <Route path="/products/page2" element={<Products />} />
-
-          {/* OTHER PAGES */}
           <Route path="/cart" element={<Cart />} />
           <Route path="/admin/orders" element={<AdminOrders />} />
           <Route path="/success" element={<Success />} />
