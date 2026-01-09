@@ -8,43 +8,44 @@ const AuthPage = () => {
 
   return (
     <div className="auth-container">
-      {/* LOGO FROM PUBLIC FOLDER */}
-      <img src="/logo.png" alt="RRR Shopkart Logo" className="auth-logo" />
+      {/* LOGO */}
+      <img src="/logo.png" alt="Logo" className="auth-logo" />
 
       {mode === "welcome" && (
-        <div className="auth-box">
-          <h1>Welcome to RRR Shopkart 🛒</h1>
-          <p>Your one-stop online shopping destination</p>
+        <div className="welcome-box">
+          <h1>Welcome to RRR Shopkart</h1>
 
           <button onClick={() => setMode("login")} className="auth-btn">
             Sign In
           </button>
 
-          <p className="switch-text">
-            No account?
-            <span onClick={() => setMode("signup")}> Create one</span>
+          <p>
+            No account?{" "}
+            <span onClick={() => setMode("signup")} className="auth-link">
+              Create one
+            </span>
           </p>
         </div>
       )}
 
       {mode === "login" && (
-        <div className="auth-box">
+        <>
           <Login />
           <p className="switch-text">
-            No account?
-            <span onClick={() => setMode("signup")}> Sign up</span>
+            No account?{" "}
+            <span onClick={() => setMode("signup")}>Sign up</span>
           </p>
-        </div>
+        </>
       )}
 
       {mode === "signup" && (
-        <div className="auth-box">
+        <>
           <Signup />
           <p className="switch-text">
-            Already have an account?
-            <span onClick={() => setMode("login")}> Sign in</span>
+            Already have an account?{" "}
+            <span onClick={() => setMode("login")}>Sign in</span>
           </p>
-        </div>
+        </>
       )}
     </div>
   );
