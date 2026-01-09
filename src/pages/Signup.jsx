@@ -6,7 +6,7 @@ const API = import.meta.env.VITE_API_URL;
 export default function Signup() {
   const navigate = useNavigate();
 
-  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -15,8 +15,8 @@ export default function Signup() {
     e.preventDefault();
     setError("");
 
-    // ✅ FRONTEND VALIDATION (IMPORTANT)
-    if (!name || !email || !password) {
+    // Frontend validation
+    if (!username || !email || !password) {
       setError("All fields are required");
       return;
     }
@@ -28,7 +28,7 @@ export default function Signup() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name: name.trim(),
+          username: username.trim(), // ✅ IMPORTANT FIX
           email: email.trim(),
           password: password.trim(),
         }),
@@ -40,7 +40,7 @@ export default function Signup() {
         throw new Error(data.error || "Signup failed");
       }
 
-      // ✅ SUCCESS → GO TO LOGIN
+      // Success → go to login
       navigate("/");
     } catch (err) {
       setError(err.message);
@@ -65,10 +65,10 @@ export default function Signup() {
 
         <input
           type="text"
-          placeholder="Name"
+          placeholder="Username"
           className="w-full p-2 mb-3 border rounded text-black"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
         />
 
         <input
