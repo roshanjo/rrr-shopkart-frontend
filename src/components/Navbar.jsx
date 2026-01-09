@@ -66,7 +66,7 @@ export default function Navbar() {
     <nav className="flex justify-between items-center p-4 bg-gray-900 text-white relative">
       {/* LEFT: LOGO */}
       <Link to="/products">
-        <img src="/logo.png" alt="Logo" className="h-10" />
+        <img src="/logo.png" alt="Logo" className="h-12 w-auto" />
       </Link>
 
       {/* RIGHT */}

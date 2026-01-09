@@ -14,7 +14,7 @@ export default function AuthPage() {
       <img
         src={logo}
         alt="RRR Shopkart Logo"
-        className="w-32 mb-6"
+        className="w-48 md:w-56 mb-6"
       />
 
       {/* WELCOME SECTION */}
