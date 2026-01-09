@@ -1,23 +1,22 @@
 import { useState } from "react";
 import Login from "./Login";
 import Signup from "./Signup";
-import logo from "/logo.png"; // logo from public folder
+import logo from "/logo.png";
 
 export default function AuthPage() {
   const [mode, setMode] = useState("welcome");
-  // modes: welcome | login | signup
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-900 px-4">
 
-      {/* LOGO (slightly closer to center) */}
+      {/* LOGO */}
       <img
         src={logo}
         alt="Ai-Kart Logo"
         className="w-48 md:w-56 mb-4"
       />
 
-      {/* WELCOME SECTION */}
+      {/* WELCOME */}
       {mode === "welcome" && (
         <div className="bg-white dark:bg-gray-800 p-6 rounded shadow w-80 text-center">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
@@ -44,9 +43,9 @@ export default function AuthPage() {
         </div>
       )}
 
-      {/* LOGIN SECTION */}
+      {/* LOGIN (PULLED UP) */}
       {mode === "login" && (
-        <div>
+        <div className="-mt-24">
           <Login />
           <p className="text-sm text-center mt-3 text-gray-700 dark:text-gray-300">
             No account?{" "}
@@ -60,9 +59,9 @@ export default function AuthPage() {
         </div>
       )}
 
-      {/* SIGNUP SECTION */}
+      {/* SIGNUP (PULLED UP) */}
       {mode === "signup" && (
-        <div>
+        <div className="-mt-24">
           <Signup onSuccess={() => setMode("login")} />
           <p className="text-sm text-center mt-3 text-gray-700 dark:text-gray-300">
             Already have an account?{" "}
@@ -76,7 +75,7 @@ export default function AuthPage() {
         </div>
       )}
 
-      {/* FOOTER TEXT (only for home page visual flow) */}
+      {/* FOOTER */}
       <p className="mt-6 text-sm text-gray-500 dark:text-gray-400">
         Designed by Roshan © 2026
       </p>
