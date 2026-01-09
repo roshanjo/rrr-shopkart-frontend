@@ -1,68 +1,81 @@
 import { useState } from "react";
 import Login from "./Login";
 import Signup from "./Signup";
+import logo from "/logo.png"; // logo from public folder
 
 export default function AuthPage() {
-  const [mode, setMode] = useState("welcome");
+  const [mode, setMode] = useState("welcome"); 
+  // modes: welcome | login | signup
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-900 px-4">
       
       {/* LOGO */}
-      <img src="/logo.png" alt="Logo" className="h-16 mb-6" />
+      <img
+        src={logo}
+        alt="RRR Shopkart Logo"
+        className="w-32 mb-6"
+      />
 
+      {/* WELCOME SECTION */}
       {mode === "welcome" && (
-        <div className="text-center">
-          <h1 className="text-3xl font-bold mb-4">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded shadow w-80 text-center">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
             Welcome to RRR Shopkart
           </h1>
 
-          <div className="flex gap-4 justify-center">
-            <button
-              onClick={() => setMode("login")}
-              className="bg-green-600 text-white px-6 py-2 rounded"
-            >
-              Sign In
-            </button>
+          <p className="text-gray-600 dark:text-gray-300 mb-6">
+            Your one-stop shopping destination
+          </p>
 
-            <button
-              onClick={() => setMode("signup")}
-              className="bg-blue-600 text-white px-6 py-2 rounded"
-            >
-              Sign Up
-            </button>
-          </div>
+          <button
+            onClick={() => setMode("login")}
+            className="w-full bg-green-600 text-white py-2 rounded mb-3 hover:bg-green-700"
+          >
+            Sign In
+          </button>
+
+          <button
+            onClick={() => setMode("signup")}
+            className="w-full border border-green-600 text-green-600 py-2 rounded hover:bg-green-50 dark:hover:bg-gray-700"
+          >
+            Create Account
+          </button>
         </div>
       )}
 
+      {/* LOGIN SECTION */}
       {mode === "login" && (
-        <>
+        <div>
           <Login />
-          <p className="mt-3 text-sm">
+
+          <p className="text-sm text-center mt-3 text-gray-700 dark:text-gray-300">
             No account?{" "}
-            <button
+            <span
               onClick={() => setMode("signup")}
-              className="text-green-600 underline"
+              className="text-green-600 cursor-pointer font-semibold"
             >
-              Create one
-            </button>
+              Sign up
+            </span>
           </p>
-        </>
+        </div>
       )}
 
+      {/* SIGNUP SECTION */}
       {mode === "signup" && (
-        <>
-          <Signup />
-          <p className="mt-3 text-sm">
+        <div>
+          <Signup onSuccess={() => setMode("login")} />
+
+          <p className="text-sm text-center mt-3 text-gray-700 dark:text-gray-300">
             Already have an account?{" "}
-            <button
+            <span
               onClick={() => setMode("login")}
-              className="text-green-600 underline"
+              className="text-green-600 cursor-pointer font-semibold"
             >
-              Sign In
-            </button>
+              Sign in
+            </span>
           </p>
-        </>
+        </div>
       )}
     </div>
   );
