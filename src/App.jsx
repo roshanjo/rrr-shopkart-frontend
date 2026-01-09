@@ -7,6 +7,7 @@ import Cart from "./pages/Cart";
 import AdminOrders from "./pages/AdminOrders";
 import Success from "./pages/Success";
 import Cancel from "./pages/Cancel";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 /* This component controls when Navbar shows */
 function Layout({ children }) {
@@ -37,6 +38,7 @@ export default function App() {
           <Route path="/admin/orders" element={<AdminOrders />} />
           <Route path="/success" element={<Success />} />
           <Route path="/cancel" element={<Cancel />} />
+          <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>}/>
         </Routes>
       </Layout>
     </BrowserRouter>
