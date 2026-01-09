@@ -4,27 +4,27 @@ import Signup from "./Signup";
 import logo from "/logo.png"; // logo from public folder
 
 export default function AuthPage() {
-  const [mode, setMode] = useState("welcome"); 
+  const [mode, setMode] = useState("welcome");
   // modes: welcome | login | signup
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-900 px-4">
-      
-      {/* LOGO */}
+
+      {/* LOGO (slightly closer to center) */}
       <img
         src={logo}
-        alt="RRR Shopkart Logo"
-        className="w-48 md:w-56 mb-6"
+        alt="Ai-Kart Logo"
+        className="w-48 md:w-56 mb-4"
       />
 
       {/* WELCOME SECTION */}
       {mode === "welcome" && (
         <div className="bg-white dark:bg-gray-800 p-6 rounded shadow w-80 text-center">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-            Welcome to RRR Shopkart
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+            Welcome to <span className="text-green-600">Ai-Kart</span>
           </h1>
 
-          <p className="text-gray-600 dark:text-gray-300 mb-6">
+          <p className="text-gray-600 dark:text-gray-300 mb-5">
             Your one-stop shopping destination
           </p>
 
@@ -48,7 +48,6 @@ export default function AuthPage() {
       {mode === "login" && (
         <div>
           <Login />
-
           <p className="text-sm text-center mt-3 text-gray-700 dark:text-gray-300">
             No account?{" "}
             <span
@@ -65,7 +64,6 @@ export default function AuthPage() {
       {mode === "signup" && (
         <div>
           <Signup onSuccess={() => setMode("login")} />
-
           <p className="text-sm text-center mt-3 text-gray-700 dark:text-gray-300">
             Already have an account?{" "}
             <span
@@ -77,6 +75,11 @@ export default function AuthPage() {
           </p>
         </div>
       )}
+
+      {/* FOOTER TEXT (only for home page visual flow) */}
+      <p className="mt-6 text-sm text-gray-500 dark:text-gray-400">
+        Designed by Roshan © 2026
+      </p>
     </div>
   );
 }
