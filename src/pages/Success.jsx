@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { Link } from "react-router-dom";
 
 export default function Success() {
-  // ✅ Clear cart once payment is successful
+  // Clear cart once payment is successful
   useEffect(() => {
     localStorage.removeItem("cart");
   }, []);
@@ -10,9 +10,9 @@ export default function Success() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-green-50 dark:bg-gray-900 text-center px-4">
       
-      {/* ✅ SUCCESS ANIMATION */}
-      <div className="relative mb-6">
-        <div className="w-28 h-28 rounded-full bg-green-100 flex items-center justify-center animate-scale">
+      {/* SUCCESS ICON */}
+      <div className="mb-6 animate-scale">
+        <div className="w-28 h-28 rounded-full bg-green-100 flex items-center justify-center">
           <svg
             className="w-16 h-16 text-green-600"
             fill="none"
@@ -30,39 +30,29 @@ export default function Success() {
       </div>
 
       <h1 className="text-4xl font-bold text-green-600 mb-4">
-        Payment Successful
+        Payment Successful 🎉
       </h1>
 
       <p className="text-lg text-gray-700 dark:text-gray-300 mb-8 max-w-md">
-        Your order has been placed successfully.  
-        Thank you for shopping with <strong>RRR Shopkart</strong> 🛍️
+        Thank you for shopping with <strong>Ai-Kart</strong>!
       </p>
 
       <Link
         to="/products"
-        className="bg-green-600 text-white px-10 py-3 rounded-lg hover:bg-green-700 transition font-semibold"
+        className="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition font-semibold"
       >
         Continue Shopping
       </Link>
 
-      {/* ✅ Animation Styles */}
+      {/* Animation */}
       <style>{`
         .animate-scale {
           animation: scaleIn 0.6s ease-out forwards;
         }
-
         @keyframes scaleIn {
-          0% {
-            transform: scale(0);
-            opacity: 0;
-          }
-          80% {
-            transform: scale(1.1);
-            opacity: 1;
-          }
-          100% {
-            transform: scale(1);
-          }
+          0% { transform: scale(0); opacity: 0; }
+          80% { transform: scale(1.1); opacity: 1; }
+          100% { transform: scale(1); }
         }
       `}</style>
     </div>
