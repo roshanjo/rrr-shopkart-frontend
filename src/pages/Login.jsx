@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-// ✅ BACKEND URL (LIVE)
+// ✅ BACKEND URL
 const API = "https://rrr-shopkart-backend.onrender.com";
 
 export default function Login() {
@@ -15,25 +15,29 @@ export default function Login() {
     setError("");
 
     try {
-      const res = await fetch(`${API}/api/login/`, {
+      const res = await fetch(`${API}/login`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({ email, password }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || "Login failed");
+        throw new Error(data.message || "Login failed");
       }
 
       // ✅ SAVE TOKEN
-      localStorage.setItem("token", data.token);
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+      }
 
-      // ✅ SAVE USER NAME
+      // ✅ SAVE USER
       localStorage.setItem(
         "user",
-        JSON.stringify({ name: data.name })
+        JSON.stringify({ name: data.name || email })
       );
 
       // ✅ REDIRECT
