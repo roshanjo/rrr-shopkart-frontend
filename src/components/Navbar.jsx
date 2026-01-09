@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const avatars = [
   "/avatars/a1.png",
@@ -11,6 +11,7 @@ const avatars = [
 export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const dropdownRef = useRef(null);
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -35,6 +36,19 @@ export default function Navbar() {
     localStorage.setItem("theme", theme);
   }, [theme]);
 
+  /* Close dropdown when clicking outside */
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setMenuOpen(false);
+        setSettingsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   /* Hide cart button on these pages */
   const hideCart =
     location.pathname === "/products" ||
@@ -47,10 +61,7 @@ export default function Navbar() {
   };
 
   const handleSaveSettings = () => {
-    localStorage.setItem(
-      "user",
-      JSON.stringify({ name: username })
-    );
+    localStorage.setItem("user", JSON.stringify({ name: username }));
 
     if (password) {
       localStorage.setItem("password", password);
@@ -58,19 +69,21 @@ export default function Navbar() {
 
     alert("Settings saved successfully");
     setSettingsOpen(false);
+    setMenuOpen(false);
   };
 
   if (!isLoggedIn) return null;
 
   return (
     <nav className="flex justify-between items-center p-4 bg-gray-900 text-white relative">
+      
       {/* LEFT: LOGO */}
       <Link to="/products">
         <img src="/logo.png" alt="Logo" className="h-12 w-auto" />
       </Link>
 
       {/* RIGHT */}
-      <div className="flex items-center gap-4 relative">
+      <div className="flex items-center gap-4 relative" ref={dropdownRef}>
         {!hideCart && (
           <Link
             to="/cart"
@@ -97,94 +110,98 @@ export default function Navbar() {
         </button>
 
         {/* DROPDOWN */}
-        {menuOpen && (
-          <div className="absolute right-0 top-12 w-64 bg-white text-black rounded shadow-lg p-3 z-50">
-            {!settingsOpen ? (
-              <>
-                <button
-                  onClick={() => setSettingsOpen(true)}
-                  className="w-full text-left px-3 py-2 hover:bg-gray-100"
-                >
-                  Settings
-                </button>
+        <div
+          className={`absolute right-0 top-12 w-64 bg-white text-black rounded shadow-lg p-3 z-50 transform transition-all duration-200 ${
+            menuOpen
+              ? "opacity-100 scale-100 translate-y-0"
+              : "opacity-0 scale-95 -translate-y-2 pointer-events-none"
+          }`}
+        >
+          {!settingsOpen ? (
+            <>
+              <button
+                onClick={() => setSettingsOpen(true)}
+                className="w-full text-left px-3 py-2 hover:bg-gray-100"
+              >
+                Settings
+              </button>
 
-                <button
-                  onClick={handleLogout}
-                  className="w-full text-left px-3 py-2 hover:bg-gray-100 text-red-600"
-                >
-                  Logout
-                </button>
-              </>
-            ) : (
-              <>
-                <p className="font-bold mb-2">Settings</p>
+              <button
+                onClick={handleLogout}
+                className="w-full text-left px-3 py-2 hover:bg-gray-100 text-red-600"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <p className="font-bold mb-2">Settings</p>
 
-                {/* AVATAR */}
-                <div className="mb-3">
-                  <p className="text-sm mb-1">Profile Picture</p>
-                  <div className="flex gap-2">
-                    {avatars.map((a) => (
-                      <img
-                        key={a}
-                        src={a}
-                        alt="avatar"
-                        className={`h-8 w-8 rounded-full cursor-pointer ${
-                          avatar === a ? "ring-2 ring-green-500" : ""
-                        }`}
-                        onClick={() => {
-                          setAvatar(a);
-                          localStorage.setItem("avatar", a);
-                        }}
-                      />
-                    ))}
-                  </div>
+              {/* AVATAR */}
+              <div className="mb-3">
+                <p className="text-sm mb-1">Profile Picture</p>
+                <div className="flex gap-2">
+                  {avatars.map((a) => (
+                    <img
+                      key={a}
+                      src={a}
+                      alt="avatar"
+                      className={`h-8 w-8 rounded-full cursor-pointer ${
+                        avatar === a ? "ring-2 ring-green-500" : ""
+                      }`}
+                      onClick={() => {
+                        setAvatar(a);
+                        localStorage.setItem("avatar", a);
+                      }}
+                    />
+                  ))}
                 </div>
+              </div>
 
-                {/* USERNAME */}
-                <input
-                  className="w-full p-2 border rounded mb-2"
-                  value={username}
-                  placeholder="Change username"
-                  onChange={(e) => setUsername(e.target.value)}
-                />
+              {/* USERNAME */}
+              <input
+                className="w-full p-2 border rounded mb-2"
+                value={username}
+                placeholder="Change username"
+                onChange={(e) => setUsername(e.target.value)}
+              />
 
-                {/* PASSWORD */}
-                <input
-                  type="password"
-                  className="w-full p-2 border rounded mb-2"
-                  placeholder="New password"
-                  onChange={(e) => setPassword(e.target.value)}
-                />
+              {/* PASSWORD */}
+              <input
+                type="password"
+                className="w-full p-2 border rounded mb-2"
+                placeholder="New password"
+                onChange={(e) => setPassword(e.target.value)}
+              />
 
-                {/* THEME */}
-                <button
-                  onClick={() =>
-                    setTheme(theme === "light" ? "dark" : "light")
-                  }
-                  className="w-full bg-gray-200 py-1 rounded mb-2"
-                >
-                  Switch to {theme === "light" ? "Dark" : "Light"} Mode
-                </button>
+              {/* THEME */}
+              <button
+                onClick={() =>
+                  setTheme(theme === "light" ? "dark" : "light")
+                }
+                className="w-full bg-gray-200 py-1 rounded mb-2"
+              >
+                Switch to {theme === "light" ? "Dark" : "Light"} Mode
+              </button>
 
-                {/* SAVE */}
-                <button
-                  onClick={handleSaveSettings}
-                  className="w-full bg-green-600 text-white py-1 rounded mb-2"
-                >
-                  Save
-                </button>
+              {/* SAVE */}
+              <button
+                onClick={handleSaveSettings}
+                className="w-full bg-green-600 text-white py-1 rounded mb-2"
+              >
+                Save
+              </button>
 
-                {/* BACK */}
-                <button
-                  onClick={() => setSettingsOpen(false)}
-                  className="w-full text-left px-3 py-1 hover:bg-gray-100"
-                >
-                  ← Back
-                </button>
-              </>
-            )}
-          </div>
-        )}
+              {/* BACK */}
+              <button
+                onClick={() => setSettingsOpen(false)}
+                className="w-full text-left px-3 py-1 hover:bg-gray-100"
+              >
+                ← Back
+              </button>
+            </>
+          )}
+        </div>
       </div>
     </nav>
   );
