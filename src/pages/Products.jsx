@@ -29,7 +29,15 @@ export default function Products() {
     localStorage.setItem("category", category);
   }, [category]);
 
-  // 🔹 Categories
+  // 🔹 Persist search
+  useEffect(() => {
+    if (search) {
+      localStorage.setItem("search", search);
+    } else {
+      localStorage.removeItem("search");
+    }
+  }, [search]);
+
   const categories = [
     "all",
     "electronics",
@@ -38,36 +46,40 @@ export default function Products() {
     "women's clothing",
   ];
 
-  // 🔹 Apply category filter
+  // 🔹 Apply filters
   let filtered =
     category === "all"
       ? products
       : products.filter((p) => p.category === category);
 
-  // 🔹 Apply SEARCH filter
   if (search) {
-    filtered = filtered.filter((p) =>
-      p.title.toLowerCase().includes(search.toLowerCase()) ||
-      p.category.toLowerCase().includes(search.toLowerCase())
+    filtered = filtered.filter(
+      (p) =>
+        p.title.toLowerCase().includes(search.toLowerCase()) ||
+        p.category.toLowerCase().includes(search.toLowerCase())
     );
   }
 
-  // 🔹 AI FALLBACK → GOOGLE SEARCH
+  // 🔹 AI-LIKE GOOGLE FALLBACK (DELAYED)
   useEffect(() => {
     if (search && products.length > 0 && filtered.length === 0) {
-      window.location.href = `https://www.google.com/search?q=${encodeURIComponent(
-        search + " product"
-      )}`;
-    }
-  }, [search, products, filtered]);
+      const timer = setTimeout(() => {
+        window.location.href = `https://www.google.com/search?q=${encodeURIComponent(
+          search + " product"
+        )}`;
+      }, 1000); // ⏳ feels smart, not broken
 
-  // 🔹 Add to cart (SAFE with Cart.jsx)
+      return () => clearTimeout(timer);
+    }
+  }, [search, filtered, products]);
+
+  // 🔹 Add to cart
   const addToCart = (p) => {
     const updatedCart = [
       ...cart,
       {
         name: p.title,
-        price: Math.round(p.price * 80), // USD → INR approx
+        price: Math.round(p.price * 80),
         image: p.image,
         qty: 1,
       },
@@ -82,14 +94,25 @@ export default function Products() {
   return (
     <div className="p-6 space-y-6">
 
-      {/* 🔹 CATEGORIES TOP */}
+      {/* 🔍 SEARCH BAR (ONLY PRODUCTS PAGE) */}
+      <div className="max-w-3xl mx-auto">
+        <input
+          type="text"
+          placeholder="Search for products, brands and more…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full px-6 py-3 rounded-full border shadow-sm
+                     focus:outline-none focus:ring-2 focus:ring-green-500"
+        />
+      </div>
+
+      {/* 🔹 CATEGORIES */}
       <div className="flex gap-3 overflow-x-auto">
         {categories.map((c) => (
           <button
             key={c}
             onClick={() => {
               setCategory(c);
-              localStorage.removeItem("search");
               setSearch("");
             }}
             className={`px-4 py-2 rounded-full text-sm font-semibold ${
@@ -106,13 +129,12 @@ export default function Products() {
       {/* 🔹 SEARCH INFO */}
       {search && (
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          Showing results for: <b>{search}</b>
+          Showing results for <b>"{search}"</b>
         </p>
       )}
 
       <div className="flex gap-6">
-
-        {/* 🔹 PRODUCTS GRID */}
+        {/* PRODUCTS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 flex-1">
           {filtered.map((p) => (
             <div
@@ -120,7 +142,6 @@ export default function Products() {
               className="bg-white dark:bg-gray-800 p-5 rounded-xl shadow
                          hover:shadow-xl hover:-translate-y-1 transition"
             >
-              {/* CATEGORY BADGE */}
               <span className="inline-block text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded mb-2">
                 {p.category}
               </span>
@@ -135,7 +156,6 @@ export default function Products() {
                 {p.title}
               </h3>
 
-              {/* ⭐ RATING */}
               <p className="text-yellow-500 text-sm mb-1">
                 ⭐ {p.rating?.rate} / 5
               </p>
@@ -154,15 +174,13 @@ export default function Products() {
           ))}
         </div>
 
-        {/* 🔹 RIGHT SIDE CART PREVIEW */}
+        {/* CART PREVIEW */}
         {cart.length > 0 && (
           <div className="w-72 bg-gray-100 dark:bg-gray-800 p-4 rounded-xl h-fit">
             <h3 className="font-bold mb-3">🛒 Cart</h3>
-
             <p className="text-sm mb-3">
               Items: <b>{totalItems}</b>
             </p>
-
             <button
               onClick={() => navigate("/cart")}
               className="w-full bg-purple-600 text-white py-2 rounded hover:bg-purple-700"
