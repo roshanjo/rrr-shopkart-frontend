@@ -33,13 +33,20 @@ export default function Signup({ onSuccess }) {
       onSubmit={handleSubmit}
       className="bg-white dark:bg-gray-800 p-6 rounded shadow w-80"
     >
-      <h2 className="text-2xl font-bold mb-4 text-center">Create Account</h2>
+      <h2 className="text-2xl font-bold mb-4 text-center text-gray-900 dark:text-white">
+        Create Account
+      </h2>
 
       {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
 
       <input
         placeholder="Username"
-        className="w-full mb-3 p-2 border rounded"
+        className="w-full mb-3 p-2 rounded
+                   bg-white dark:bg-gray-700
+                   text-gray-900 dark:text-white
+                   placeholder-gray-500 dark:placeholder-gray-400
+                   border border-gray-300 dark:border-gray-600
+                   focus:outline-none focus:ring-2 focus:ring-green-500"
         onChange={(e) => setUsername(e.target.value)}
         required
       />
@@ -47,7 +54,12 @@ export default function Signup({ onSuccess }) {
       <input
         type="email"
         placeholder="Email"
-        className="w-full mb-3 p-2 border rounded"
+        className="w-full mb-3 p-2 rounded
+                   bg-white dark:bg-gray-700
+                   text-gray-900 dark:text-white
+                   placeholder-gray-500 dark:placeholder-gray-400
+                   border border-gray-300 dark:border-gray-600
+                   focus:outline-none focus:ring-2 focus:ring-green-500"
         onChange={(e) => setEmail(e.target.value)}
         required
       />
@@ -55,12 +67,17 @@ export default function Signup({ onSuccess }) {
       <input
         type="password"
         placeholder="Password"
-        className="w-full mb-4 p-2 border rounded"
+        className="w-full mb-4 p-2 rounded
+                   bg-white dark:bg-gray-700
+                   text-gray-900 dark:text-white
+                   placeholder-gray-500 dark:placeholder-gray-400
+                   border border-gray-300 dark:border-gray-600
+                   focus:outline-none focus:ring-2 focus:ring-green-500"
         onChange={(e) => setPassword(e.target.value)}
         required
       />
 
-      <button className="w-full bg-green-600 text-white py-2 rounded">
+      <button className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">
         Sign Up
       </button>
     </form>
