@@ -15,10 +15,7 @@ export default function Navbar() {
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-
-  const [search, setSearch] = useState(
-    localStorage.getItem("search") || ""
-  );
+  const [search, setSearch] = useState("");
 
   const storedUser = JSON.parse(localStorage.getItem("user")) || { name: "User" };
   const [username, setUsername] = useState(storedUser.name);
@@ -40,18 +37,16 @@ export default function Navbar() {
     localStorage.setItem("theme", theme);
   }, [theme]);
 
-  /* Close dropdown when clicking outside */
+  /* Close dropdown on outside click */
   useEffect(() => {
-    const handleClickOutside = (e) => {
+    const handler = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setMenuOpen(false);
         setSettingsOpen(false);
       }
     };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () =>
-      document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, []);
 
   const handleLogout = () => {
@@ -62,54 +57,43 @@ export default function Navbar() {
   const handleSaveSettings = () => {
     localStorage.setItem("user", JSON.stringify({ name: username }));
     if (password) localStorage.setItem("password", password);
-
-    alert("Settings saved successfully");
+    alert("Settings saved");
     setSettingsOpen(false);
     setMenuOpen(false);
   };
 
-  /* 🔍 SEARCH (Products page only) */
+  /* ✅ REAL SEARCH (NO REFRESH NEEDED) */
   const handleSearch = (e) => {
     e.preventDefault();
     if (!search.trim()) return;
 
-    localStorage.setItem("search", search);
-    navigate("/products");
+    navigate(`/products?q=${encodeURIComponent(search)}`);
   };
 
   if (!isLoggedIn) return null;
 
-  const showSearch = location.pathname === "/products";
-
   return (
-    <nav className="flex items-center p-4 bg-gray-900 text-white relative">
+    <nav className="flex items-center p-4 bg-gray-900 text-white">
 
-      {/* LEFT: LOGO */}
+      {/* LOGO */}
       <Link to="/products" className="shrink-0">
-        <img src="/logo.png" alt="Logo" className="h-12 w-auto" />
+        <img src="/logo.png" alt="Logo" className="h-12" />
       </Link>
 
-      {/* CENTER: SEARCH (ONLY PRODUCTS PAGE) */}
-      {showSearch && (
-        <div className="flex-1 mx-6">
-          <form onSubmit={handleSearch}>
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search for products, brands and more…"
-              className="w-full px-6 py-2 rounded-full text-black
-                         focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
-          </form>
-        </div>
+      {/* SEARCH BAR (PRODUCTS ONLY) */}
+      {location.pathname === "/products" && (
+        <form onSubmit={handleSearch} className="flex-1 mx-6">
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search for products, brands and more..."
+            className="w-full px-5 py-2 rounded-full text-black focus:outline-none"
+          />
+        </form>
       )}
 
-      {/* RIGHT: PROFILE */}
-      <div
-        className="flex items-center gap-4 relative shrink-0"
-        ref={dropdownRef}
-      >
+      {/* PROFILE */}
+      <div className="relative flex items-center gap-4" ref={dropdownRef}>
         <button
           onClick={() => {
             setMenuOpen(!menuOpen);
@@ -117,17 +101,15 @@ export default function Navbar() {
           }}
           className="flex items-center gap-2"
         >
-          <img src={avatar} alt="Profile" className="h-8 w-8 rounded-full" />
+          <img src={avatar} className="h-8 w-8 rounded-full" />
           <span>{username}</span>
         </button>
 
-        {/* DROPDOWN */}
         <div
-          className={`absolute right-0 top-12 w-64 bg-white text-black rounded shadow-lg p-3 z-50
-          transform transition-all duration-200 ${
+          className={`absolute right-0 top-12 w-64 bg-white text-black rounded shadow p-3 transition ${
             menuOpen
-              ? "opacity-100 scale-100 translate-y-0"
-              : "opacity-0 scale-95 -translate-y-2 pointer-events-none"
+              ? "opacity-100 scale-100"
+              : "opacity-0 scale-95 pointer-events-none"
           }`}
         >
           {!settingsOpen ? (
@@ -138,10 +120,9 @@ export default function Navbar() {
               >
                 Settings
               </button>
-
               <button
                 onClick={handleLogout}
-                className="w-full text-left px-3 py-2 hover:bg-gray-100 text-red-600"
+                className="w-full text-left px-3 py-2 text-red-600 hover:bg-gray-100"
               >
                 Logout
               </button>
@@ -150,36 +131,28 @@ export default function Navbar() {
             <>
               <p className="font-bold mb-2">Settings</p>
 
-              {/* AVATAR */}
-              <div className="mb-3">
-                <p className="text-sm mb-1">Profile Picture</p>
-                <div className="flex gap-2">
-                  {avatars.map((a) => (
-                    <img
-                      key={a}
-                      src={a}
-                      alt="avatar"
-                      className={`h-8 w-8 rounded-full cursor-pointer ${
-                        avatar === a ? "ring-2 ring-green-500" : ""
-                      }`}
-                      onClick={() => {
-                        setAvatar(a);
-                        localStorage.setItem("avatar", a);
-                      }}
-                    />
-                  ))}
-                </div>
+              <div className="flex gap-2 mb-3">
+                {avatars.map((a) => (
+                  <img
+                    key={a}
+                    src={a}
+                    className={`h-8 w-8 rounded-full cursor-pointer ${
+                      avatar === a ? "ring-2 ring-green-500" : ""
+                    }`}
+                    onClick={() => {
+                      setAvatar(a);
+                      localStorage.setItem("avatar", a);
+                    }}
+                  />
+                ))}
               </div>
 
-              {/* USERNAME */}
               <input
                 className="w-full p-2 border rounded mb-2"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Change username"
               />
 
-              {/* PASSWORD */}
               <input
                 type="password"
                 className="w-full p-2 border rounded mb-2"
@@ -187,30 +160,20 @@ export default function Navbar() {
                 onChange={(e) => setPassword(e.target.value)}
               />
 
-              {/* THEME */}
               <button
                 onClick={() =>
                   setTheme(theme === "light" ? "dark" : "light")
                 }
                 className="w-full bg-gray-200 py-1 rounded mb-2"
               >
-                Switch to {theme === "light" ? "Dark" : "Light"} Mode
+                Switch Theme
               </button>
 
-              {/* SAVE */}
               <button
                 onClick={handleSaveSettings}
-                className="w-full bg-green-600 text-white py-1 rounded mb-2"
+                className="w-full bg-green-600 text-white py-1 rounded"
               >
                 Save
-              </button>
-
-              {/* BACK */}
-              <button
-                onClick={() => setSettingsOpen(false)}
-                className="w-full text-left px-3 py-1 hover:bg-gray-100"
-              >
-                ← Back
               </button>
             </>
           )}
