@@ -79,7 +79,7 @@ export default function Cart() {
         {/* ✅ EMPTY CART — CENTERED */}
         {cart.length === 0 ? (
           <div className="flex flex-col items-center justify-center text-center min-h-[50vh]">
-            <p className="text-gray-500 mb-6">Your cart is empty</p>
+            
 
             <button
               onClick={() => navigate("/products")}
