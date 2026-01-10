@@ -70,25 +70,27 @@ export default function Cart() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-between">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+
       {/* MAIN CONTENT */}
       <div className="max-w-4xl mx-auto p-6 w-full">
         <h1 className="text-3xl font-bold mb-6">Your Cart</h1>
 
+        {/* ✅ EMPTY CART — CENTERED */}
         {cart.length === 0 ? (
-          <>
+          <div className="flex flex-col items-center justify-center text-center min-h-[50vh]">
             <p className="text-gray-500 mb-6">Your cart is empty</p>
 
-            {/* BACK BUTTON STAYS */}
             <button
               onClick={() => navigate("/products")}
               className="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600"
             >
               ← Back to Products
             </button>
-          </>
+          </div>
         ) : (
           <>
+            {/* CART ITEMS */}
             <div className="space-y-4">
               {cart.map((item, index) => (
                 <div
@@ -135,7 +137,7 @@ export default function Cart() {
               ))}
             </div>
 
-            {/* ACTION BUTTONS */}
+            {/* ACTIONS */}
             <div className="mt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
               <h2 className="text-2xl font-bold">Total: ₹{total}</h2>
 
