@@ -16,9 +16,7 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
-  const [search, setSearch] = useState(
-    localStorage.getItem("search") || ""
-  );
+  const [search, setSearch] = useState(localStorage.getItem("search") || "");
 
   const storedUser = JSON.parse(localStorage.getItem("user")) || { name: "User" };
   const [username, setUsername] = useState(storedUser.name);
@@ -34,26 +32,15 @@ export default function Navbar() {
     localStorage.getItem("theme") || "light"
   );
 
-  /* ✅ APPLY THEME SAFELY (FIXED) */
+  /* ✅ APPLY THEME */
   useEffect(() => {
     const root = document.documentElement;
-
-    if (theme === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
+    theme === "dark"
+      ? root.classList.add("dark")
+      : root.classList.remove("dark");
 
     localStorage.setItem("theme", theme);
   }, [theme]);
-
-  /* ✅ LOAD THEME ONCE */
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
-    if (savedTheme === "dark") {
-      setTheme("dark");
-    }
-  }, []);
 
   /* Close dropdown when clicking outside */
   useEffect(() => {
@@ -63,7 +50,6 @@ export default function Navbar() {
         setSettingsOpen(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () =>
       document.removeEventListener("mousedown", handleClickOutside);
@@ -78,16 +64,15 @@ export default function Navbar() {
     localStorage.setItem("user", JSON.stringify({ name: username }));
     if (password) localStorage.setItem("password", password);
 
-    alert("Settings saved successfully");
+    alert("Profile updated successfully");
     setSettingsOpen(false);
     setMenuOpen(false);
   };
 
-  /* 🔍 SEARCH (Products page only) */
+  /* 🔍 SEARCH */
   const handleSearch = (e) => {
     e.preventDefault();
     if (!search.trim()) return;
-
     localStorage.setItem("search", search);
     navigate("/products");
   };
@@ -98,13 +83,12 @@ export default function Navbar() {
 
   return (
     <nav className="flex items-center justify-between p-4 bg-gray-900 text-white relative">
-
-      {/* LEFT: LOGO */}
+      {/* LOGO */}
       <Link to="/products" className="shrink-0">
         <img src="/logo.png" alt="Logo" className="h-12 w-auto" />
       </Link>
 
-      {/* CENTER: SEARCH OR SPACER */}
+      {/* SEARCH */}
       <div className="flex-1 mx-6">
         {showSearch && (
           <form onSubmit={handleSearch}>
@@ -120,7 +104,7 @@ export default function Navbar() {
         )}
       </div>
 
-      {/* RIGHT: PROFILE */}
+      {/* PROFILE */}
       <div
         className="flex items-center gap-4 relative shrink-0"
         ref={dropdownRef}
@@ -133,16 +117,16 @@ export default function Navbar() {
           className="flex items-center gap-2"
         >
           <img src={avatar} alt="Profile" className="h-8 w-8 rounded-full" />
-          <span>{username}</span>
+          <span className="font-medium">Hi, {username}</span>
         </button>
 
         {/* DROPDOWN */}
         <div
           className={`absolute right-0 top-12 w-64 bg-white text-black rounded shadow-lg p-3 z-50
-          transform transition-all duration-200 ${
+          transition-all duration-200 ${
             menuOpen
-              ? "opacity-100 scale-100 translate-y-0"
-              : "opacity-0 scale-95 -translate-y-2 pointer-events-none"
+              ? "opacity-100 scale-100"
+              : "opacity-0 scale-95 pointer-events-none"
           }`}
         >
           {!settingsOpen ? (
@@ -151,7 +135,7 @@ export default function Navbar() {
                 onClick={() => setSettingsOpen(true)}
                 className="w-full text-left px-3 py-2 hover:bg-gray-100"
               >
-                Settings
+                Edit Profile
               </button>
 
               <button
@@ -163,8 +147,9 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <p className="font-bold mb-2">Settings</p>
+              <p className="font-bold mb-2">Edit Profile</p>
 
+              {/* AVATAR */}
               <div className="mb-3">
                 <p className="text-sm mb-1">Profile Picture</p>
                 <div className="flex gap-2">
@@ -185,6 +170,7 @@ export default function Navbar() {
                 </div>
               </div>
 
+              {/* USERNAME */}
               <input
                 className="w-full p-2 border rounded mb-2"
                 value={username}
@@ -192,6 +178,7 @@ export default function Navbar() {
                 placeholder="Change username"
               />
 
+              {/* PASSWORD */}
               <input
                 type="password"
                 className="w-full p-2 border rounded mb-2"
@@ -199,6 +186,7 @@ export default function Navbar() {
                 onChange={(e) => setPassword(e.target.value)}
               />
 
+              {/* THEME */}
               <button
                 onClick={() =>
                   setTheme(theme === "light" ? "dark" : "light")
@@ -212,7 +200,7 @@ export default function Navbar() {
                 onClick={handleSaveSettings}
                 className="w-full bg-green-600 text-white py-1 rounded mb-2"
               >
-                Save
+                Save Changes
               </button>
 
               <button

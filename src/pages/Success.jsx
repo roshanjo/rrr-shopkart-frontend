@@ -1,50 +1,49 @@
 import { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export default function Success() {
+  const navigate = useNavigate();
+
   useEffect(() => {
     localStorage.removeItem("cart");
-  }, []);
+
+    const timer = setTimeout(() => {
+      navigate("/products");
+    }, 2500);
+
+    return () => clearTimeout(timer);
+  }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-green-50 dark:bg-gray-900 px-4">
-
-      <div className="flex items-center justify-center min-h-screen text-center">
-        <div>
-          {/* SUCCESS ICON */}
-          <div className="mb-6 animate-scale">
-            <div className="w-28 h-28 rounded-full bg-green-100 flex items-center justify-center mx-auto">
-              <svg
-                className="w-16 h-16 text-green-600"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="4"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
-            </div>
+    <div className="min-h-screen bg-green-50 dark:bg-gray-900 flex items-center justify-center px-4 text-center">
+      <div>
+        {/* SUCCESS ICON */}
+        <div className="mb-6 animate-scale">
+          <div className="w-28 h-28 rounded-full bg-green-100 flex items-center justify-center mx-auto">
+            <svg
+              className="w-16 h-16 text-green-600"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="4"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
           </div>
-
-          <h1 className="text-4xl font-bold text-green-600 mb-4">
-            Payment Successful 🎉
-          </h1>
-
-          <p className="text-lg text-gray-700 dark:text-gray-300 mb-8 max-w-md mx-auto">
-            Thank you for shopping with <strong>Ai-Kart</strong>!
-          </p>
-
-          <Link
-            to="/products"
-            className="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition font-semibold"
-          >
-            Continue Shopping
-          </Link>
         </div>
+
+        <h1 className="text-4xl font-bold text-green-600 mb-4">
+          Payment Successful 🎉
+        </h1>
+
+        <p className="text-lg text-gray-700 dark:text-gray-300 max-w-md mx-auto">
+          Thank you for shopping with <strong>Ai-Kart</strong>!  
+          Redirecting you to products…
+        </p>
       </div>
 
       {/* Animation */}

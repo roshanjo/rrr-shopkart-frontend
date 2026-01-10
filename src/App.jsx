@@ -10,18 +10,19 @@ import AdminOrders from "./pages/AdminOrders";
 import Success from "./pages/Success";
 import Cancel from "./pages/Cancel";
 
-/* Layout controls Navbar only */
+/* Layout controls Navbar & Footer */
 function Layout({ children }) {
   const location = useLocation();
 
-  // Hide Navbar only on home/auth page
   const hideNavbar = location.pathname === "/";
+  const hideFooter =
+    location.pathname === "/" || location.pathname === "/success";
 
   return (
     <>
       {!hideNavbar && <Navbar />}
       {children}
-      <Footer />
+      {!hideFooter && <Footer />}
     </>
   );
 }
@@ -31,10 +32,7 @@ export default function App() {
     <BrowserRouter>
       <Layout>
         <Routes>
-          {/* HOME / AUTH */}
           <Route path="/" element={<AuthPage />} />
-
-          {/* MAIN PAGES */}
           <Route path="/products" element={<Products />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/admin/orders" element={<AdminOrders />} />
