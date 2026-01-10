@@ -15,7 +15,10 @@ export default function Navbar() {
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [search, setSearch] = useState("");
+
+  const [search, setSearch] = useState(
+    localStorage.getItem("search") || ""
+  );
 
   const storedUser = JSON.parse(localStorage.getItem("user")) || { name: "User" };
   const [username, setUsername] = useState(storedUser.name);
@@ -51,12 +54,6 @@ export default function Navbar() {
       document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  /* Hide cart button on these pages */
-  const hideCart =
-    location.pathname === "/products" ||
-    location.pathname === "/cart" ||
-    location.pathname === "/success";
-
   const handleLogout = () => {
     localStorage.clear();
     navigate("/");
@@ -64,17 +61,14 @@ export default function Navbar() {
 
   const handleSaveSettings = () => {
     localStorage.setItem("user", JSON.stringify({ name: username }));
-
-    if (password) {
-      localStorage.setItem("password", password);
-    }
+    if (password) localStorage.setItem("password", password);
 
     alert("Settings saved successfully");
     setSettingsOpen(false);
     setMenuOpen(false);
   };
 
-  /* SEARCH SUBMIT */
+  /* 🔍 SEARCH (Products page only) */
   const handleSearch = (e) => {
     e.preventDefault();
     if (!search.trim()) return;
@@ -85,6 +79,8 @@ export default function Navbar() {
 
   if (!isLoggedIn) return null;
 
+  const showSearch = location.pathname === "/products";
+
   return (
     <nav className="flex items-center p-4 bg-gray-900 text-white relative">
 
@@ -93,34 +89,27 @@ export default function Navbar() {
         <img src="/logo.png" alt="Logo" className="h-12 w-auto" />
       </Link>
 
-      {/* CENTER: SEARCH BAR */}
-      <div className="flex-1 mx-6">
-        <form onSubmit={handleSearch}>
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search for products, brands and more..."
-            className="w-full px-5 py-2 rounded-full text-black focus:outline-none"
-          />
-        </form>
-      </div>
+      {/* CENTER: SEARCH (ONLY PRODUCTS PAGE) */}
+      {showSearch && (
+        <div className="flex-1 mx-6">
+          <form onSubmit={handleSearch}>
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search for products, brands and more…"
+              className="w-full px-6 py-2 rounded-full text-black
+                         focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+          </form>
+        </div>
+      )}
 
-      {/* RIGHT */}
+      {/* RIGHT: PROFILE */}
       <div
         className="flex items-center gap-4 relative shrink-0"
         ref={dropdownRef}
       >
-        {!hideCart && (
-          <Link
-            to="/cart"
-            className="bg-green-600 px-3 py-1 rounded hover:bg-green-700"
-          >
-            Cart
-          </Link>
-        )}
-
-        {/* PROFILE BUTTON */}
         <button
           onClick={() => {
             setMenuOpen(!menuOpen);
@@ -128,17 +117,14 @@ export default function Navbar() {
           }}
           className="flex items-center gap-2"
         >
-          <img
-            src={avatar}
-            alt="Profile"
-            className="h-8 w-8 rounded-full"
-          />
+          <img src={avatar} alt="Profile" className="h-8 w-8 rounded-full" />
           <span>{username}</span>
         </button>
 
         {/* DROPDOWN */}
         <div
-          className={`absolute right-0 top-12 w-64 bg-white text-black rounded shadow-lg p-3 z-50 transform transition-all duration-200 ${
+          className={`absolute right-0 top-12 w-64 bg-white text-black rounded shadow-lg p-3 z-50
+          transform transition-all duration-200 ${
             menuOpen
               ? "opacity-100 scale-100 translate-y-0"
               : "opacity-0 scale-95 -translate-y-2 pointer-events-none"
@@ -189,8 +175,8 @@ export default function Navbar() {
               <input
                 className="w-full p-2 border rounded mb-2"
                 value={username}
-                placeholder="Change username"
                 onChange={(e) => setUsername(e.target.value)}
+                placeholder="Change username"
               />
 
               {/* PASSWORD */}

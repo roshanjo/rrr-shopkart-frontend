@@ -29,14 +29,15 @@ export default function Products() {
     localStorage.setItem("category", category);
   }, [category]);
 
-  // 🔹 Persist search
+  // 🔹 Sync search from Navbar (localStorage)
   useEffect(() => {
-    if (search) {
-      localStorage.setItem("search", search);
-    } else {
-      localStorage.removeItem("search");
-    }
-  }, [search]);
+    const syncSearch = () => {
+      setSearch(localStorage.getItem("search") || "");
+    };
+
+    window.addEventListener("storage", syncSearch);
+    return () => window.removeEventListener("storage", syncSearch);
+  }, []);
 
   const categories = [
     "all",
@@ -46,7 +47,7 @@ export default function Products() {
     "women's clothing",
   ];
 
-  // 🔹 Filter products
+  // 🔹 Apply filters
   let filtered =
     category === "all"
       ? products
@@ -60,7 +61,7 @@ export default function Products() {
     );
   }
 
-  // 🔹 AI-like Google fallback (delayed)
+  // 🔹 AI-like Google fallback
   useEffect(() => {
     if (search && products.length > 0 && filtered.length === 0) {
       const timer = setTimeout(() => {
@@ -94,18 +95,6 @@ export default function Products() {
   return (
     <div className="p-6 space-y-6">
 
-      {/* 🔍 SINGLE SEARCH BAR (ONLY ONE) */}
-      <div className="max-w-3xl mx-auto">
-        <input
-          type="text"
-          placeholder="Search for products, brands and more…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full px-6 py-3 rounded-full border shadow-sm
-                     focus:outline-none focus:ring-2 focus:ring-green-500"
-        />
-      </div>
-
       {/* 🔹 CATEGORIES */}
       <div className="flex gap-3 overflow-x-auto">
         {categories.map((c) => (
@@ -113,6 +102,7 @@ export default function Products() {
             key={c}
             onClick={() => {
               setCategory(c);
+              localStorage.removeItem("search");
               setSearch("");
             }}
             className={`px-4 py-2 rounded-full text-sm font-semibold ${
@@ -126,16 +116,9 @@ export default function Products() {
         ))}
       </div>
 
-      {/* 🔹 SEARCH INFO */}
-      {search && (
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          Showing results for <b>"{search}"</b>
-        </p>
-      )}
-
       <div className="flex gap-6">
 
-        {/* PRODUCTS GRID */}
+        {/* 🔹 PRODUCTS GRID */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 flex-1">
           {filtered.map((p) => (
             <div
@@ -175,13 +158,15 @@ export default function Products() {
           ))}
         </div>
 
-        {/* CART PREVIEW */}
+        {/* 🔹 RIGHT CART PREVIEW */}
         {cart.length > 0 && (
           <div className="w-72 bg-gray-100 dark:bg-gray-800 p-4 rounded-xl h-fit">
             <h3 className="font-bold mb-3">🛒 Cart</h3>
+
             <p className="text-sm mb-3">
               Items: <b>{totalItems}</b>
             </p>
+
             <button
               onClick={() => navigate("/cart")}
               className="w-full bg-purple-600 text-white py-2 rounded hover:bg-purple-700"
