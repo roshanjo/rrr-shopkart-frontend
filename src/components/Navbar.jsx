@@ -34,11 +34,26 @@ export default function Navbar() {
     localStorage.getItem("theme") || "light"
   );
 
-  /* Apply dark/light theme */
+  /* ✅ APPLY THEME SAFELY (FIXED) */
   useEffect(() => {
-    document.documentElement.className = theme;
+    const root = document.documentElement;
+
+    if (theme === "dark") {
+      root.classList.add("dark");
+    } else {
+      root.classList.remove("dark");
+    }
+
     localStorage.setItem("theme", theme);
   }, [theme]);
+
+  /* ✅ LOAD THEME ONCE */
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "dark") {
+      setTheme("dark");
+    }
+  }, []);
 
   /* Close dropdown when clicking outside */
   useEffect(() => {
