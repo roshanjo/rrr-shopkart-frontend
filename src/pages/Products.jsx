@@ -46,7 +46,7 @@ export default function Products() {
     "women's clothing",
   ];
 
-  // 🔹 Apply filters
+  // 🔹 Filter products
   let filtered =
     category === "all"
       ? products
@@ -60,14 +60,14 @@ export default function Products() {
     );
   }
 
-  // 🔹 AI-LIKE GOOGLE FALLBACK (DELAYED)
+  // 🔹 AI-like Google fallback (delayed)
   useEffect(() => {
     if (search && products.length > 0 && filtered.length === 0) {
       const timer = setTimeout(() => {
         window.location.href = `https://www.google.com/search?q=${encodeURIComponent(
           search + " product"
         )}`;
-      }, 1000); // ⏳ feels smart, not broken
+      }, 1000);
 
       return () => clearTimeout(timer);
     }
@@ -94,7 +94,7 @@ export default function Products() {
   return (
     <div className="p-6 space-y-6">
 
-      {/* 🔍 SEARCH BAR (ONLY PRODUCTS PAGE) */}
+      {/* 🔍 SINGLE SEARCH BAR (ONLY ONE) */}
       <div className="max-w-3xl mx-auto">
         <input
           type="text"
@@ -134,7 +134,8 @@ export default function Products() {
       )}
 
       <div className="flex gap-6">
-        {/* PRODUCTS */}
+
+        {/* PRODUCTS GRID */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 flex-1">
           {filtered.map((p) => (
             <div
