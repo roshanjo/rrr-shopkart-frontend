@@ -1,20 +1,20 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export default function Products() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [products, setProducts] = useState([]);
   const [category, setCategory] = useState(
     localStorage.getItem("category") || "all"
   );
+
   const [cart, setCart] = useState(
     JSON.parse(localStorage.getItem("cart")) || []
   );
 
-  const [search, setSearch] = useState(
-    localStorage.getItem("search") || ""
-  );
+  const [search, setSearch] = useState("");
 
   // 🔹 Fetch LIVE products
   useEffect(() => {
@@ -29,15 +29,12 @@ export default function Products() {
     localStorage.setItem("category", category);
   }, [category]);
 
-  // 🔹 Sync search from Navbar (localStorage)
+  // ✅ IMPORTANT FIX
+  // Sync search whenever user lands on /products
   useEffect(() => {
-    const syncSearch = () => {
-      setSearch(localStorage.getItem("search") || "");
-    };
-
-    window.addEventListener("storage", syncSearch);
-    return () => window.removeEventListener("storage", syncSearch);
-  }, []);
+    const storedSearch = localStorage.getItem("search") || "";
+    setSearch(storedSearch);
+  }, [location.pathname]);
 
   const categories = [
     "all",
@@ -74,13 +71,13 @@ export default function Products() {
     }
   }, [search, filtered, products]);
 
-  // 🔹 Add to cart
+  // 🔹 Add to cart (SAFE)
   const addToCart = (p) => {
     const updatedCart = [
       ...cart,
       {
         name: p.title,
-        price: Math.round(p.price * 80),
+        price: Math.round(p.price * 80), // USD → INR
         image: p.image,
         qty: 1,
       },
@@ -115,6 +112,13 @@ export default function Products() {
           </button>
         ))}
       </div>
+
+      {/* 🔍 SEARCH INFO */}
+      {search && (
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          Showing results for <b>"{search}"</b>
+        </p>
+      )}
 
       <div className="flex gap-6">
 
