@@ -18,8 +18,9 @@ export default function Navbar() {
 
   const [search, setSearch] = useState(localStorage.getItem("search") || "");
 
-  const storedUser = JSON.parse(localStorage.getItem("user")) || { name: "User" };
-  const [username, setUsername] = useState(storedUser.name);
+  const storedUser = JSON.parse(localStorage.getItem("user")) || {};
+  const [username, setUsername] = useState(storedUser.username || "User");
+
   const [password, setPassword] = useState("");
 
   const isLoggedIn = !!localStorage.getItem("token");
@@ -61,7 +62,7 @@ export default function Navbar() {
   };
 
   const handleSaveSettings = () => {
-    localStorage.setItem("user", JSON.stringify({ name: username }));
+    localStorage.setItem("user", JSON.stringify({...storedUser, username,}));
     if (password) localStorage.setItem("password", password);
 
     alert("Profile updated successfully");
