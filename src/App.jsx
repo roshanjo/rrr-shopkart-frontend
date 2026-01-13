@@ -9,6 +9,7 @@ import Cart from "./pages/Cart";
 import AdminOrders from "./pages/AdminOrders";
 import Success from "./pages/Success";
 import Cancel from "./pages/Cancel";
+import MyOrders from "./pages/MyOrders";
 
 /* Layout controls Navbar & Footer */
 function Layout({ children }) {
@@ -38,6 +39,7 @@ export default function App() {
           <Route path="/admin/orders" element={<AdminOrders />} />
           <Route path="/success" element={<Success />} />
           <Route path="/cancel" element={<Cancel />} />
+          <Route path="/my-orders" element={<MyOrders />} />
         </Routes>
       </Layout>
     </BrowserRouter>
