@@ -26,14 +26,13 @@ export default function Login() {
 
       if (!res.ok) {
         alert(data.error || "Login failed");
-        setLoading(false);
         return;
       }
 
-      // ✅ STORE TOKEN
+      // ✅ REQUIRED FOR STRIPE
       localStorage.setItem("token", data.token);
+      localStorage.setItem("user_id", data.id);
 
-      // ✅ STORE USER (THIS FIXES STRIPE)
       localStorage.setItem(
         "user",
         JSON.stringify({
@@ -44,7 +43,7 @@ export default function Login() {
       );
 
       navigate("/products");
-    } catch (err) {
+    } catch {
       alert("Server error");
     } finally {
       setLoading(false);
@@ -56,9 +55,7 @@ export default function Login() {
       onSubmit={handleLogin}
       className="bg-white dark:bg-gray-800 p-6 rounded shadow w-80"
     >
-      <h2 className="text-xl font-bold mb-4 text-center text-gray-900 dark:text-white">
-        Sign In
-      </h2>
+      <h2 className="text-xl font-bold mb-4 text-center">Sign In</h2>
 
       <input
         type="email"
