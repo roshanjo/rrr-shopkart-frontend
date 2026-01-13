@@ -62,7 +62,7 @@ export default function Navbar() {
   };
 
   const handleSaveSettings = () => {
-    localStorage.setItem("user", JSON.stringify({...storedUser, username,}));
+    localStorage.setItem("user", JSON.stringify({ ...storedUser, username }));
     if (password) localStorage.setItem("password", password);
 
     alert("Profile updated successfully");
@@ -132,6 +132,15 @@ export default function Navbar() {
         >
           {!settingsOpen ? (
             <>
+              {/* ✅ NEW: MY ORDERS LINK */}
+              <Link
+                to="/my-orders"
+                onClick={() => setMenuOpen(false)}
+                className="block w-full text-left px-3 py-2 hover:bg-gray-100"
+              >
+                My Orders
+              </Link>
+
               <button
                 onClick={() => setSettingsOpen(true)}
                 className="w-full text-left px-3 py-2 hover:bg-gray-100"
