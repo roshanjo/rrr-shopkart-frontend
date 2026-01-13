@@ -7,13 +7,17 @@ export default function MyOrders() {
   const token = localStorage.getItem("token");
 
   useEffect(() => {
-    fetch(`${API}/api/my-orders/`, {
+    fetch(`${API}/api/orders/`, {   // ✅ FIXED URL
       headers: {
         Authorization: `Bearer ${token}`,
       },
     })
-      .then((res) => res.json())
-      .then((data) => setOrders(data));
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to load orders");
+        return res.json();
+      })
+      .then((data) => setOrders(data))
+      .catch(() => setOrders([]));
   }, []);
 
   return (
