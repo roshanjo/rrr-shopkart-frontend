@@ -19,7 +19,9 @@ export default function Navbar() {
   const [search, setSearch] = useState(localStorage.getItem("search") || "");
 
   const storedUser = JSON.parse(localStorage.getItem("user")) || {};
-  const [username, setUsername] = useState(storedUser.username || "User");
+  const [username, setUsername] = useState(
+    storedUser.username || storedUser.email || "User"
+  );
   const [password, setPassword] = useState("");
 
   const isLoggedIn = !!localStorage.getItem("token");
@@ -61,10 +63,16 @@ export default function Navbar() {
   };
 
   const handleSaveSettings = () => {
-    localStorage.setItem("user", JSON.stringify({ ...storedUser, username }));
-    if (password) localStorage.setItem("password", password);
+    localStorage.setItem(
+      "user",
+      JSON.stringify({ ...storedUser, username })
+    );
 
-    alert("Profile updated successfully");
+    if (password) {
+      localStorage.setItem("password", password);
+    }
+
+    alert("Settings updated successfully");
     setSettingsOpen(false);
     setMenuOpen(false);
   };
@@ -144,12 +152,13 @@ export default function Navbar() {
                 My Orders
               </Link>
 
+              {/* ✅ RENAMED */}
               <button
                 onClick={() => setSettingsOpen(true)}
                 className="w-full text-left px-3 py-2
                            hover:bg-gray-100 dark:hover:bg-gray-700"
               >
-                Edit Profile
+                Settings
               </button>
 
               <button
@@ -162,7 +171,8 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <p className="font-bold mb-2">Edit Profile</p>
+              {/* ✅ RENAMED */}
+              <p className="font-bold mb-2">Settings</p>
 
               {/* AVATAR */}
               <div className="mb-3">
@@ -185,14 +195,14 @@ export default function Navbar() {
                 </div>
               </div>
 
-              {/* USERNAME */}
+              {/* DISPLAY NAME */}
               <input
                 className="w-full p-2 border rounded mb-2
                            bg-white text-black
                            dark:bg-gray-700 dark:text-white"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Change username"
+                placeholder="Display name"
               />
 
               {/* PASSWORD */}
@@ -201,7 +211,7 @@ export default function Navbar() {
                 className="w-full p-2 border rounded mb-2
                            bg-white text-black
                            dark:bg-gray-700 dark:text-white"
-                placeholder="New password"
+                placeholder="Change password"
                 onChange={(e) => setPassword(e.target.value)}
               />
 
