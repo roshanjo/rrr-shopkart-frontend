@@ -15,12 +15,12 @@ export default function Navbar() {
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [editProfileOpen, setEditProfileOpen] = useState(false);
 
   const [search, setSearch] = useState(localStorage.getItem("search") || "");
 
   const storedUser = JSON.parse(localStorage.getItem("user")) || {};
   const [username, setUsername] = useState(storedUser.username || "User");
-
   const [password, setPassword] = useState("");
 
   const isLoggedIn = !!localStorage.getItem("token");
@@ -33,7 +33,7 @@ export default function Navbar() {
     localStorage.getItem("theme") || "light"
   );
 
-  /* ✅ APPLY THEME */
+  /* APPLY THEME */
   useEffect(() => {
     const root = document.documentElement;
     theme === "dark"
@@ -49,6 +49,7 @@ export default function Navbar() {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setMenuOpen(false);
         setSettingsOpen(false);
+        setEditProfileOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -61,16 +62,20 @@ export default function Navbar() {
     navigate("/");
   };
 
-  const handleSaveSettings = () => {
-    localStorage.setItem("user", JSON.stringify({ ...storedUser, username }));
+  const handleSaveProfile = () => {
+    localStorage.setItem(
+      "user",
+      JSON.stringify({ ...storedUser, username })
+    );
     if (password) localStorage.setItem("password", password);
 
     alert("Profile updated successfully");
+    setEditProfileOpen(false);
     setSettingsOpen(false);
     setMenuOpen(false);
   };
 
-  /* 🔍 SEARCH */
+  /* SEARCH */
   const handleSearch = (e) => {
     e.preventDefault();
     if (!search.trim()) return;
@@ -114,6 +119,7 @@ export default function Navbar() {
           onClick={() => {
             setMenuOpen(!menuOpen);
             setSettingsOpen(false);
+            setEditProfileOpen(false);
           }}
           className="flex items-center gap-2"
         >
@@ -130,9 +136,9 @@ export default function Navbar() {
               : "opacity-0 scale-95 pointer-events-none"
           }`}
         >
-          {!settingsOpen ? (
+          {/* MAIN MENU */}
+          {!settingsOpen && !editProfileOpen && (
             <>
-              {/* ✅ NEW: MY ORDERS LINK */}
               <Link
                 to="/my-orders"
                 onClick={() => setMenuOpen(false)}
@@ -145,7 +151,7 @@ export default function Navbar() {
                 onClick={() => setSettingsOpen(true)}
                 className="w-full text-left px-3 py-2 hover:bg-gray-100"
               >
-                Edit Profile
+                Settings
               </button>
 
               <button
@@ -155,9 +161,12 @@ export default function Navbar() {
                 Logout
               </button>
             </>
-          ) : (
+          )}
+
+          {/* SETTINGS */}
+          {settingsOpen && !editProfileOpen && (
             <>
-              <p className="font-bold mb-2">Edit Profile</p>
+              <p className="font-bold mb-2">Settings</p>
 
               {/* AVATAR */}
               <div className="mb-3">
@@ -180,22 +189,6 @@ export default function Navbar() {
                 </div>
               </div>
 
-              {/* USERNAME */}
-              <input
-                className="w-full p-2 border rounded mb-2"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Change username"
-              />
-
-              {/* PASSWORD */}
-              <input
-                type="password"
-                className="w-full p-2 border rounded mb-2"
-                placeholder="New password"
-                onChange={(e) => setPassword(e.target.value)}
-              />
-
               {/* THEME */}
               <button
                 onClick={() =>
@@ -207,14 +200,49 @@ export default function Navbar() {
               </button>
 
               <button
-                onClick={handleSaveSettings}
+                onClick={() => setEditProfileOpen(true)}
+                className="w-full text-left px-3 py-2 hover:bg-gray-100"
+              >
+                Edit Profile
+              </button>
+
+              <button
+                onClick={() => setSettingsOpen(false)}
+                className="w-full text-left px-3 py-1 hover:bg-gray-100"
+              >
+                ← Back
+              </button>
+            </>
+          )}
+
+          {/* EDIT PROFILE */}
+          {editProfileOpen && (
+            <>
+              <p className="font-bold mb-2">Edit Profile</p>
+
+              <input
+                className="w-full p-2 border rounded mb-2"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Change username"
+              />
+
+              <input
+                type="password"
+                className="w-full p-2 border rounded mb-2"
+                placeholder="New password"
+                onChange={(e) => setPassword(e.target.value)}
+              />
+
+              <button
+                onClick={handleSaveProfile}
                 className="w-full bg-green-600 text-white py-1 rounded mb-2"
               >
                 Save Changes
               </button>
 
               <button
-                onClick={() => setSettingsOpen(false)}
+                onClick={() => setEditProfileOpen(false)}
                 className="w-full text-left px-3 py-1 hover:bg-gray-100"
               >
                 ← Back
