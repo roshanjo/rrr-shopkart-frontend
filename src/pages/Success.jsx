@@ -21,6 +21,7 @@ export default function Success() {
                  flex items-center justify-center
                  px-4 text-center"
     >
+      {/* MAIN CONTENT */}
       <div>
         {/* SUCCESS ICON */}
         <div className="mb-6 animate-scale">
@@ -46,10 +47,15 @@ export default function Success() {
         </h1>
 
         <p className="text-lg text-gray-700 dark:text-gray-300 max-w-md mx-auto">
-          Thank you for shopping with <strong>Ai-Kart</strong>!  
+          Thank you for shopping with <strong>Ai-Kart</strong>!
           <br />
           Redirecting you to products…
         </p>
+      </div>
+
+      {/* FOOTER */}
+      <div className="absolute bottom-4 text-sm text-gray-500 dark:text-gray-400">
+        Designed by Roshan © 2026
       </div>
 
       {/* Animation */}
