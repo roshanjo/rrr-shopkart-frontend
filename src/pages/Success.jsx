@@ -15,7 +15,12 @@ export default function Success() {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-green-50 dark:bg-gray-900 flex items-center justify-center px-4 text-center">
+    <div
+      className="fixed inset-0 z-[9999]
+                 bg-green-50 dark:bg-gray-900
+                 flex items-center justify-center
+                 px-4 text-center"
+    >
       <div>
         {/* SUCCESS ICON */}
         <div className="mb-6 animate-scale">
@@ -42,6 +47,7 @@ export default function Success() {
 
         <p className="text-lg text-gray-700 dark:text-gray-300 max-w-md mx-auto">
           Thank you for shopping with <strong>Ai-Kart</strong>!  
+          <br />
           Redirecting you to products…
         </p>
       </div>
