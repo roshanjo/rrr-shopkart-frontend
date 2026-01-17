@@ -86,8 +86,8 @@ export default function Products() {
   /* ================================================= */
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-      {/* ================= FILTER BAR ================= */}
-      <div className="sticky top-[72px] z-40 bg-gray-100 dark:bg-gray-900 border-b">
+      {/* ================= FIXED FILTER BAR ================= */}
+      <div className="fixed top-[72px] left-0 right-0 z-40 bg-gray-100 dark:bg-gray-900 border-b">
         <div className="px-4 pt-4 flex gap-3 overflow-x-auto">
           {categories.map((c) => (
             <button
@@ -108,15 +108,19 @@ export default function Products() {
           ))}
         </div>
 
-        {/* 🔒 RESERVED SPACE — PREVENTS MOVEMENT */}
-        <p
-          className={`px-4 pb-3 pt-2 text-sm text-gray-600 dark:text-gray-400 ${
-            search ? "visible" : "invisible"
-          }`}
-        >
-          Showing results for <b>"{search || "placeholder"}"</b>
+        <p className="px-4 pb-3 pt-2 text-sm text-gray-600 dark:text-gray-400">
+          {search ? (
+            <>
+              Showing results for <b>"{search}"</b>
+            </>
+          ) : (
+            <span className="opacity-0">placeholder</span>
+          )}
         </p>
       </div>
+
+      {/* ===== SPACER (PREVENT CONTENT HIDING) ===== */}
+      <div className="h-[132px]" />
 
       {/* ================= CONTENT ================= */}
       <div className="px-4 py-6">
@@ -162,7 +166,7 @@ export default function Products() {
 
           {/* ================= DESKTOP CART ================= */}
           {cart.length > 0 && (
-            <div className="hidden lg:block w-72 sticky top-[160px] h-fit bg-gray-100 dark:bg-gray-800 p-4 rounded-xl">
+            <div className="hidden lg:block w-72 sticky top-[180px] h-fit bg-gray-100 dark:bg-gray-800 p-4 rounded-xl">
               <h3 className="font-bold mb-3">🛒 Cart</h3>
               <p className="text-sm mb-3">
                 Items: <b>{totalItems}</b>
