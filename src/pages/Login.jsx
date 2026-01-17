@@ -29,7 +29,6 @@ export default function Login() {
         return;
       }
 
-      // ✅ REQUIRED FOR STRIPE
       localStorage.setItem("token", data.token);
       localStorage.setItem("user_id", data.id);
 
@@ -55,12 +54,16 @@ export default function Login() {
       onSubmit={handleLogin}
       className="bg-white dark:bg-gray-800 p-6 rounded shadow w-80"
     >
-      <h2 className="text-xl font-bold mb-4 text-center">Sign In</h2>
+      <h2 className="text-xl font-bold mb-4 text-center text-gray-900 dark:text-white">
+        Sign In
+      </h2>
 
       <input
         type="email"
         placeholder="Email"
-        className="w-full p-2 border rounded mb-3"
+        className="w-full p-2 border rounded mb-3
+                   text-black dark:text-black
+                   bg-white dark:bg-gray-200"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         required
@@ -69,7 +72,9 @@ export default function Login() {
       <input
         type="password"
         placeholder="Password"
-        className="w-full p-2 border rounded mb-4"
+        className="w-full p-2 border rounded mb-4
+                   text-black dark:text-black
+                   bg-white dark:bg-gray-200"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         required
@@ -85,4 +90,3 @@ export default function Login() {
     </form>
   );
 }
-
