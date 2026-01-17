@@ -1,8 +1,6 @@
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
-
 import AuthPage from "./pages/AuthPage";
 import Products from "./pages/Products";
 import Cart from "./pages/Cart";
@@ -12,14 +10,10 @@ import Cancel from "./pages/Cancel";
 import MyOrders from "./pages/MyOrders";
 import OrderDetails from "./pages/OrderDetails";
 
-/* Layout controls Navbar & Footer */
 function Layout({ children }) {
   const location = useLocation();
-
   const hideNavbar = location.pathname === "/";
-  const hideFooter =
-    location.pathname === "/" || location.pathname === "/success";
-
+  const hideFooter = location.pathname === "/" || location.pathname === "/success";
   return (
     <>
       {!hideNavbar && <Navbar />}
