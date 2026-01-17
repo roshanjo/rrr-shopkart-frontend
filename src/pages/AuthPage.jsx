@@ -13,8 +13,14 @@ export default function AuthPage() {
         <img src={logo} alt="Ai-Kart Logo" className="w-52" />
       </div>
 
-      {/* MAIN CONTENT */}
-      <div className="min-h-screen flex flex-col items-center justify-center px-4 pt-32">
+      {/* MAIN CONTENT (TRUE CENTER) */}
+      <div
+        className="
+          flex flex-col items-center justify-center
+          px-4
+          min-h-[calc(100vh-160px)]
+        "
+      >
         {mode === "welcome" && (
           <div className="bg-white dark:bg-gray-800 p-6 rounded shadow w-80 text-center">
             <h1 className="text-2xl font-bold mb-3 text-gray-900 dark:text-white">
