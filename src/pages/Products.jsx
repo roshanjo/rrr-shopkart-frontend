@@ -84,9 +84,8 @@ export default function Products() {
   const totalItems = cart.reduce((s, i) => s + (i.qty || 1), 0);
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900
-                    pt-[72px] pb-[64px]">
-      {/* 🔒 CATEGORY BAR (fixed BELOW global navbar) */}
+    <div className="fixed inset-0 bg-gray-100 dark:bg-gray-900">
+      {/* 🔒 FILTER BAR (PERMANENT) */}
       <div className="fixed top-[72px] left-0 right-0 z-40
                       bg-gray-100 dark:bg-gray-900
                       px-6 py-4 border-b">
@@ -117,8 +116,12 @@ export default function Products() {
         )}
       </div>
 
-      {/* 🔽 PAGE CONTENT */}
-      <div className="px-6 pt-[120px]">
+      {/* 🔽 SCROLL AREA (ONLY THIS SCROLLS) */}
+      <div
+        className="absolute left-0 right-0
+                   top-[160px] bottom-[64px]
+                   overflow-y-auto px-6"
+      >
         <div className="flex gap-6">
           {/* PRODUCTS */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 flex-1">
@@ -159,9 +162,9 @@ export default function Products() {
             ))}
           </div>
 
-          {/* CART */}
+          {/* CART (STATIONARY RELATIVE TO SCROLL AREA) */}
           {cart.length > 0 && (
-            <div className="w-72 sticky top-[200px] h-fit
+            <div className="w-72 sticky top-4 h-fit
                             bg-gray-100 dark:bg-gray-800
                             p-4 rounded-xl">
               <h3 className="font-bold mb-3">🛒 Cart</h3>
