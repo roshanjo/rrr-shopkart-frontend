@@ -5,6 +5,8 @@
 /* Default body styling */
 body {
   @apply bg-gray-100 text-gray-900;
+  scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Dark mode support */

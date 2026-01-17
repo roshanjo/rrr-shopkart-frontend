@@ -73,15 +73,29 @@ export default function Products() {
       <div className="flex gap-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 flex-1">
           {filtered.map(p => (
-            <div key={p.id} className="bg-white dark:bg-gray-800 p-5 rounded-xl shadow hover:shadow-xl transition">
+            <div
+              key={p.id}
+              className="bg-white dark:bg-gray-800 p-5 rounded-xl shadow hover:shadow-xl transition"
+            >
               <span className="inline-block text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded mb-2">
                 {p.category}
               </span>
-              <img src={p.image} alt={p.title} className="h-44 w-full object-contain my-4" />
+
+              <img
+                src={p.image}
+                alt={p.title}
+                loading="lazy"
+                className="h-44 w-full object-contain my-4 transition-transform duration-200 hover:scale-105"
+              />
+
               <h3 className="font-semibold text-sm mb-1 line-clamp-2">{p.title}</h3>
               <p className="text-yellow-500 text-sm mb-1">⭐ {p.rating?.rate} / 5</p>
               <p className="text-lg font-bold mb-3">₹ {Math.round(p.price * 80)}</p>
-              <button onClick={() => addToCart(p)} className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">
+
+              <button
+                onClick={() => addToCart(p)}
+                className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
+              >
                 Add to Cart
               </button>
             </div>
@@ -89,10 +103,13 @@ export default function Products() {
         </div>
 
         {cart.length > 0 && (
-          <div className="hidden lg:block w-72 self-start bg-gray-100 dark:bg-gray-800 p-4 rounded-xl">
+          <div className="hidden lg:block w-72 sticky top-24 h-fit bg-gray-100 dark:bg-gray-800 p-4 rounded-xl">
             <h3 className="font-bold mb-3">🛒 Cart</h3>
             <p className="text-sm mb-3">Items: <b>{totalItems}</b></p>
-            <button onClick={() => navigate("/cart")} className="w-full bg-purple-600 text-white py-2 rounded hover:bg-purple-700">
+            <button
+              onClick={() => navigate("/cart")}
+              className="w-full bg-purple-600 text-white py-2 rounded hover:bg-purple-700"
+            >
               Go to Cart
             </button>
           </div>
