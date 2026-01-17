@@ -9,9 +9,11 @@ export default function Products() {
   const [category, setCategory] = useState(
     localStorage.getItem("category") || "all"
   );
+
   const [cart, setCart] = useState(
     JSON.parse(localStorage.getItem("cart")) || []
   );
+
   const [search, setSearch] = useState("");
 
   // 🔹 Fetch products
@@ -84,41 +86,10 @@ export default function Products() {
   const totalItems = cart.reduce((s, i) => s + (i.qty || 1), 0);
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col">
-      {/* 🔒 TOP BAR (LOGO + SEARCH + PROFILE) */}
-      <div className="sticky top-0 z-50 bg-white dark:bg-gray-900 border-b">
-        <div className="flex items-center justify-between px-6 py-4 gap-4">
-          {/* Logo */}
-          <h1 className="text-xl font-bold text-green-600">Ai-Kart</h1>
-
-          {/* Search */}
-          <input
-            type="text"
-            placeholder="Search products..."
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              localStorage.setItem("search", e.target.value);
-            }}
-            className="flex-1 max-w-md px-4 py-2 rounded-full border focus:outline-none"
-          />
-
-          {/* Profile / Cart */}
-          <button
-            onClick={() => navigate("/cart")}
-            className="relative font-semibold"
-          >
-            🛒 Cart
-            {totalItems > 0 && (
-              <span className="absolute -top-2 -right-3 bg-green-600 text-white text-xs px-2 rounded-full">
-                {totalItems}
-              </span>
-            )}
-          </button>
-        </div>
-
-        {/* 🔹 FIXED CATEGORY FILTER */}
-        <div className="flex gap-3 px-6 pb-4 overflow-x-auto">
+    <div className="fixed inset-0 bg-gray-100 dark:bg-gray-900 overflow-hidden">
+      {/* 🔒 HEADER */}
+      <div className="fixed top-0 left-0 right-0 z-50 bg-gray-100 dark:bg-gray-900 px-6 py-4 space-y-4 border-b">
+        <div className="flex gap-3 overflow-x-auto">
           {categories.map((c) => (
             <button
               key={c}
@@ -139,15 +110,16 @@ export default function Products() {
         </div>
 
         {search && (
-          <p className="px-6 pb-3 text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
             Showing results for <b>"{search}"</b>
           </p>
         )}
       </div>
 
-      {/* 🔽 PRODUCTS */}
-      <div className="flex-1 p-6">
+      {/* 🔽 SCROLL AREA (padding instead of top magic number) */}
+      <div className="absolute inset-0 pt-[120px] pb-[48px] overflow-y-auto px-6">
         <div className="flex gap-6">
+          {/* PRODUCTS */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 flex-1">
             {filtered.map((p) => (
               <div
@@ -185,13 +157,30 @@ export default function Products() {
               </div>
             ))}
           </div>
+
+          {/* CART */}
+          {cart.length > 0 && (
+            <div className="w-72 sticky top-32 h-fit bg-gray-100 dark:bg-gray-800 p-4 rounded-xl">
+              <h3 className="font-bold mb-3">🛒 Cart</h3>
+              <p className="text-sm mb-3">
+                Items: <b>{totalItems}</b>
+              </p>
+              <button
+                onClick={() => navigate("/cart")}
+                className="w-full bg-purple-600 text-white py-2 rounded hover:bg-purple-700"
+              >
+                Go to Cart
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
       {/* 🔒 FOOTER */}
-      <div className="text-center text-sm text-gray-400 bg-gray-100 dark:bg-gray-900 py-2 border-t">
+      <div className="fixed bottom-0 left-0 right-0 text-center text-sm text-gray-400 bg-gray-100 dark:bg-gray-900 py-2 border-t">
         Designed by Roshan © 2026
       </div>
     </div>
   );
 }
+a
