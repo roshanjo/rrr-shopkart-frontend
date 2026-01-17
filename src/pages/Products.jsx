@@ -9,18 +9,16 @@ export default function Products() {
   const [category, setCategory] = useState(
     localStorage.getItem("category") || "all"
   );
-
   const [cart, setCart] = useState(
     JSON.parse(localStorage.getItem("cart")) || []
   );
-
   const [search, setSearch] = useState("");
 
   // 🔹 Fetch products
   useEffect(() => {
     fetch("https://fakestoreapi.com/products")
       .then((res) => res.json())
-      .then((data) => setProducts(data))
+      .then(setProducts)
       .catch(() => alert("Failed to load products"));
   }, []);
 
@@ -86,9 +84,9 @@ export default function Products() {
   const totalItems = cart.reduce((s, i) => s + (i.qty || 1), 0);
 
   return (
-    <div className="fixed inset-0 bg-gray-100 dark:bg-gray-900 overflow-hidden">
-      {/* 🔒 HEADER */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-gray-100 dark:bg-gray-900 px-6 py-4 space-y-4 border-b">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+      {/* 🔒 CATEGORY BAR (sticky, not fixed full-screen) */}
+      <div className="sticky top-0 z-40 bg-gray-100 dark:bg-gray-900 px-6 py-4 space-y-4 border-b">
         <div className="flex gap-3 overflow-x-auto">
           {categories.map((c) => (
             <button
@@ -116,8 +114,8 @@ export default function Products() {
         )}
       </div>
 
-      {/* 🔽 SCROLL AREA (padding instead of top magic number) */}
-      <div className="absolute inset-0 pt-[120px] pb-[48px] overflow-y-auto px-6">
+      {/* 🔽 MAIN CONTENT */}
+      <div className="px-6 py-6">
         <div className="flex gap-6">
           {/* PRODUCTS */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 flex-1">
@@ -160,7 +158,7 @@ export default function Products() {
 
           {/* CART */}
           {cart.length > 0 && (
-            <div className="w-72 sticky top-32 h-fit bg-gray-100 dark:bg-gray-800 p-4 rounded-xl">
+            <div className="w-72 sticky top-28 h-fit bg-gray-100 dark:bg-gray-800 p-4 rounded-xl">
               <h3 className="font-bold mb-3">🛒 Cart</h3>
               <p className="text-sm mb-3">
                 Items: <b>{totalItems}</b>
@@ -177,7 +175,7 @@ export default function Products() {
       </div>
 
       {/* 🔒 FOOTER */}
-      <div className="fixed bottom-0 left-0 right-0 text-center text-sm text-gray-400 bg-gray-100 dark:bg-gray-900 py-2 border-t">
+      <div className="text-center text-sm text-gray-400 py-4 border-t">
         Designed by Roshan © 2026
       </div>
     </div>
