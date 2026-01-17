@@ -84,9 +84,12 @@ export default function Products() {
   const totalItems = cart.reduce((s, i) => s + (i.qty || 1), 0);
 
   return (
-    <div className="fixed inset-0 bg-gray-100 dark:bg-gray-900">
-      {/* 🔒 FIXED TOP BAR */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-gray-100 dark:bg-gray-900 px-6 py-4 space-y-4 border-b">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900
+                    pt-[72px] pb-[64px]">
+      {/* 🔒 CATEGORY BAR (fixed BELOW global navbar) */}
+      <div className="fixed top-[72px] left-0 right-0 z-40
+                      bg-gray-100 dark:bg-gray-900
+                      px-6 py-4 border-b">
         <div className="flex gap-3 overflow-x-auto">
           {categories.map((c) => (
             <button
@@ -108,14 +111,14 @@ export default function Products() {
         </div>
 
         {search && (
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
             Showing results for <b>"{search}"</b>
           </p>
         )}
       </div>
 
-      {/* 🔽 SCROLLABLE CONTENT */}
-      <div className="absolute inset-0 pt-[120px] pb-[60px] overflow-y-auto px-6">
+      {/* 🔽 PAGE CONTENT */}
+      <div className="px-6 pt-[120px]">
         <div className="flex gap-6">
           {/* PRODUCTS */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 flex-1">
@@ -158,7 +161,9 @@ export default function Products() {
 
           {/* CART */}
           {cart.length > 0 && (
-            <div className="w-72 sticky top-36 h-fit bg-gray-100 dark:bg-gray-800 p-4 rounded-xl">
+            <div className="w-72 sticky top-[200px] h-fit
+                            bg-gray-100 dark:bg-gray-800
+                            p-4 rounded-xl">
               <h3 className="font-bold mb-3">🛒 Cart</h3>
               <p className="text-sm mb-3">
                 Items: <b>{totalItems}</b>
