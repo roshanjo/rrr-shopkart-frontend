@@ -89,9 +89,9 @@ export default function Products() {
   const totalItems = cart.reduce((sum, i) => sum + (i.qty || 1), 0);
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
-      {/* 🔒 FIXED / STICKY TOP */}
-      <div className="sticky top-0 z-40 bg-gray-100 dark:bg-gray-900 p-6 space-y-4">
+    <div className="fixed inset-0 overflow-hidden bg-gray-100 dark:bg-gray-900">
+      {/* 🔒 FIXED HEADER */}
+      <div className="fixed top-0 left-0 right-0 z-40 bg-gray-100 dark:bg-gray-900 p-6 space-y-4">
         <div className="flex gap-3 overflow-x-auto">
           {categories.map((c) => (
             <button
@@ -119,8 +119,8 @@ export default function Products() {
         )}
       </div>
 
-      {/* 🔽 ONLY THIS AREA SCROLLS */}
-      <div className="flex-1 overflow-y-auto p-6 pb-16">
+      {/* 🔽 SINGLE SCROLL AREA */}
+      <div className="absolute top-[132px] bottom-[44px] left-0 right-0 overflow-y-auto p-6">
         <div className="flex gap-6">
           {/* 🔹 PRODUCTS GRID */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 flex-1">
@@ -164,7 +164,7 @@ export default function Products() {
 
           {/* 🔹 STICKY CART */}
           {cart.length > 0 && (
-            <div className="w-72 sticky top-32 h-fit bg-gray-100 dark:bg-gray-800 p-4 rounded-xl">
+            <div className="w-72 sticky top-6 h-fit bg-gray-100 dark:bg-gray-800 p-4 rounded-xl">
               <h3 className="font-bold mb-3">🛒 Cart</h3>
 
               <p className="text-sm mb-3">
@@ -183,7 +183,7 @@ export default function Products() {
       </div>
 
       {/* 🔒 FIXED FOOTER */}
-      <div className="fixed bottom-0 w-full text-center text-sm text-gray-400 bg-gray-100 dark:bg-gray-900 py-2">
+      <div className="fixed bottom-0 left-0 right-0 text-center text-sm text-gray-400 bg-gray-100 dark:bg-gray-900 py-2">
         Designed by Roshan © 2026
       </div>
     </div>
