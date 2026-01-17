@@ -7,71 +7,77 @@ export default function AuthPage() {
   const [mode, setMode] = useState("welcome");
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-900 px-4">
-      <img src={logo} alt="Ai-Kart Logo" className="w-52 mb-6" />
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+      {/* FIXED LOGO HEADER */}
+      <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50">
+        <img src={logo} alt="Ai-Kart Logo" className="w-52" />
+      </div>
 
-      {mode === "welcome" && (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded shadow w-80 text-center">
-          <h1 className="text-2xl font-bold mb-3 text-gray-900 dark:text-white">
-            Welcome to <span className="text-green-600">Ai-Kart</span>
-          </h1>
+      {/* MAIN CONTENT */}
+      <div className="min-h-screen flex flex-col items-center justify-center px-4 pt-32">
+        {mode === "welcome" && (
+          <div className="bg-white dark:bg-gray-800 p-6 rounded shadow w-80 text-center">
+            <h1 className="text-2xl font-bold mb-3 text-gray-900 dark:text-white">
+              Welcome to <span className="text-green-600">Ai-Kart</span>
+            </h1>
 
-          <p className="mb-5 text-gray-600 dark:text-gray-300">
-            Your one-stop shopping destination
-          </p>
+            <p className="mb-5 text-gray-600 dark:text-gray-300">
+              Your one-stop shopping destination
+            </p>
 
-          <button
-            onClick={() => setMode("login")}
-            className="w-full bg-green-600 text-white py-2 rounded mb-3"
-          >
-            Sign In
-          </button>
-
-          <button
-            onClick={() => setMode("signup")}
-            className="w-full border border-green-600 text-green-600 py-2 rounded"
-          >
-            Create Account
-          </button>
-        </div>
-      )}
-
-      {mode === "login" && (
-        <>
-          <Login />
-          <p className="text-sm mt-3 text-gray-800 dark:text-gray-300">
-            No account?{" "}
-            <span
-              onClick={() => setMode("signup")}
-              className="font-medium cursor-pointer
-                         text-black dark:text-white
-                         hover:text-green-600"
-            >
-              Sign up
-            </span>
-          </p>
-        </>
-      )}
-
-      {mode === "signup" && (
-        <>
-          <Signup onSuccess={() => setMode("login")} />
-          <p className="text-sm mt-3 text-gray-800 dark:text-gray-300">
-            Already have an account?{" "}
-            <span
+            <button
               onClick={() => setMode("login")}
-              className="font-medium cursor-pointer
-                         text-black dark:text-white
-                         hover:text-green-600"
+              className="w-full bg-green-600 text-white py-2 rounded mb-3"
             >
-              Sign in
-            </span>
-          </p>
-        </>
-      )}
+              Sign In
+            </button>
+
+            <button
+              onClick={() => setMode("signup")}
+              className="w-full border border-green-600 text-green-600 py-2 rounded"
+            >
+              Create Account
+            </button>
+          </div>
+        )}
+
+        {mode === "login" && (
+          <>
+            <Login />
+            <p className="text-sm mt-3 text-gray-800 dark:text-gray-300">
+              No account?{" "}
+              <span
+                onClick={() => setMode("signup")}
+                className="font-medium cursor-pointer
+                           text-black dark:text-white
+                           hover:text-green-600"
+              >
+                Sign up
+              </span>
+            </p>
+          </>
+        )}
+
+        {mode === "signup" && (
+          <>
+            <Signup onSuccess={() => setMode("login")} />
+            <p className="text-sm mt-3 text-gray-800 dark:text-gray-300">
+              Already have an account?{" "}
+              <span
+                onClick={() => setMode("login")}
+                className="font-medium cursor-pointer
+                           text-black dark:text-white
+                           hover:text-green-600"
+              >
+                Sign in
+              </span>
+            </p>
+          </>
+        )}
+      </div>
 
       {/* FOOTER */}
-      <p className="fixed bottom-4 text-sm text-gray-400">
+      <p className="fixed bottom-4 w-full text-center text-sm text-gray-400">
         Designed by Roshan © 2026
       </p>
     </div>
