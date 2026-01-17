@@ -88,7 +88,7 @@ export default function Products() {
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       {/* ================= FILTER BAR ================= */}
       <div className="sticky top-[72px] z-40 bg-gray-100 dark:bg-gray-900 border-b">
-        <div className="px-4 py-4 flex gap-3 overflow-x-auto">
+        <div className="px-4 pt-4 flex gap-3 overflow-x-auto">
           {categories.map((c) => (
             <button
               key={c}
@@ -108,11 +108,14 @@ export default function Products() {
           ))}
         </div>
 
-        {search && (
-          <p className="px-4 pb-3 text-sm text-gray-600 dark:text-gray-400">
-            Showing results for <b>"{search}"</b>
-          </p>
-        )}
+        {/* 🔒 RESERVED SPACE — PREVENTS MOVEMENT */}
+        <p
+          className={`px-4 pb-3 pt-2 text-sm text-gray-600 dark:text-gray-400 ${
+            search ? "visible" : "invisible"
+          }`}
+        >
+          Showing results for <b>"{search || "placeholder"}"</b>
+        </p>
       </div>
 
       {/* ================= CONTENT ================= */}
