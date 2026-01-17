@@ -62,8 +62,8 @@ export default function Login() {
         type="email"
         placeholder="Email"
         className="w-full p-2 border rounded mb-3
-                   text-black dark:text-black
-                   bg-white dark:bg-gray-200"
+                   bg-black text-white placeholder-gray-400
+                   focus:outline-none focus:ring-2 focus:ring-green-500"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         required
@@ -73,8 +73,8 @@ export default function Login() {
         type="password"
         placeholder="Password"
         className="w-full p-2 border rounded mb-4
-                   text-black dark:text-black
-                   bg-white dark:bg-gray-200"
+                   bg-black text-white placeholder-gray-400
+                   focus:outline-none focus:ring-2 focus:ring-green-500"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         required
