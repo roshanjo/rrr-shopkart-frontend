@@ -29,10 +29,9 @@ export default function Products() {
     localStorage.setItem("category", category);
   }, [category]);
 
-  // 🔹 Sync search on navigation
+  // 🔹 Sync search
   useEffect(() => {
-    const storedSearch = localStorage.getItem("search") || "";
-    setSearch(storedSearch);
+    setSearch(localStorage.getItem("search") || "");
   }, [location.key]);
 
   const categories = [
@@ -43,7 +42,7 @@ export default function Products() {
     "women's clothing",
   ];
 
-  // 🔹 Apply filters
+  // 🔹 Filtering
   let filtered =
     category === "all"
       ? products
@@ -59,20 +58,19 @@ export default function Products() {
 
   // 🔹 AI fallback
   useEffect(() => {
-    if (search && products.length > 0 && filtered.length === 0) {
-      const timer = setTimeout(() => {
+    if (search && products.length && filtered.length === 0) {
+      const t = setTimeout(() => {
         window.location.href = `https://www.google.com/search?q=${encodeURIComponent(
           search + " product"
         )}`;
       }, 1000);
-
-      return () => clearTimeout(timer);
+      return () => clearTimeout(t);
     }
   }, [search, filtered, products]);
 
-  // 🔹 Add to cart
+  // 🔹 Cart
   const addToCart = (p) => {
-    const updatedCart = [
+    const updated = [
       ...cart,
       {
         name: p.title,
@@ -81,17 +79,16 @@ export default function Products() {
         qty: 1,
       },
     ];
-
-    setCart(updatedCart);
-    localStorage.setItem("cart", JSON.stringify(updatedCart));
+    setCart(updated);
+    localStorage.setItem("cart", JSON.stringify(updated));
   };
 
-  const totalItems = cart.reduce((sum, i) => sum + (i.qty || 1), 0);
+  const totalItems = cart.reduce((s, i) => s + (i.qty || 1), 0);
 
   return (
-    <div className="fixed inset-0 overflow-hidden bg-gray-100 dark:bg-gray-900">
-      {/* 🔒 FIXED HEADER */}
-      <div className="fixed top-0 left-0 right-0 z-40 bg-gray-100 dark:bg-gray-900 p-6 space-y-4">
+    <div className="fixed inset-0 bg-gray-100 dark:bg-gray-900 overflow-hidden">
+      {/* 🔒 HEADER */}
+      <div className="fixed top-0 left-0 right-0 z-50 bg-gray-100 dark:bg-gray-900 px-6 py-4 space-y-4 border-b">
         <div className="flex gap-3 overflow-x-auto">
           {categories.map((c) => (
             <button
@@ -119,16 +116,15 @@ export default function Products() {
         )}
       </div>
 
-      {/* 🔽 SINGLE SCROLL AREA */}
-      <div className="absolute top-[132px] bottom-[44px] left-0 right-0 overflow-y-auto p-6">
+      {/* 🔽 SCROLL AREA (padding instead of top magic number) */}
+      <div className="absolute inset-0 pt-[120px] pb-[48px] overflow-y-auto px-6">
         <div className="flex gap-6">
-          {/* 🔹 PRODUCTS GRID */}
+          {/* PRODUCTS */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 flex-1">
             {filtered.map((p) => (
               <div
                 key={p.id}
-                className="bg-white dark:bg-gray-800 p-5 rounded-xl shadow
-                           hover:shadow-xl hover:-translate-y-1 transition"
+                className="bg-white dark:bg-gray-800 p-5 rounded-xl shadow hover:shadow-xl transition"
               >
                 <span className="inline-block text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded mb-2">
                   {p.category}
@@ -162,15 +158,13 @@ export default function Products() {
             ))}
           </div>
 
-          {/* 🔹 STICKY CART */}
+          {/* CART */}
           {cart.length > 0 && (
-            <div className="w-72 sticky top-6 h-fit bg-gray-100 dark:bg-gray-800 p-4 rounded-xl">
+            <div className="w-72 sticky top-32 h-fit bg-gray-100 dark:bg-gray-800 p-4 rounded-xl">
               <h3 className="font-bold mb-3">🛒 Cart</h3>
-
               <p className="text-sm mb-3">
                 Items: <b>{totalItems}</b>
               </p>
-
               <button
                 onClick={() => navigate("/cart")}
                 className="w-full bg-purple-600 text-white py-2 rounded hover:bg-purple-700"
@@ -182,8 +176,8 @@ export default function Products() {
         </div>
       </div>
 
-      {/* 🔒 FIXED FOOTER */}
-      <div className="fixed bottom-0 left-0 right-0 text-center text-sm text-gray-400 bg-gray-100 dark:bg-gray-900 py-2">
+      {/* 🔒 FOOTER */}
+      <div className="fixed bottom-0 left-0 right-0 text-center text-sm text-gray-400 bg-gray-100 dark:bg-gray-900 py-2 border-t">
         Designed by Roshan © 2026
       </div>
     </div>
