@@ -51,44 +51,37 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900">
-      <form
-        onSubmit={handleLogin}
-        className="bg-white dark:bg-gray-800 p-6 rounded shadow w-80"
+    <form
+      onSubmit={handleLogin}
+      className="bg-white dark:bg-gray-800 p-6 rounded shadow w-80"
+    >
+      <h2 className="text-xl font-bold mb-4 text-center">Sign In</h2>
+
+      <input
+        type="email"
+        placeholder="Email"
+        className="w-full p-2 border rounded mb-3"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        required
+      />
+
+      <input
+        type="password"
+        placeholder="Password"
+        className="w-full p-2 border rounded mb-4"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        required
+      />
+
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full bg-green-600 text-white py-2 rounded"
       >
-        <h2 className="text-xl font-bold mb-4 text-center">Sign In</h2>
-
-        <input
-          type="email"
-          placeholder="Email"
-          className="w-full p-2 border rounded mb-3"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-
-        <input
-          type="password"
-          placeholder="Password"
-          className="w-full p-2 border rounded mb-4"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-green-600 text-white py-2 rounded"
-        >
-          {loading ? "Signing in..." : "Sign In"}
-        </button>
-      </form>
-
-      {/* FOOTER */}
-      <p className="fixed bottom-4 text-sm text-gray-400">
-        Designed by Roshan © 2026
-      </p>
-    </div>
+        {loading ? "Signing in..." : "Sign In"}
+      </button>
+    </form>
   );
 }
