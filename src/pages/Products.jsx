@@ -85,39 +85,39 @@ export default function Products() {
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-      {/* 🔒 FILTER BAR (STICKY, BELOW GLOBAL NAVBAR) */}
-      <div className="sticky top-[72px] z-40
-                      bg-gray-100 dark:bg-gray-900
-                      px-6 py-4 border-b">
-        <div className="flex gap-3 overflow-x-auto">
-          {categories.map((c) => (
-            <button
-              key={c}
-              onClick={() => {
-                setCategory(c);
-                localStorage.removeItem("search");
-                setSearch("");
-              }}
-              className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap ${
-                category === c
-                  ? "bg-green-600 text-white"
-                  : "bg-gray-200 dark:bg-gray-800"
-              }`}
-            >
-              {c.toUpperCase()}
-            </button>
-          ))}
-        </div>
+      {/* 🔒 FILTER BAR (STICKY BELOW GLOBAL NAVBAR) */}
+      <div className="sticky top-[72px] z-40 bg-gray-100 dark:bg-gray-900 border-b">
+        <div className="px-6 py-4">
+          <div className="flex gap-3 overflow-x-auto">
+            {categories.map((c) => (
+              <button
+                key={c}
+                onClick={() => {
+                  setCategory(c);
+                  localStorage.removeItem("search");
+                  setSearch("");
+                }}
+                className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap ${
+                  category === c
+                    ? "bg-green-600 text-white"
+                    : "bg-gray-200 dark:bg-gray-800"
+                }`}
+              >
+                {c.toUpperCase()}
+              </button>
+            ))}
+          </div>
 
-        {search && (
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-            Showing results for <b>"{search}"</b>
-          </p>
-        )}
+          {search && (
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+              Showing results for <b>"{search}"</b>
+            </p>
+          )}
+        </div>
       </div>
 
-      {/* 🔽 PAGE CONTENT */}
-      <div className="px-6 py-6">
+      {/* 🔽 PAGE CONTENT (PUSHED DOWN TO AVOID OVERLAP) */}
+      <div className="px-6 pt-[96px] pb-8">
         <div className="flex gap-6">
           {/* PRODUCTS */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 flex-1">
@@ -160,9 +160,7 @@ export default function Products() {
 
           {/* CART */}
           {cart.length > 0 && (
-            <div className="w-72 sticky top-[160px] h-fit
-                            bg-gray-100 dark:bg-gray-800
-                            p-4 rounded-xl">
+            <div className="w-72 sticky top-[180px] h-fit bg-gray-100 dark:bg-gray-800 p-4 rounded-xl">
               <h3 className="font-bold mb-3">🛒 Cart</h3>
               <p className="text-sm mb-3">
                 Items: <b>{totalItems}</b>
