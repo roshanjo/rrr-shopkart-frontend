@@ -61,8 +61,11 @@ export default function Login() {
       <input
         type="email"
         placeholder="Email"
-        className="w-full p-2 border rounded mb-3
-                   bg-black text-white placeholder-gray-400
+        className="w-full mb-3 p-2 rounded
+                   bg-white dark:bg-gray-700
+                   text-gray-900 dark:text-white
+                   placeholder-gray-500 dark:placeholder-gray-400
+                   border border-gray-300 dark:border-gray-600
                    focus:outline-none focus:ring-2 focus:ring-green-500"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
@@ -72,8 +75,11 @@ export default function Login() {
       <input
         type="password"
         placeholder="Password"
-        className="w-full p-2 border rounded mb-4
-                   bg-black text-white placeholder-gray-400
+        className="w-full mb-4 p-2 rounded
+                   bg-white dark:bg-gray-700
+                   text-gray-900 dark:text-white
+                   placeholder-gray-500 dark:placeholder-gray-400
+                   border border-gray-300 dark:border-gray-600
                    focus:outline-none focus:ring-2 focus:ring-green-500"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
@@ -83,7 +89,7 @@ export default function Login() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-green-600 text-white py-2 rounded"
+        className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
       >
         {loading ? "Signing in..." : "Sign In"}
       </button>
