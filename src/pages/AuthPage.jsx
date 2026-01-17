@@ -7,13 +7,11 @@ export default function AuthPage() {
   const [mode, setMode] = useState("welcome");
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-900 px-4 relative">
-      {/* LOGO */}
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-900 px-4">
       <img src={logo} alt="Ai-Kart Logo" className="w-52 mb-6" />
 
-      {/* CONTENT */}
       {mode === "welcome" && (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded shadow w-80 text-center mb-20">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded shadow w-80 text-center">
           <h1 className="text-2xl font-bold mb-3 text-gray-900 dark:text-white">
             Welcome to <span className="text-green-600">Ai-Kart</span>
           </h1>
@@ -39,33 +37,37 @@ export default function AuthPage() {
       )}
 
       {mode === "login" && (
-        <div className="mb-20">
+        <>
           <Login />
-          <p className="text-sm mt-3 text-gray-700 dark:text-gray-300 text-center">
+          <p className="text-sm mt-3 text-gray-800 dark:text-gray-300">
             No account?{" "}
             <span
               onClick={() => setMode("signup")}
-              className="text-green-600 cursor-pointer"
+              className="font-medium cursor-pointer
+                         text-black dark:text-white
+                         hover:text-green-600"
             >
               Sign up
             </span>
           </p>
-        </div>
+        </>
       )}
 
       {mode === "signup" && (
-        <div className="mb-20">
+        <>
           <Signup onSuccess={() => setMode("login")} />
-          <p className="text-sm mt-3 text-gray-700 dark:text-gray-300 text-center">
+          <p className="text-sm mt-3 text-gray-800 dark:text-gray-300">
             Already have an account?{" "}
             <span
               onClick={() => setMode("login")}
-              className="text-green-600 cursor-pointer"
+              className="font-medium cursor-pointer
+                         text-black dark:text-white
+                         hover:text-green-600"
             >
               Sign in
             </span>
           </p>
-        </div>
+        </>
       )}
 
       {/* FOOTER */}
