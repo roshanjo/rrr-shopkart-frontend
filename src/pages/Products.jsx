@@ -73,9 +73,9 @@ export default function Products() {
 
   /* ================================================= */
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 px-4">
-      {/* ================= FILTER BAR (STATIC) ================= */}
-      <div className="bg-gray-100 dark:bg-gray-900 border-b pt-4 pb-3">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 px-4 pt-6">
+      {/* ================= FILTER BAR (STATIC — NEVER MOVES) ================= */}
+      <div className="mb-6 border-b pb-4">
         <div className="flex gap-3 overflow-x-auto">
           {categories.map((c) => (
             <button
@@ -96,17 +96,15 @@ export default function Products() {
           ))}
         </div>
 
-        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-          {search && (
-            <>
-              Showing results for <b>"{search}"</b>
-            </>
-          )}
-        </p>
+        {search && (
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+            Showing results for <b>"{search}"</b>
+          </p>
+        )}
       </div>
 
       {/* ================= CONTENT ================= */}
-      <div className="py-6 flex gap-6">
+      <div className="flex gap-6">
         {/* ================= PRODUCTS ================= */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 flex-1">
           {filtered.map((p) => (
