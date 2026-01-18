@@ -13,6 +13,13 @@ export default function ProductDetail() {
     JSON.parse(localStorage.getItem("wishlist")) || []
   );
 
+  /* ================= REVIEWS ================= */
+  const reviewKey = `reviews-${id}`;
+  const [reviews, setReviews] = useState(
+    JSON.parse(localStorage.getItem(reviewKey)) || []
+  );
+  const [reviewText, setReviewText] = useState("");
+
   if (!product) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
@@ -63,6 +70,16 @@ export default function ProductDetail() {
     p => p.id !== product.id && p.category === product.category
   );
 
+  /* ================= ADD REVIEW ================= */
+  const submitReview = () => {
+    if (!reviewText.trim()) return;
+    const updated = [...reviews, reviewText];
+    setReviews(updated);
+    localStorage.setItem(reviewKey, JSON.stringify(updated));
+    setReviewText("");
+    toast.success("Review submitted");
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-4 md:p-8 pb-28">
       {/* ================= BREADCRUMB ================= */}
@@ -89,7 +106,9 @@ export default function ProductDetail() {
 
         {/* Info */}
         <div>
-          <h1 className="text-2xl font-bold mb-3">{product.name}</h1>
+          <h1 className="text-2xl font-bold mb-2">{product.name}</h1>
+
+          <p className="text-yellow-500 mb-2">⭐⭐⭐⭐☆</p>
 
           <p className="text-xl font-semibold text-green-600 mb-3">
             ₹ {product.price}
@@ -127,6 +146,38 @@ export default function ProductDetail() {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* ================= REVIEWS ================= */}
+      <div className="max-w-5xl mx-auto mt-10 bg-white dark:bg-gray-800 p-6 rounded-xl shadow">
+        <h2 className="font-bold mb-4">Customer Reviews</h2>
+
+        {reviews.length === 0 && (
+          <p className="text-gray-500 mb-4">No reviews yet</p>
+        )}
+
+        {reviews.map((r, i) => (
+          <div
+            key={i}
+            className="bg-gray-100 dark:bg-gray-700 p-3 rounded mb-2 text-sm"
+          >
+            {r}
+          </div>
+        ))}
+
+        <textarea
+          value={reviewText}
+          onChange={e => setReviewText(e.target.value)}
+          placeholder="Write a review..."
+          className="w-full p-2 border rounded mt-3 dark:bg-gray-700"
+        />
+
+        <button
+          onClick={submitReview}
+          className="mt-3 bg-green-600 text-white px-4 py-2 rounded"
+        >
+          Submit Review
+        </button>
       </div>
 
       {/* ================= RELATED PRODUCTS ================= */}

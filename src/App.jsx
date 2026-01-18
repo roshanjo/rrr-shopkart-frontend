@@ -9,6 +9,7 @@ import Success from "./pages/Success";
 import Cancel from "./pages/Cancel";
 import MyOrders from "./pages/MyOrders";
 import OrderDetails from "./pages/OrderDetails";
+import Wishlist from "./pages/Wishlist";
 
 function Layout({ children }) {
   const location = useLocation();
@@ -36,6 +37,7 @@ export default function App() {
           <Route path="/cancel" element={<Cancel />} />
           <Route path="/my-orders" element={<MyOrders />} />
           <Route path="/orders/:id" element={<OrderDetails />} />
+          <Route path="/wishlist" element={<Wishlist />} />
         </Routes>
       </Layout>
     </BrowserRouter>
