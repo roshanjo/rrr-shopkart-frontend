@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
-
 import AuthPage from "./pages/AuthPage";
 import Products from "./pages/Products";
 import Cart from "./pages/Cart";
@@ -15,7 +14,6 @@ import ProductDetail from "./pages/ProductDetail";
 
 function Layout({ children }) {
   const location = useLocation();
-
   const hideNavbar = location.pathname === "/";
   const hideFooter =
     location.pathname === "/" || location.pathname === "/success";
@@ -23,12 +21,7 @@ function Layout({ children }) {
   return (
     <>
       {!hideNavbar && <Navbar />}
-
-      {/* 🔥 IMPORTANT: isolates page content so fixed works on mobile */}
-      <main className="relative min-h-screen">
-        {children}
-      </main>
-
+      {children}
       {!hideFooter && <Footer />}
     </>
   );
