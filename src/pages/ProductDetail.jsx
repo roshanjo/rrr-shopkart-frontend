@@ -2,13 +2,13 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { products } from "../data/products";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import Seo from "../components/Seo";
 
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
 
-  // ✅ FIRST: try FakeStore product
   const product =
     location.state ||
     products.find(p => String(p.id) === String(id));
@@ -25,6 +25,7 @@ export default function ProductDetail() {
     );
   }
 
+  const productId = String(product.id);
   const name = product.title || product.name;
   const price = product.price > 100 ? product.price : product.price * 80;
 
@@ -42,48 +43,58 @@ export default function ProductDetail() {
 
   const toggleWishlist = () => {
     let updated;
-    if (wishlist.includes(id)) {
-      updated = wishlist.filter(i => i !== id);
+    if (wishlist.includes(productId)) {
+      updated = wishlist.filter(i => i !== productId);
+      toast("Removed from wishlist");
     } else {
-      updated = [...wishlist, id];
+      updated = [...wishlist, productId];
+      toast.success("Added to wishlist ❤️");
     }
     setWishlist(updated);
     localStorage.setItem("wishlist", JSON.stringify(updated));
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6">
-      <div className="max-w-5xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow p-6 grid md:grid-cols-2 gap-8">
-        <img src={product.image} className="h-72 object-contain mx-auto" />
+    <>
+      <Seo title={`${name} | AIKart`} description={name} />
 
-        <div>
-          <h1 className="text-2xl font-bold">{name}</h1>
-          <p className="text-xl text-green-600 font-bold mt-2">
-            ₹ {Math.round(price)}
-          </p>
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6">
+        <div className="max-w-5xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow p-6 grid md:grid-cols-2 gap-8">
+          <img
+            src={product.image}
+            alt={name}
+            className="h-72 object-contain mx-auto"
+          />
 
-          <p className="mt-4 text-gray-600 dark:text-gray-300">
-            {product.description ||
-              "High quality product with best price."}
-          </p>
+          <div>
+            <h1 className="text-2xl font-bold">{name}</h1>
+            <p className="text-xl text-green-600 font-bold mt-2">
+              ₹ {Math.round(price)}
+            </p>
 
-          <div className="flex gap-4 mt-6">
-            <button
-              onClick={addToCart}
-              className="bg-green-600 text-white px-6 py-2 rounded"
-            >
-              Add to Cart
-            </button>
+            <p className="mt-4 text-gray-600 dark:text-gray-300">
+              {product.description ||
+                "High quality product with best price."}
+            </p>
 
-            <button
-              onClick={toggleWishlist}
-              className="border px-6 py-2 rounded"
-            >
-              ❤️ Wishlist
-            </button>
+            <div className="flex gap-4 mt-6">
+              <button
+                onClick={addToCart}
+                className="bg-green-600 text-white px-6 py-2 rounded"
+              >
+                Add to Cart
+              </button>
+
+              <button
+                onClick={toggleWishlist}
+                className="border px-6 py-2 rounded"
+              >
+                ❤️ Wishlist
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

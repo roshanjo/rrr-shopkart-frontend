@@ -10,12 +10,10 @@ export default function Products() {
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [category, setCategory] = useState(
-    localStorage.getItem("category") || "all"
-  );
-  const [cart, setCart] = useState(
-    JSON.parse(localStorage.getItem("cart")) || []
-  );
+  const [category, setCategory] =
+    useState(localStorage.getItem("category") || "all");
+  const [cart, setCart] =
+    useState(JSON.parse(localStorage.getItem("cart")) || []);
   const [search, setSearch] = useState("");
 
   useEffect(() => {
@@ -31,10 +29,6 @@ export default function Products() {
         setLoading(false);
       });
   }, []);
-
-  useEffect(() => {
-    localStorage.setItem("category", category);
-  }, [category]);
 
   useEffect(() => {
     setSearch(localStorage.getItem("search") || "");
@@ -86,28 +80,6 @@ export default function Products() {
       />
 
       <div className="min-h-screen bg-gray-100 dark:bg-gray-900 px-4 pt-6">
-        <div className="mb-6 border-b pb-4">
-          <div className="flex gap-3 overflow-x-auto">
-            {categories.map(c => (
-              <button
-                key={c}
-                onClick={() => {
-                  setCategory(c);
-                  localStorage.removeItem("search");
-                  setSearch("");
-                }}
-                className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap ${
-                  category === c
-                    ? "bg-green-600 text-white"
-                    : "bg-gray-200 dark:bg-gray-800"
-                }`}
-              >
-                {c.toUpperCase()}
-              </button>
-            ))}
-          </div>
-        </div>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {loading
             ? Array.from({ length: 6 }).map((_, i) => (
