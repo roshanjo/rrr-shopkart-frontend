@@ -80,7 +80,6 @@ export default function Products() {
 
   return (
     <>
-      {/* ✅ SEO ADDED (SAFE) */}
       <Seo
         title="Products | AIKart"
         description="Browse and buy the best products online at AIKart"
@@ -107,78 +106,54 @@ export default function Products() {
               </button>
             ))}
           </div>
-
-          {search && (
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-              Showing results for <b>"{search}"</b>
-            </p>
-          )}
         </div>
 
-        <div className="flex gap-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 flex-1">
-            {loading
-              ? Array.from({ length: 6 }).map((_, i) => (
-                  <ProductSkeleton key={i} />
-                ))
-              : filtered.map(p => (
-                  <div
-                    key={p.id}
-                    className="bg-white dark:bg-gray-800 p-5 rounded-xl shadow hover:shadow-xl transition"
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {loading
+            ? Array.from({ length: 6 }).map((_, i) => (
+                <ProductSkeleton key={i} />
+              ))
+            : filtered.map(p => (
+                <div
+                  key={p.id}
+                  onClick={() =>
+                    navigate(`/product/${p.id}`, { state: p })
+                  }
+                  className="cursor-pointer bg-white dark:bg-gray-800 p-5 rounded-xl shadow hover:shadow-xl transition"
+                >
+                  <img
+                    src={p.image}
+                    alt={p.title}
+                    className="h-44 w-full object-contain my-4"
+                  />
+
+                  <h3 className="font-semibold text-sm line-clamp-2">
+                    {p.title}
+                  </h3>
+
+                  <p className="text-lg font-bold mt-2">
+                    ₹ {Math.round(p.price * 80)}
+                  </p>
+
+                  <button
+                    onClick={e => {
+                      e.stopPropagation();
+                      addToCart(p);
+                    }}
+                    className="mt-3 w-full bg-green-600 text-white py-2 rounded"
                   >
-                    <span className="inline-block text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded mb-2">
-                      {p.category}
-                    </span>
-
-                    <img
-                      src={p.image}
-                      alt={p.title}
-                      loading="lazy"
-                      className="h-44 w-full object-contain my-4 transition-transform duration-200 hover:scale-105"
-                    />
-
-                    <h3 className="font-semibold text-sm mb-1 line-clamp-2">
-                      {p.title}
-                    </h3>
-                    <p className="text-yellow-500 text-sm mb-1">
-                      ⭐ {p.rating?.rate} / 5
-                    </p>
-                    <p className="text-lg font-bold mb-3">
-                      ₹ {Math.round(p.price * 80)}
-                    </p>
-
-                    <button
-                      onClick={() => addToCart(p)}
-                      className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
-                    >
-                      Add to Cart
-                    </button>
-                  </div>
-                ))}
-          </div>
-
-          {cart.length > 0 && (
-            <div className="hidden lg:block w-72 sticky top-24 h-fit bg-gray-100 dark:bg-gray-800 p-4 rounded-xl">
-              <h3 className="font-bold mb-3">🛒 Cart</h3>
-              <p className="text-sm mb-3">
-                Items: <b>{totalItems}</b>
-              </p>
-              <button
-                onClick={() => navigate("/cart")}
-                className="w-full bg-purple-600 text-white py-2 rounded hover:bg-purple-700"
-              >
-                Go to Cart
-              </button>
-            </div>
-          )}
+                    Add to Cart
+                  </button>
+                </div>
+              ))}
         </div>
 
         {cart.length > 0 && (
           <button
             onClick={() => navigate("/cart")}
-            className="lg:hidden fixed bottom-6 right-6 z-50 bg-purple-600 text-white px-5 py-3 rounded-full shadow-lg flex items-center gap-2"
+            className="fixed bottom-6 right-6 bg-purple-600 text-white px-5 py-3 rounded-full"
           >
-            🛒 <span className="font-semibold">{totalItems}</span>
+            🛒 {totalItems}
           </button>
         )}
       </div>
