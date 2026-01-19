@@ -75,9 +75,7 @@ export default function Navbar() {
 
     setSuccessMsg("Settings updated successfully");
 
-    setTimeout(() => {
-      setSuccessMsg("");
-    }, 2000);
+    setTimeout(() => setSuccessMsg(""), 2000);
 
     setSettingsOpen(false);
     setMenuOpen(false);
@@ -97,167 +95,173 @@ export default function Navbar() {
 
   return (
     <>
-      {/* ✅ SUCCESS TOAST */}
+      {/* SUCCESS MESSAGE */}
       {successMsg && (
-        <div
-          className="fixed top-4 left-1/2 -translate-x-1/2
-                     bg-green-600 text-white
-                     px-4 py-2 rounded shadow-lg
-                     z-[10000] text-sm"
-        >
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded shadow-lg z-[10000] text-sm">
           {successMsg}
         </div>
       )}
 
-      <nav className="flex items-center justify-between p-4 bg-gray-900 text-white relative">
-        {/* LOGO */}
-        <Link to="/products" className="shrink-0">
-          <img src="/logo.png" alt="Logo" className="h-12 w-auto" />
-        </Link>
+      {/* ===== FIXED NAVBAR ===== */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-gray-900 text-white">
+        <div className="flex items-center justify-between p-4 max-w-7xl mx-auto">
+          {/* LOGO */}
+          <Link to="/products" className="shrink-0">
+            <img src="/logo.png" alt="Logo" className="h-12 w-auto" />
+          </Link>
 
-        {/* SEARCH */}
-        <div className="flex-1 mx-6">
-          {showSearch && (
-            <form onSubmit={handleSearch}>
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search for products, brands and more…"
-                className="w-full px-6 py-2 rounded-full
-                           bg-white text-black
-                           dark:bg-gray-800 dark:text-white
-                           focus:outline-none focus:ring-2 focus:ring-green-500"
-              />
-            </form>
-          )}
-        </div>
-
-        {/* PROFILE */}
-        <div
-          className="flex items-center gap-4 relative shrink-0"
-          ref={dropdownRef}
-        >
-          <button
-            onClick={() => {
-              setMenuOpen(!menuOpen);
-              setSettingsOpen(false);
-            }}
-            className="flex items-center gap-2"
-          >
-            <img src={avatar} alt="Profile" className="h-8 w-8 rounded-full" />
-            <span className="font-medium">Hi, {username}</span>
-          </button>
-
-          {/* DROPDOWN */}
-          <div
-            className={`absolute right-0 top-12 w-64 rounded shadow-lg p-3 z-50
-            bg-white text-black
-            dark:bg-gray-800 dark:text-white
-            transition-all duration-200 ${
-              menuOpen
-                ? "opacity-100 scale-100"
-                : "opacity-0 scale-95 pointer-events-none"
-            }`}
-          >
-            {!settingsOpen ? (
-              <>
-                <Link
-                  to="/my-orders"
-                  onClick={() => setMenuOpen(false)}
-                  className="block w-full text-left px-3 py-2
-                             hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  My Orders
-                </Link>
-
-                <button
-                  onClick={() => setSettingsOpen(true)}
-                  className="w-full text-left px-3 py-2
-                             hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  Settings
-                </button>
-
-                <button
-                  onClick={handleLogout}
-                  className="w-full text-left px-3 py-2
-                             hover:bg-gray-100 dark:hover:bg-gray-700 text-red-600"
-                >
-                  Logout
-                </button>
-              </>
-            ) : (
-              <>
-                <p className="font-bold mb-2">Settings</p>
-
-                {/* AVATAR */}
-                <div className="mb-3">
-                  <p className="text-sm mb-1">Profile Picture</p>
-                  <div className="flex gap-2">
-                    {avatars.map((a) => (
-                      <img
-                        key={a}
-                        src={a}
-                        alt="avatar"
-                        className={`h-8 w-8 rounded-full cursor-pointer ${
-                          avatar === a ? "ring-2 ring-green-500" : ""
-                        }`}
-                        onClick={() => {
-                          setAvatar(a);
-                          localStorage.setItem("avatar", a);
-                        }}
-                      />
-                    ))}
-                  </div>
-                </div>
-
+          {/* SEARCH */}
+          <div className="flex-1 mx-6">
+            {showSearch && (
+              <form onSubmit={handleSearch}>
                 <input
-                  className="w-full p-2 border rounded mb-2
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search for products, brands and more…"
+                  className="w-full px-6 py-2 rounded-full
                              bg-white text-black
-                             dark:bg-gray-700 dark:text-white"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Display name"
+                             dark:bg-gray-800 dark:text-white
+                             focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
-
-                <input
-                  type="password"
-                  className="w-full p-2 border rounded mb-2
-                             bg-white text-black
-                             dark:bg-gray-700 dark:text-white"
-                  placeholder="Change password"
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-
-                <button
-                  onClick={() =>
-                    setTheme(theme === "light" ? "dark" : "light")
-                  }
-                  className="w-full bg-gray-200 dark:bg-gray-700 py-1 rounded mb-2"
-                >
-                  Switch to {theme === "light" ? "Dark" : "Light"} Mode
-                </button>
-
-                <button
-                  onClick={handleSaveSettings}
-                  className="w-full bg-green-600 text-white py-1 rounded mb-2"
-                >
-                  Save Changes
-                </button>
-
-                <button
-                  onClick={() => setSettingsOpen(false)}
-                  className="w-full text-left px-3 py-1
-                             hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  ← Back
-                </button>
-              </>
+              </form>
             )}
+          </div>
+
+          {/* PROFILE */}
+          <div
+            className="flex items-center gap-4 relative shrink-0"
+            ref={dropdownRef}
+          >
+            <button
+              onClick={() => {
+                setMenuOpen(!menuOpen);
+                setSettingsOpen(false);
+              }}
+              className="flex items-center gap-2"
+            >
+              <img src={avatar} alt="Profile" className="h-8 w-8 rounded-full" />
+              <span className="font-medium">Hi, {username}</span>
+            </button>
+
+            {/* DROPDOWN */}
+            <div
+              className={`absolute right-0 top-12 w-64 rounded shadow-lg p-3 z-50
+              bg-white text-black
+              dark:bg-gray-800 dark:text-white
+              transition-all duration-200 ${
+                menuOpen
+                  ? "opacity-100 scale-100"
+                  : "opacity-0 scale-95 pointer-events-none"
+              }`}
+            >
+              {!settingsOpen ? (
+                <>
+                  <Link
+                    to="/my-orders"
+                    onClick={() => setMenuOpen(false)}
+                    className="block px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    My Orders
+                  </Link>
+
+                  {/* ✅ WISHLIST ADDED */}
+                  <Link
+                    to="/wishlist"
+                    onClick={() => setMenuOpen(false)}
+                    className="block px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    ❤️ My Wishlist
+                  </Link>
+
+                  <button
+                    onClick={() => setSettingsOpen(true)}
+                    className="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    Settings
+                  </button>
+
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-3 py-2 text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p className="font-bold mb-2">Settings</p>
+
+                  {/* AVATAR */}
+                  <div className="mb-3">
+                    <p className="text-sm mb-1">Profile Picture</p>
+                    <div className="flex gap-2">
+                      {avatars.map((a) => (
+                        <img
+                          key={a}
+                          src={a}
+                          alt="avatar"
+                          className={`h-8 w-8 rounded-full cursor-pointer ${
+                            avatar === a ? "ring-2 ring-green-500" : ""
+                          }`}
+                          onClick={() => {
+                            setAvatar(a);
+                            localStorage.setItem("avatar", a);
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  <input
+                    className="w-full p-2 border rounded mb-2
+                               bg-white text-black
+                               dark:bg-gray-700 dark:text-white"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Display name"
+                  />
+
+                  <input
+                    type="password"
+                    className="w-full p-2 border rounded mb-2
+                               bg-white text-black
+                               dark:bg-gray-700 dark:text-white"
+                    placeholder="Change password"
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+
+                  <button
+                    onClick={() =>
+                      setTheme(theme === "light" ? "dark" : "light")
+                    }
+                    className="w-full bg-gray-200 dark:bg-gray-700 py-1 rounded mb-2"
+                  >
+                    Switch to {theme === "light" ? "Dark" : "Light"} Mode
+                  </button>
+
+                  <button
+                    onClick={handleSaveSettings}
+                    className="w-full bg-green-600 text-white py-1 rounded mb-2"
+                  >
+                    Save Changes
+                  </button>
+
+                  <button
+                    onClick={() => setSettingsOpen(false)}
+                    className="w-full text-left px-3 py-1 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    ← Back
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </nav>
+
+      {/* SPACER so content doesn't go under fixed navbar */}
+      <div className="h-20" />
     </>
   );
 }
