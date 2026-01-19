@@ -14,15 +14,17 @@ export default function Wishlist() {
   /* FETCH FAKESTORE PRODUCTS */
   useEffect(() => {
     if (wishlist.length === 0) {
+      setItems([]); // ✅ FIX: clear old items immediately
       setLoading(false);
       return;
     }
 
+    setLoading(true);
     fetch("https://fakestoreapi.com/products")
       .then(res => res.json())
       .then(data => {
         const filtered = data.filter(p =>
-          wishlist.includes(p.id) || wishlist.includes(String(p.id))
+          wishlist.includes(String(p.id))
         );
         setItems(filtered);
         setLoading(false);
@@ -96,7 +98,7 @@ export default function Wishlist() {
                 <div className="flex gap-2">
                   <button
                     onClick={() =>
-                      navigate(`/product/${p.id}`, { state: p })
+                      navigate(`/product/${p.id}`)
                     }
                     className="flex-1 bg-green-600 text-white py-1 rounded"
                   >
