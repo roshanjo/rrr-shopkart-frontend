@@ -78,12 +78,10 @@ export default function ProductDetail() {
 
   return (
     <>
-      <Seo
-        title={`${name} | AIKart`}
-        description={product.description}
-      />
+      <Seo title={`${name} | AIKart`} description={product.description} />
 
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6">
+      {/* MAIN CONTENT */}
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6 pb-28">
         <div className="max-w-5xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow p-6">
 
           {/* BACK BUTTON */}
@@ -106,9 +104,7 @@ export default function ProductDetail() {
                 {product.category}
               </span>
 
-              <h1 className="text-2xl font-bold mt-2">
-                {name}
-              </h1>
+              <h1 className="text-2xl font-bold mt-2">{name}</h1>
 
               <p className="text-yellow-500 mt-1">
                 ⭐ {product.rating?.rate} / 5
@@ -122,7 +118,8 @@ export default function ProductDetail() {
                 {product.description}
               </p>
 
-              <div className="flex gap-4 mt-6">
+              {/* DESKTOP BUTTONS */}
+              <div className="hidden md:flex gap-4 mt-6">
                 <button
                   onClick={addToCart}
                   className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700"
@@ -144,6 +141,20 @@ export default function ProductDetail() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* ✅ MOBILE STICKY CART BAR */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-800 border-t p-4 flex items-center justify-between">
+        <p className="text-lg font-bold text-green-600">
+          ₹ {price}
+        </p>
+
+        <button
+          onClick={addToCart}
+          className="bg-green-600 text-white px-6 py-2 rounded"
+        >
+          Add to Cart
+        </button>
       </div>
     </>
   );
