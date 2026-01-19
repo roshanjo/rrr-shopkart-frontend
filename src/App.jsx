@@ -10,11 +10,14 @@ import Cancel from "./pages/Cancel";
 import MyOrders from "./pages/MyOrders";
 import OrderDetails from "./pages/OrderDetails";
 import Wishlist from "./pages/Wishlist";
+import ProductDetail from "./pages/ProductDetail"; // ✅ ADDED
 
 function Layout({ children }) {
   const location = useLocation();
   const hideNavbar = location.pathname === "/";
-  const hideFooter = location.pathname === "/" || location.pathname === "/success";
+  const hideFooter =
+    location.pathname === "/" || location.pathname === "/success";
+
   return (
     <>
       {!hideNavbar && <Navbar />}
@@ -31,6 +34,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<AuthPage />} />
           <Route path="/products" element={<Products />} />
+          <Route path="/product/:id" element={<ProductDetail />} /> {/* ✅ ADDED */}
           <Route path="/cart" element={<Cart />} />
           <Route path="/admin/orders" element={<AdminOrders />} />
           <Route path="/success" element={<Success />} />
