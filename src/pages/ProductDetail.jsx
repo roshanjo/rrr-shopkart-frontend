@@ -1,21 +1,41 @@
-import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { products } from "../data/products";
-import { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import Seo from "../components/Seo";
 
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
 
-  const product =
-    location.state ||
-    products.find(p => String(p.id) === String(id));
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const [wishlist, setWishlist] = useState(
     JSON.parse(localStorage.getItem("wishlist")) || []
   );
+
+  /* FETCH PRODUCT FROM FAKESTORE */
+  useEffect(() => {
+    setLoading(true);
+    fetch(`https://fakestoreapi.com/products/${id}`)
+      .then(res => res.json())
+      .then(data => {
+        setProduct(data);
+        setLoading(false);
+      })
+      .catch(() => {
+        toast.error("Product not found");
+        navigate("/products");
+      });
+  }, [id, navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Loading product...
+      </div>
+    );
+  }
 
   if (!product) {
     return (
@@ -26,14 +46,15 @@ export default function ProductDetail() {
   }
 
   const productId = String(product.id);
-  const name = product.title || product.name;
-  const price = product.price > 100 ? product.price : product.price * 80;
+  const name = product.title;
+  const price = Math.round(product.price * 80);
 
+  /* ADD TO CART */
   const addToCart = () => {
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
     cart.push({
       name,
-      price: Math.round(price),
+      price,
       image: product.image,
       qty: 1
     });
@@ -41,6 +62,7 @@ export default function ProductDetail() {
     toast.success("Added to cart");
   };
 
+  /* TOGGLE WISHLIST */
   const toggleWishlist = () => {
     let updated;
     if (wishlist.includes(productId)) {
@@ -56,41 +78,69 @@ export default function ProductDetail() {
 
   return (
     <>
-      <Seo title={`${name} | AIKart`} description={name} />
+      <Seo
+        title={`${name} | AIKart`}
+        description={product.description}
+      />
 
       <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6">
-        <div className="max-w-5xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow p-6 grid md:grid-cols-2 gap-8">
-          <img
-            src={product.image}
-            alt={name}
-            className="h-72 object-contain mx-auto"
-          />
+        <div className="max-w-5xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow p-6">
 
-          <div>
-            <h1 className="text-2xl font-bold">{name}</h1>
-            <p className="text-xl text-green-600 font-bold mt-2">
-              ₹ {Math.round(price)}
-            </p>
+          {/* BACK BUTTON */}
+          <button
+            onClick={() => navigate(-1)}
+            className="mb-4 text-sm text-blue-600"
+          >
+            ← Back
+          </button>
 
-            <p className="mt-4 text-gray-600 dark:text-gray-300">
-              {product.description ||
-                "High quality product with best price."}
-            </p>
+          <div className="grid md:grid-cols-2 gap-8">
+            <img
+              src={product.image}
+              alt={name}
+              className="h-72 object-contain mx-auto"
+            />
 
-            <div className="flex gap-4 mt-6">
-              <button
-                onClick={addToCart}
-                className="bg-green-600 text-white px-6 py-2 rounded"
-              >
-                Add to Cart
-              </button>
+            <div>
+              <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">
+                {product.category}
+              </span>
 
-              <button
-                onClick={toggleWishlist}
-                className="border px-6 py-2 rounded"
-              >
-                ❤️ Wishlist
-              </button>
+              <h1 className="text-2xl font-bold mt-2">
+                {name}
+              </h1>
+
+              <p className="text-yellow-500 mt-1">
+                ⭐ {product.rating?.rate} / 5
+              </p>
+
+              <p className="text-2xl text-green-600 font-bold mt-3">
+                ₹ {price}
+              </p>
+
+              <p className="mt-4 text-gray-600 dark:text-gray-300">
+                {product.description}
+              </p>
+
+              <div className="flex gap-4 mt-6">
+                <button
+                  onClick={addToCart}
+                  className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700"
+                >
+                  Add to Cart
+                </button>
+
+                <button
+                  onClick={toggleWishlist}
+                  className={`border px-6 py-2 rounded ${
+                    wishlist.includes(productId)
+                      ? "border-red-500 text-red-500"
+                      : ""
+                  }`}
+                >
+                  ❤️ Wishlist
+                </button>
+              </div>
             </div>
           </div>
         </div>
