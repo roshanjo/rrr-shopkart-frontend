@@ -81,16 +81,19 @@ export default function Products() {
     toast.success("Added to cart");
   };
 
-  /* WISHLIST */
+  /* ✅ WISHLIST (FIXED) */
   const toggleWishlist = (id) => {
+    const pid = String(id);
     let updated;
-    if (wishlist.includes(id)) {
-      updated = wishlist.filter(i => i !== id);
+
+    if (wishlist.includes(pid)) {
+      updated = wishlist.filter(i => i !== pid);
       toast("Removed from wishlist");
     } else {
-      updated = [...wishlist, id];
+      updated = [...wishlist, pid];
       toast.success("Added to wishlist ❤️");
     }
+
     setWishlist(updated);
     localStorage.setItem("wishlist", JSON.stringify(updated));
   };
@@ -152,7 +155,7 @@ export default function Products() {
                         onClick={() => toggleWishlist(p.id)}
                         className="text-xl"
                       >
-                        {wishlist.includes(p.id) ? "❤️" : "🤍"}
+                        {wishlist.includes(String(p.id)) ? "❤️" : "🤍"}
                       </button>
                     </div>
 
@@ -185,7 +188,7 @@ export default function Products() {
                 ))}
           </div>
 
-          {/* DESKTOP CART SIDEBAR (UNCHANGED) */}
+          {/* DESKTOP CART SIDEBAR */}
           {cart.length > 0 && (
             <div className="hidden lg:block w-72 sticky top-24 bg-gray-100 dark:bg-gray-800 p-4 rounded-xl">
               <h3 className="font-bold mb-3">🛒 Cart</h3>
@@ -203,7 +206,7 @@ export default function Products() {
         </div>
       </div>
 
-      {/* ✅ MOBILE FLOATING CART ICON */}
+      {/* MOBILE FLOATING CART ICON */}
       {totalItems > 0 && (
         <button
           onClick={() => navigate("/cart")}
