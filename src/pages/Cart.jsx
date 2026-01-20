@@ -50,36 +50,19 @@ export default function Cart() {
     0
   );
 
-  const proceedToCheckout = async () => {
+  // ✅ NEW CHECKOUT FLOW
+  const proceedToCheckout = () => {
     if (!user) {
       alert("Please login first");
       navigate("/login");
       return;
     }
 
-    try {
-      const res = await fetch(`${API}/api/create-checkout-session/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          total,
-          user_id: user.id, // ✅ THIS IS REQUIRED FOR STRIPE
-        }),
-      });
+    // Save total for next steps
+    localStorage.setItem("order_total", total);
 
-      const data = await res.json();
-
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        alert("Stripe checkout failed");
-      }
-    } catch (err) {
-      alert("Payment error");
-    }
+    // Go to Address page (Step 1)
+    navigate("/address");
   };
 
   return (
