@@ -14,6 +14,10 @@ export default function ProductDetail() {
     JSON.parse(localStorage.getItem("wishlist")) || []
   );
 
+  const [cartCount, setCartCount] = useState(
+    JSON.parse(localStorage.getItem("cart"))?.length || 0
+  );
+
   /* FETCH PRODUCT FROM FAKESTORE */
   useEffect(() => {
     setLoading(true);
@@ -40,7 +44,7 @@ export default function ProductDetail() {
   if (!product) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p>Product not found</p>
+        Product not found
       </div>
     );
   }
@@ -59,6 +63,7 @@ export default function ProductDetail() {
       qty: 1
     });
     localStorage.setItem("cart", JSON.stringify(cart));
+    setCartCount(cart.length);
     toast.success("Added to cart");
   };
 
@@ -84,7 +89,6 @@ export default function ProductDetail() {
       <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6 pb-32">
         <div className="max-w-5xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow p-6">
 
-          {/* BACK */}
           <button
             onClick={() => navigate(-1)}
             className="mb-4 text-sm text-blue-600"
@@ -143,7 +147,7 @@ export default function ProductDetail() {
         </div>
       </div>
 
-      {/* ✅ OLD-STYLE MOBILE STICKY (WORKING LIKE EARLY BUILD) */}
+      {/* ✅ OLD-STYLE MOBILE STICKY (UNCHANGED & WORKING) */}
       <div className="md:hidden sticky bottom-0 z-40 bg-white dark:bg-gray-800 border-t">
         <div className="flex items-center justify-between px-4 py-4">
           <p className="text-lg font-bold text-green-600">
@@ -158,6 +162,24 @@ export default function ProductDetail() {
           </button>
         </div>
       </div>
+
+      {/* ✅ FLOATING MOBILE CART ICON (NEW, NON-BREAKING) */}
+      {cartCount > 0 && (
+        <button
+          onClick={() => navigate("/cart")}
+          className="md:hidden fixed bottom-24 right-4 z-50
+                     bg-green-600 text-white w-14 h-14 rounded-full
+                     flex items-center justify-center shadow-lg"
+        >
+          🛒
+          <span
+            className="absolute -top-1 -right-1 bg-red-600 text-white
+                       text-xs w-5 h-5 rounded-full flex items-center justify-center"
+          >
+            {cartCount}
+          </span>
+        </button>
+      )}
     </>
   );
 }
