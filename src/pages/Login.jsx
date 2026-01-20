@@ -29,17 +29,20 @@ export default function Login() {
         return;
       }
 
+      /* ✅ PRESERVE EXISTING USER DATA (AVATAR) */
+      const existingUser =
+        JSON.parse(localStorage.getItem("user")) || {};
+
+      const updatedUser = {
+        ...existingUser,          // keeps avatar
+        id: data.id,
+        username: data.username,
+        email: data.email,
+      };
+
       localStorage.setItem("token", data.token);
       localStorage.setItem("user_id", data.id);
-
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          id: data.id,
-          username: data.username,
-          email: data.email,
-        })
-      );
+      localStorage.setItem("user", JSON.stringify(updatedUser));
 
       navigate("/products");
     } catch {
@@ -64,9 +67,7 @@ export default function Login() {
         className="w-full mb-3 p-2 rounded
                    bg-white dark:bg-gray-700
                    text-gray-900 dark:text-white
-                   placeholder-gray-500 dark:placeholder-gray-400
-                   border border-gray-300 dark:border-gray-600
-                   focus:outline-none focus:ring-2 focus:ring-green-500"
+                   border border-gray-300 dark:border-gray-600"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         required
@@ -78,9 +79,7 @@ export default function Login() {
         className="w-full mb-4 p-2 rounded
                    bg-white dark:bg-gray-700
                    text-gray-900 dark:text-white
-                   placeholder-gray-500 dark:placeholder-gray-400
-                   border border-gray-300 dark:border-gray-600
-                   focus:outline-none focus:ring-2 focus:ring-green-500"
+                   border border-gray-300 dark:border-gray-600"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         required
