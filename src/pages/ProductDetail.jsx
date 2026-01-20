@@ -80,11 +80,11 @@ export default function ProductDetail() {
     <>
       <Seo title={`${name} | AIKart`} description={product.description} />
 
-      {/* MAIN CONTENT */}
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6 pb-[140px]">
+      {/* MAIN PAGE */}
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6 pb-32">
         <div className="max-w-5xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow p-6">
 
-          {/* BACK BUTTON */}
+          {/* BACK */}
           <button
             onClick={() => navigate(-1)}
             className="mb-4 text-sm text-blue-600"
@@ -118,11 +118,11 @@ export default function ProductDetail() {
                 {product.description}
               </p>
 
-              {/* DESKTOP ACTIONS */}
+              {/* DESKTOP ACTIONS (UNCHANGED) */}
               <div className="hidden md:flex gap-4 mt-6">
                 <button
                   onClick={addToCart}
-                  className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700"
+                  className="bg-green-600 text-white px-6 py-2 rounded"
                 >
                   Add to Cart
                 </button>
@@ -143,12 +143,8 @@ export default function ProductDetail() {
         </div>
       </div>
 
-      {/* 🔥 GUARANTEED MOBILE STICKY CART */}
-      <div
-        className="md:hidden fixed bottom-0 left-0 right-0 z-[9999]
-                   bg-white dark:bg-gray-800 border-t"
-        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
-      >
+      {/* ✅ OLD-STYLE MOBILE STICKY (WORKING LIKE EARLY BUILD) */}
+      <div className="md:hidden sticky bottom-0 z-40 bg-white dark:bg-gray-800 border-t">
         <div className="flex items-center justify-between px-4 py-4">
           <p className="text-lg font-bold text-green-600">
             ₹ {price}
