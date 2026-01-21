@@ -6,8 +6,6 @@ const API = import.meta.env.VITE_API_URL;
 
 export default function Address() {
   const navigate = useNavigate();
-
-  const user = JSON.parse(localStorage.getItem("user"));
   const token = localStorage.getItem("token");
 
   const [address, setAddress] = useState({
@@ -19,29 +17,26 @@ export default function Address() {
     pincode: "",
   });
 
-  // ✅ Load saved address (safe)
+  // ✅ LOAD SAVED ADDRESS (DJANGO WAY)
   useEffect(() => {
-    if (!user) {
+    if (!token) {
       navigate("/login");
       return;
     }
 
     const fetchAddress = async () => {
       try {
-        const res = await axios.get(
-          `${API}/api/address/${user._id || user.id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const res = await axios.get(`${API}/api/address/`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         if (res.data) {
           setAddress(res.data);
         }
       } catch (err) {
-        console.log("No saved address found");
+        console.log("No saved address");
       }
     };
 
@@ -55,11 +50,8 @@ export default function Address() {
   const handleSubmit = async () => {
     try {
       const res = await axios.post(
-        `${API}/api/address`,
-        {
-          ...address,
-          userId: user._id || user.id, // ✅ FIXED HERE
-        },
+        `${API}/api/address/`,
+        address,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -67,9 +59,8 @@ export default function Address() {
         }
       );
 
-      localStorage.setItem("address_id", res.data._id);
-
-      navigate("/checkout", { state: { addressId: res.data._id } });
+      localStorage.setItem("address_id", res.data.id);
+      navigate("/checkout");
     } catch (err) {
       console.error(err);
       alert("Failed to save address");
@@ -84,83 +75,28 @@ export default function Address() {
         </h2>
 
         <div className="space-y-4">
-          <input
-            name="fullName"
-            placeholder="Full Name"
-            value={address.fullName}
-            onChange={handleChange}
-            className="w-full rounded-lg px-4 py-2
-              bg-gray-100 dark:bg-gray-700
-              text-gray-900 dark:text-white
-              placeholder-gray-500 dark:placeholder-gray-400
-              border border-gray-300 dark:border-gray-600
-              focus:outline-none focus:ring-2 focus:ring-purple-500"
-          />
-
-          <input
-            name="phone"
-            placeholder="Phone"
-            value={address.phone}
-            onChange={handleChange}
-            className="w-full rounded-lg px-4 py-2
-              bg-gray-100 dark:bg-gray-700
-              text-gray-900 dark:text-white
-              placeholder-gray-500 dark:placeholder-gray-400
-              border border-gray-300 dark:border-gray-600
-              focus:outline-none focus:ring-2 focus:ring-purple-500"
-          />
-
-          <input
-            name="street"
-            placeholder="Street / House No"
-            value={address.street}
-            onChange={handleChange}
-            className="w-full rounded-lg px-4 py-2
-              bg-gray-100 dark:bg-gray-700
-              text-gray-900 dark:text-white
-              placeholder-gray-500 dark:placeholder-gray-400
-              border border-gray-300 dark:border-gray-600
-              focus:outline-none focus:ring-2 focus:ring-purple-500"
-          />
-
-          <input
-            name="city"
-            placeholder="City"
-            value={address.city}
-            onChange={handleChange}
-            className="w-full rounded-lg px-4 py-2
-              bg-gray-100 dark:bg-gray-700
-              text-gray-900 dark:text-white
-              placeholder-gray-500 dark:placeholder-gray-400
-              border border-gray-300 dark:border-gray-600
-              focus:outline-none focus:ring-2 focus:ring-purple-500"
-          />
-
-          <input
-            name="state"
-            placeholder="State"
-            value={address.state}
-            onChange={handleChange}
-            className="w-full rounded-lg px-4 py-2
-              bg-gray-100 dark:bg-gray-700
-              text-gray-900 dark:text-white
-              placeholder-gray-500 dark:placeholder-gray-400
-              border border-gray-300 dark:border-gray-600
-              focus:outline-none focus:ring-2 focus:ring-purple-500"
-          />
-
-          <input
-            name="pincode"
-            placeholder="Pincode"
-            value={address.pincode}
-            onChange={handleChange}
-            className="w-full rounded-lg px-4 py-2
-              bg-gray-100 dark:bg-gray-700
-              text-gray-900 dark:text-white
-              placeholder-gray-500 dark:placeholder-gray-400
-              border border-gray-300 dark:border-gray-600
-              focus:outline-none focus:ring-2 focus:ring-purple-500"
-          />
+          {[
+            ["fullName", "Full Name"],
+            ["phone", "Phone"],
+            ["street", "Street / House No"],
+            ["city", "City"],
+            ["state", "State"],
+            ["pincode", "Pincode"],
+          ].map(([name, placeholder]) => (
+            <input
+              key={name}
+              name={name}
+              placeholder={placeholder}
+              value={address[name]}
+              onChange={handleChange}
+              className="w-full rounded-lg px-4 py-2
+                bg-gray-100 dark:bg-gray-700
+                text-gray-900 dark:text-white
+                placeholder-gray-500 dark:placeholder-gray-400
+                border border-gray-300 dark:border-gray-600
+                focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+          ))}
         </div>
 
         <div className="flex justify-between items-center mt-6">
