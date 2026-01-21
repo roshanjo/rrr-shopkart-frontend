@@ -14,52 +14,47 @@ export default function Navbar() {
   const location = useLocation();
   const dropdownRef = useRef(null);
 
-  /* ✅ THEME CONTEXT */
   const { theme, toggleTheme } = useTheme();
+
+  const storedUser = JSON.parse(localStorage.getItem("user")) || {};
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [successMsg, setSuccessMsg] = useState("");
-
-  const [search, setSearch] = useState(localStorage.getItem("search") || "");
-
-  /* ✅ USER SOURCE */
-  const storedUser = JSON.parse(localStorage.getItem("user")) || {};
+  const [editProfileOpen, setEditProfileOpen] = useState(false);
 
   const [username, setUsername] = useState(
-    storedUser.username || storedUser.email || "User"
+    storedUser.username || "User"
   );
-
   const [password, setPassword] = useState("");
 
-  const isLoggedIn = !!localStorage.getItem("token");
-
-  /* ✅ AVATAR FROM USER */
   const [avatar, setAvatar] = useState(
     storedUser.avatar || avatars[0]
   );
 
-  /* CLOSE DROPDOWN */
+  const [successMsg, setSuccessMsg] = useState("");
+  const [search, setSearch] = useState(localStorage.getItem("search") || "");
+
+  const isLoggedIn = !!localStorage.getItem("token");
+
+  /* CLOSE DROPDOWN ON OUTSIDE CLICK */
   useEffect(() => {
-    const handleClickOutside = (e) => {
+    const close = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setMenuOpen(false);
         setSettingsOpen(false);
+        setEditProfileOpen(false);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () =>
-      document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
   }, []);
 
-  /* ✅ SAFE LOGOUT (DO NOT CLEAR ALL) */
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     navigate("/");
   };
 
-  /* SAVE SETTINGS */
   const handleSaveSettings = () => {
     const updatedUser = {
       ...storedUser,
@@ -76,11 +71,11 @@ export default function Navbar() {
     setSuccessMsg("Settings updated successfully");
     setTimeout(() => setSuccessMsg(""), 2000);
 
+    setEditProfileOpen(false);
     setSettingsOpen(false);
     setMenuOpen(false);
   };
 
-  /* SEARCH */
   const handleSearch = (e) => {
     e.preventDefault();
     if (!search.trim()) return;
@@ -95,13 +90,14 @@ export default function Navbar() {
   return (
     <>
       {successMsg && (
-        <div className="fixed top-20 left-1/2 -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded shadow-lg z-[10000] text-sm">
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded z-[10000] text-sm">
           {successMsg}
         </div>
       )}
 
       <nav className="fixed top-0 left-0 right-0 z-50 bg-gray-900 text-white">
         <div className="flex items-center justify-between p-4 max-w-7xl mx-auto">
+
           <Link to="/products">
             <img src="/logo.png" alt="Logo" className="h-12" />
           </Link>
@@ -113,9 +109,7 @@ export default function Navbar() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search products…"
-                  className="w-full px-6 py-2 rounded-full
-                             bg-white text-black
-                             dark:bg-gray-800 dark:text-white"
+                  className="w-full px-6 py-2 rounded-full bg-white text-black"
                 />
               </form>
             )}
@@ -126,6 +120,7 @@ export default function Navbar() {
               onClick={() => {
                 setMenuOpen(!menuOpen);
                 setSettingsOpen(false);
+                setEditProfileOpen(false);
               }}
               className="flex items-center gap-2"
             >
@@ -157,7 +152,7 @@ export default function Navbar() {
                     onClick={() => setMenuOpen(false)}
                     className="block px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
-                    ❤️ My Wishlist
+                    My Wishlist
                   </Link>
 
                   <button
@@ -174,43 +169,16 @@ export default function Navbar() {
                     Logout
                   </button>
                 </>
-              ) : (
+              ) : !editProfileOpen ? (
                 <>
-                  <p className="font-bold mb-2">Settings</p>
+                  <p className="font-semibold mb-2">Settings</p>
 
-                  {/* AVATAR PICKER */}
-                  <div className="flex gap-2 mb-3">
-                    {avatars.map((a) => (
-                      <img
-                        key={a}
-                        src={a}
-                        className={`h-8 w-8 rounded-full cursor-pointer ${
-                          avatar === a ? "ring-2 ring-green-500" : ""
-                        }`}
-                        onClick={() => {
-                          setAvatar(a);
-                          localStorage.setItem(
-                            "user",
-                            JSON.stringify({ ...storedUser, avatar: a })
-                          );
-                        }}
-                      />
-                    ))}
-                  </div>
-
-                  <input
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="w-full p-2 border rounded mb-2 dark:bg-gray-700"
-                    placeholder="Display name"
-                  />
-
-                  <input
-                    type="password"
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full p-2 border rounded mb-2 dark:bg-gray-700"
-                    placeholder="Change password"
-                  />
+                  <button
+                    onClick={() => setEditProfileOpen(true)}
+                    className="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    Edit Profile
+                  </button>
 
                   <button
                     onClick={toggleTheme}
@@ -228,6 +196,44 @@ export default function Navbar() {
 
                   <button
                     onClick={() => setSettingsOpen(false)}
+                    className="w-full text-left px-3 py-1 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    ← Back
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p className="font-semibold mb-2">Edit Profile</p>
+
+                  <div className="flex gap-2 mb-3">
+                    {avatars.map((a) => (
+                      <img
+                        key={a}
+                        src={a}
+                        className={`h-8 w-8 rounded-full cursor-pointer ${
+                          avatar === a ? "ring-2 ring-green-500" : ""
+                        }`}
+                        onClick={() => setAvatar(a)}
+                      />
+                    ))}
+                  </div>
+
+                  <input
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="w-full p-2 border rounded mb-2 dark:bg-gray-700"
+                    placeholder="Change name"
+                  />
+
+                  <input
+                    type="password"
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full p-2 border rounded mb-2 dark:bg-gray-700"
+                    placeholder="Change password"
+                  />
+
+                  <button
+                    onClick={() => setEditProfileOpen(false)}
                     className="w-full text-left px-3 py-1 hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     ← Back
