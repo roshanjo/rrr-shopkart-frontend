@@ -17,7 +17,7 @@ export default function Address() {
     pincode: "",
   });
 
-  // ✅ LOAD SAVED ADDRESS (DJANGO WAY)
+  // ✅ Load saved address if exists
   useEffect(() => {
     if (!token) {
       navigate("/login");
@@ -27,21 +27,26 @@ export default function Address() {
     const fetchAddress = async () => {
       try {
         const res = await axios.get(`${API}/api/address/`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
 
         if (res.data) {
-          setAddress(res.data);
+          setAddress({
+            fullName: res.data.fullName || "",
+            phone: res.data.phone || "",
+            street: res.data.street || "",
+            city: res.data.city || "",
+            state: res.data.state || "",
+            pincode: res.data.pincode || "",
+          });
         }
       } catch (err) {
-        console.log("No saved address");
+        console.log("No saved address found", err);
       }
     };
 
     fetchAddress();
-  }, []);
+  }, [token, navigate]);
 
   const handleChange = (e) => {
     setAddress({ ...address, [e.target.name]: e.target.value });
@@ -50,20 +55,16 @@ export default function Address() {
   const handleSubmit = async () => {
     try {
       const res = await axios.post(
-        `${API}/api/address`,
+        `${API}/api/address/`,
         address,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       localStorage.setItem("address_id", res.data.id);
       navigate("/checkout");
     } catch (err) {
-      console.error(err);
-      alert("Failed to save address");
+      console.error("Failed to save address:", err.response || err);
+      alert("Failed to save address. Make sure you are logged in.");
     }
   };
 
