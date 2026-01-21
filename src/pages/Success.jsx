@@ -94,7 +94,7 @@ export default function Success() {
         {/* ACTION BUTTONS (NEW, SAFE) */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
           <button
-            onClick={() => navigate("/orders")}
+            onClick={() => navigate("/my-orders")}
             className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg"
           >
             View My Orders
