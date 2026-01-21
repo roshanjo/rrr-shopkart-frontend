@@ -22,21 +22,16 @@ export default function Navbar() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [editProfileOpen, setEditProfileOpen] = useState(false);
 
-  const [username, setUsername] = useState(
-    storedUser.username || "User"
-  );
+  const [username, setUsername] = useState(storedUser.username || "User");
   const [password, setPassword] = useState("");
-
-  const [avatar, setAvatar] = useState(
-    storedUser.avatar || avatars[0]
-  );
+  const [avatar, setAvatar] = useState(storedUser.avatar || avatars[0]);
 
   const [successMsg, setSuccessMsg] = useState("");
   const [search, setSearch] = useState(localStorage.getItem("search") || "");
 
   const isLoggedIn = !!localStorage.getItem("token");
 
-  /* CLOSE DROPDOWN ON OUTSIDE CLICK */
+  /* CLOSE DROPDOWN */
   useEffect(() => {
     const close = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -51,7 +46,6 @@ export default function Navbar() {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    localStorage.removeItem("user");
     navigate("/");
   };
 
@@ -84,7 +78,6 @@ export default function Navbar() {
   };
 
   if (!isLoggedIn) return null;
-
   const showSearch = location.pathname === "/products";
 
   return (
@@ -102,7 +95,7 @@ export default function Navbar() {
             <img src="/logo.png" alt="Logo" className="h-12" />
           </Link>
 
-          {/* SEARCH (FIXED DARK MODE) */}
+          {/* SEARCH */}
           <div className="flex-1 mx-6">
             {showSearch && (
               <form onSubmit={handleSearch}>
@@ -134,20 +127,19 @@ export default function Navbar() {
 
             <div
               className={`absolute right-0 top-12 w-64 rounded shadow-lg p-3
-                bg-white text-black dark:bg-gray-800 dark:text-white
-                transition-all ${
-                  menuOpen
-                    ? "opacity-100 scale-100"
-                    : "opacity-0 scale-95 pointer-events-none"
-                }`}
+              bg-white text-black dark:bg-gray-800 dark:text-white
+              transition-all ${
+                menuOpen
+                  ? "opacity-100 scale-100"
+                  : "opacity-0 scale-95 pointer-events-none"
+              }`}
             >
               {!settingsOpen ? (
                 <>
                   <Link
                     to="/my-orders"
                     onClick={() => setMenuOpen(false)}
-                    className="block px-3 py-2 rounded
-                               hover:bg-gray-200 dark:hover:bg-gray-600"
+                    className="block px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
                   >
                     My Orders
                   </Link>
@@ -155,24 +147,21 @@ export default function Navbar() {
                   <Link
                     to="/wishlist"
                     onClick={() => setMenuOpen(false)}
-                    className="block px-3 py-2 rounded
-                               hover:bg-gray-200 dark:hover:bg-gray-600"
+                    className="block px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
                   >
                     My Wishlist
                   </Link>
 
                   <button
                     onClick={() => setSettingsOpen(true)}
-                    className="w-full text-left px-3 py-2 rounded
-                               hover:bg-gray-200 dark:hover:bg-gray-600"
+                    className="w-full text-left px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
                   >
                     Settings
                   </button>
 
                   <button
                     onClick={handleLogout}
-                    className="w-full text-left px-3 py-2 rounded
-                               text-red-600 hover:bg-gray-200 dark:hover:bg-gray-600"
+                    className="w-full text-left px-3 py-2 rounded text-red-600 hover:bg-gray-200 dark:hover:bg-gray-600"
                   >
                     Logout
                   </button>
@@ -183,17 +172,14 @@ export default function Navbar() {
 
                   <button
                     onClick={() => setEditProfileOpen(true)}
-                    className="w-full text-left px-3 py-2 rounded
-                               hover:bg-gray-200 dark:hover:bg-gray-600"
+                    className="w-full text-left px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
                   >
                     Edit Profile
                   </button>
 
                   <button
                     onClick={toggleTheme}
-                    className="w-full px-3 py-2 rounded
-                               bg-gray-200 dark:bg-gray-700
-                               hover:bg-gray-300 dark:hover:bg-gray-600"
+                    className="w-full px-3 py-2 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600"
                   >
                     Switch to {theme === "light" ? "Dark" : "Light"} Mode
                   </button>
@@ -207,26 +193,33 @@ export default function Navbar() {
 
                   <button
                     onClick={() => setSettingsOpen(false)}
-                    className="w-full text-left px-3 py-2 rounded
-                               hover:bg-gray-200 dark:hover:bg-gray-600"
+                    className="w-full text-left px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
                   >
                     ← Back
                   </button>
                 </>
               ) : (
-                <>
-                  <p className="font-semibold mb-2">Edit Profile</p>
+                /* ✅ EDIT PROFILE BOX */
+                <div className="border rounded-lg p-3
+                                bg-gray-50 dark:bg-gray-900
+                                border-gray-200 dark:border-gray-700">
+                  <p className="font-semibold mb-3">Edit Profile</p>
 
-                  {/* AVATAR PICKER */}
                   <div className="flex gap-2 mb-3">
                     {avatars.map((a) => (
                       <img
                         key={a}
                         src={a}
-                        className={`h-8 w-8 rounded-full cursor-pointer ${
+                        className={`h-9 w-9 rounded-full cursor-pointer ${
                           avatar === a ? "ring-2 ring-green-500" : ""
                         }`}
-                        onClick={() => setAvatar(a)}
+                        onClick={() => {
+                          setAvatar(a);
+                          localStorage.setItem(
+                            "user",
+                            JSON.stringify({ ...storedUser, avatar: a })
+                          );
+                        }}
                       />
                     ))}
                   </div>
@@ -235,26 +228,27 @@ export default function Navbar() {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     className="w-full p-2 border rounded mb-2
-                               bg-white dark:bg-gray-700"
+                               bg-white dark:bg-gray-700
+                               border-gray-300 dark:border-gray-600"
                     placeholder="Change name"
                   />
 
                   <input
                     type="password"
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full p-2 border rounded mb-2
-                               bg-white dark:bg-gray-700"
+                    className="w-full p-2 border rounded mb-3
+                               bg-white dark:bg-gray-700
+                               border-gray-300 dark:border-gray-600"
                     placeholder="Change password"
                   />
 
                   <button
                     onClick={() => setEditProfileOpen(false)}
-                    className="w-full text-left px-3 py-2 rounded
-                               hover:bg-gray-200 dark:hover:bg-gray-600"
+                    className="w-full text-left px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
                   >
                     ← Back
                   </button>
-                </>
+                </div>
               )}
             </div>
           </div>
