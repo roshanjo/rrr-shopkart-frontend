@@ -8,15 +8,19 @@ export default function Success() {
   const [address, setAddress] = useState(null);
   const [total, setTotal] = useState(0);
 
+  // ✅ LOAD ORDER DATA FIRST
   useEffect(() => {
-    // Load order data
     setCart(JSON.parse(localStorage.getItem("cart")) || []);
     setAddress(JSON.parse(localStorage.getItem("address_data")));
     setTotal(localStorage.getItem("cart_total"));
-
-    // Clear cart after success
-    localStorage.removeItem("cart");
   }, []);
+
+  // ✅ CLEAR CART AFTER STATE IS READY (MOBILE SAFE)
+  useEffect(() => {
+    if (cart.length > 0) {
+      localStorage.removeItem("cart");
+    }
+  }, [cart]);
 
   return (
     <div
@@ -75,23 +79,30 @@ export default function Success() {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-5 text-left">
           <h2 className="text-xl font-semibold mb-3">Items Purchased</h2>
 
-          {cart.map((item, index) => (
-            <div
-              key={index}
-              className="flex justify-between border-b py-2 last:border-b-0"
-            >
-              <div>
-                <p className="font-medium">{item.name}</p>
-                <p className="text-sm text-gray-500">
-                  Qty: {item.qty || 1}
+          {cart.length === 0 ? (
+            <p className="text-gray-500 text-sm">No items found</p>
+          ) : (
+            cart.map((item, index) => (
+              <div
+                key={index}
+                className="flex justify-between items-start
+                           border-b py-2 last:border-b-0 gap-3"
+              >
+                <div className="flex-1">
+                  <p className="font-medium break-words">{item.name}</p>
+                  <p className="text-sm text-gray-500">
+                    Qty: {item.qty || 1}
+                  </p>
+                </div>
+                <p className="whitespace-nowrap">
+                  ₹{item.price * (item.qty || 1)}
                 </p>
               </div>
-              <p>₹{item.price * (item.qty || 1)}</p>
-            </div>
-          ))}
+            ))
+          )}
         </div>
 
-        {/* ACTION BUTTONS (NEW, SAFE) */}
+        {/* ACTION BUTTONS */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
           <button
             onClick={() => navigate("/my-orders")}
