@@ -69,7 +69,6 @@ export default function Cart() {
 
         {/* LEFT — YOUR CART */}
         <div className="lg:col-span-2 space-y-6">
-
           <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
             Your Cart ({cart.length} item{cart.length !== 1 && "s"})
           </h1>
@@ -89,19 +88,23 @@ export default function Cart() {
               {cart.map((item, index) => (
                 <div
                   key={index}
-                  className="bg-white dark:bg-gray-800 rounded-xl shadow p-4 flex flex-col sm:flex-row gap-4"
+                  className="bg-white dark:bg-gray-800 rounded-xl shadow p-4
+                             flex flex-col sm:flex-row gap-4"
                 >
+                  {/* PRODUCT IMAGE */}
                   <img
                     src={item.image}
                     alt={item.name}
                     className="h-24 w-24 object-cover rounded"
                   />
 
+                  {/* PRODUCT INFO */}
                   <div className="flex-1">
                     <h3 className="font-semibold text-lg">{item.name}</h3>
                     <p className="text-gray-500">₹{item.price}</p>
 
-                    <div className="flex items-center gap-3 mt-2">
+                    {/* QTY CONTROLS */}
+                    <div className="flex items-center gap-3 mt-3">
                       <button
                         onClick={() => decreaseQty(index)}
                         className="px-3 py-1 bg-gray-300 dark:bg-gray-700 rounded"
@@ -118,17 +121,25 @@ export default function Cart() {
                         +
                       </button>
                     </div>
+                  </div>
+
+                  {/* PRICE + REMOVE (RIGHT SIDE) */}
+                  <div
+                    className="flex sm:flex-col items-end justify-between
+                               gap-3 min-w-[120px]"
+                  >
+                    <p className="font-semibold">
+                      ₹{item.price * (item.qty || 1)}
+                    </p>
 
                     <button
                       onClick={() => removeItem(index)}
-                      className="text-red-500 font-semibold mt-2"
+                      className="border border-red-500 text-red-500
+                                 px-4 py-1 rounded text-sm
+                                 hover:bg-red-500 hover:text-white transition"
                     >
                       Remove
                     </button>
-                  </div>
-
-                  <div className="font-semibold self-start sm:self-center">
-                    ₹{item.price * (item.qty || 1)}
                   </div>
                 </div>
               ))}
@@ -185,8 +196,8 @@ export default function Cart() {
 
             <button
               onClick={proceedToCheckout}
-              className="w-full mt-4 bg-purple-600 hover:bg-purple-700
-                         text-white py-2 rounded-lg"
+              className="w-full mt-4 bg-purple-600
+                         hover:bg-purple-700 text-white py-2 rounded-lg"
             >
               Checkout
             </button>
