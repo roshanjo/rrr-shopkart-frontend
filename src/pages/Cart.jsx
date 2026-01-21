@@ -50,7 +50,7 @@ export default function Cart() {
     0
   );
 
-  // ✅ NEW CHECKOUT FLOW
+  // ✅ CHECKOUT FLOW (FIXED)
   const proceedToCheckout = () => {
     if (!user) {
       alert("Please login first");
@@ -58,10 +58,10 @@ export default function Cart() {
       return;
     }
 
-    // Save total for next steps
-    localStorage.setItem("order_total", total);
+    // 🔴 IMPORTANT: Stripe expects THIS key
+    localStorage.setItem("cart_total", total);
 
-    // Go to Address page (Step 1)
+    // Step 1 → Address
     navigate("/address");
   };
 

@@ -41,7 +41,7 @@ export default function Address() {
           });
         }
       } catch (err) {
-        console.log("No saved address found", err);
+        console.log("No saved address found");
       }
     };
 
@@ -52,19 +52,43 @@ export default function Address() {
     setAddress({ ...address, [e.target.name]: e.target.value });
   };
 
+  // ✅ STEP 1 → SAVE ADDRESS
+  // ✅ STEP 2 → STRIPE PAYMENT
   const handleSubmit = async () => {
     try {
+      // -------------------------
+      // SAVE ADDRESS
+      // -------------------------
       const res = await axios.post(
         `${API}/api/address/`,
         address,
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
 
       localStorage.setItem("address_id", res.data.id);
-      navigate("/checkout");
+
+      // -------------------------
+      // STRIPE PAYMENT (STEP 2)
+      // -------------------------
+      const total =
+        JSON.parse(localStorage.getItem("cart_total")) || 1;
+
+      const stripeRes = await axios.post(
+        `${API}/api/create-checkout-session/`,
+        { total },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      // 🚀 Redirect to Stripe
+      window.location.href = stripeRes.data.url;
+
     } catch (err) {
-      console.error("Failed to save address:", err.response || err);
-      alert("Failed to save address. Make sure you are logged in.");
+      console.error("Failed to save address or start payment:", err);
+      alert("Failed to continue. Please try again.");
     }
   };
 
@@ -116,6 +140,11 @@ export default function Address() {
             Continue →
           </button>
         </div>
+
+        {/* STEP INDICATOR */}
+        <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
+          Step 2: Secure Payment (Stripe)
+        </p>
       </div>
     </div>
   );
