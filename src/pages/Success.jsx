@@ -16,13 +16,7 @@ export default function Success() {
 
     // Clear cart after success
     localStorage.removeItem("cart");
-
-    const timer = setTimeout(() => {
-      navigate("/products");
-    }, 2500);
-
-    return () => clearTimeout(timer);
-  }, [navigate]);
+  }, []);
 
   return (
     <div
@@ -97,9 +91,22 @@ export default function Success() {
           ))}
         </div>
 
-        <p className="text-gray-600 dark:text-gray-400">
-          Redirecting you to products…
-        </p>
+        {/* ACTION BUTTONS (NEW, SAFE) */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
+          <button
+            onClick={() => navigate("/orders")}
+            className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg"
+          >
+            View My Orders
+          </button>
+
+          <button
+            onClick={() => navigate("/products")}
+            className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg"
+          >
+            Continue Shopping
+          </button>
+        </div>
 
       </div>
 
