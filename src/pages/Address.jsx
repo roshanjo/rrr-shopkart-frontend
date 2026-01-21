@@ -50,7 +50,7 @@ export default function Address() {
   const handleSubmit = async () => {
     try {
       const res = await axios.post(
-        `${API}/api/address/`,
+        `${API}/api/address`,
         address,
         {
           headers: {
