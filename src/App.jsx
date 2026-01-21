@@ -11,6 +11,7 @@ import MyOrders from "./pages/MyOrders";
 import OrderDetails from "./pages/OrderDetails";
 import Wishlist from "./pages/Wishlist";
 import ProductDetail from "./pages/ProductDetail";
+import Address from "./pages/Address";
 
 function Layout({ children }) {
   const location = useLocation();
@@ -42,6 +43,7 @@ export default function App() {
           <Route path="/my-orders" element={<MyOrders />} />
           <Route path="/orders/:id" element={<OrderDetails />} />
           <Route path="/wishlist" element={<Wishlist />} />
+          <Route path="/address" element={<Address />} />
         </Routes>
       </Layout>
     </BrowserRouter>
