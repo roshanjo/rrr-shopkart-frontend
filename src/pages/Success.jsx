@@ -1,10 +1,20 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function Success() {
   const navigate = useNavigate();
 
+  const [cart, setCart] = useState([]);
+  const [address, setAddress] = useState(null);
+  const [total, setTotal] = useState(0);
+
   useEffect(() => {
+    // Load order data
+    setCart(JSON.parse(localStorage.getItem("cart")) || []);
+    setAddress(JSON.parse(localStorage.getItem("address_data")));
+    setTotal(localStorage.getItem("cart_total"));
+
+    // Clear cart after success
     localStorage.removeItem("cart");
 
     const timer = setTimeout(() => {
@@ -18,13 +28,13 @@ export default function Success() {
     <div
       className="fixed inset-0 z-[9999]
                  bg-green-50 dark:bg-gray-900
-                 flex items-center justify-center
-                 px-4 text-center"
+                 overflow-y-auto
+                 px-4 py-10 text-center"
     >
-      {/* MAIN CONTENT */}
-      <div>
+      <div className="max-w-3xl mx-auto space-y-6">
+
         {/* SUCCESS ICON */}
-        <div className="mb-6 animate-scale">
+        <div className="mb-4 animate-scale">
           <div className="w-28 h-28 rounded-full bg-green-100 flex items-center justify-center mx-auto">
             <svg
               className="w-16 h-16 text-green-600"
@@ -42,19 +52,59 @@ export default function Success() {
           </div>
         </div>
 
-        <h1 className="text-4xl font-bold text-green-600 mb-4">
+        <h1 className="text-4xl font-bold text-green-600">
           Payment Successful 🎉
         </h1>
 
-        <p className="text-lg text-gray-700 dark:text-gray-300 max-w-md mx-auto">
-          Thank you for shopping with <strong>Ai-Kart</strong>!
-          <br />
+        {/* ORDER SUMMARY */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-5 text-left">
+          <h2 className="text-xl font-semibold mb-2">Order Summary</h2>
+          <p><strong>Status:</strong> Paid</p>
+          <p><strong>Total:</strong> ₹{total}</p>
+          <p><strong>Date:</strong> {new Date().toLocaleString()}</p>
+        </div>
+
+        {/* ADDRESS */}
+        {address && (
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-5 text-left">
+            <h2 className="text-xl font-semibold mb-2">Delivery Address</h2>
+            <p>{address.fullName}</p>
+            <p>{address.phone}</p>
+            <p>
+              {address.street}, {address.city}, {address.state} -{" "}
+              {address.pincode}
+            </p>
+          </div>
+        )}
+
+        {/* ITEMS */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-5 text-left">
+          <h2 className="text-xl font-semibold mb-3">Items Purchased</h2>
+
+          {cart.map((item, index) => (
+            <div
+              key={index}
+              className="flex justify-between border-b py-2 last:border-b-0"
+            >
+              <div>
+                <p className="font-medium">{item.name}</p>
+                <p className="text-sm text-gray-500">
+                  Qty: {item.qty || 1}
+                </p>
+              </div>
+              <p>₹{item.price * (item.qty || 1)}</p>
+            </div>
+          ))}
+        </div>
+
+        <p className="text-gray-600 dark:text-gray-400">
           Redirecting you to products…
         </p>
+
       </div>
 
       {/* FOOTER */}
-      <div className="absolute bottom-4 text-sm text-gray-500 dark:text-gray-400">
+      <div className="mt-10 text-sm text-gray-500 dark:text-gray-400">
         Designed by Roshan © 2026
       </div>
 

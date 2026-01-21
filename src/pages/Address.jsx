@@ -67,6 +67,9 @@ export default function Address() {
         }
       );
 
+      // ✅ REQUIRED SMALL ADDITION (SAFE)
+      localStorage.setItem("address_data", JSON.stringify(address));
+
       localStorage.setItem("address_id", res.data.id);
 
       // -------------------------
