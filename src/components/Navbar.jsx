@@ -22,7 +22,12 @@ export default function Navbar() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [editProfileOpen, setEditProfileOpen] = useState(false);
 
-  const [username, setUsername] = useState(storedUser.username || "User");
+  const [username, setUsername] = useState(
+    storedUser.username && !storedUser.username.includes("@")
+      ? storedUser.username
+      : "User"
+  );
+
   const [password, setPassword] = useState("");
   const [avatar, setAvatar] = useState(storedUser.avatar || avatars[0]);
 
@@ -31,7 +36,6 @@ export default function Navbar() {
 
   const isLoggedIn = !!localStorage.getItem("token");
 
-  /* CLOSE DROPDOWN */
   useEffect(() => {
     const close = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -58,9 +62,7 @@ export default function Navbar() {
 
     localStorage.setItem("user", JSON.stringify(updatedUser));
 
-    if (password) {
-      localStorage.setItem("password", password);
-    }
+    if (password) localStorage.setItem("password", password);
 
     setSuccessMsg("Settings updated successfully");
     setTimeout(() => setSuccessMsg(""), 2000);
@@ -95,7 +97,6 @@ export default function Navbar() {
             <img src="/logo.png" alt="Logo" className="h-12" />
           </Link>
 
-          {/* SEARCH */}
           <div className="flex-1 mx-6">
             {showSearch && (
               <form onSubmit={handleSearch}>
@@ -139,7 +140,7 @@ export default function Navbar() {
                   <Link
                     to="/my-orders"
                     onClick={() => setMenuOpen(false)}
-                    className="block px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
+                    className="block px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
                   >
                     My Orders
                   </Link>
@@ -147,21 +148,21 @@ export default function Navbar() {
                   <Link
                     to="/wishlist"
                     onClick={() => setMenuOpen(false)}
-                    className="block px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
+                    className="block px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
                   >
                     My Wishlist
                   </Link>
 
                   <button
                     onClick={() => setSettingsOpen(true)}
-                    className="w-full text-left px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
+                    className="w-full text-left px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
                   >
                     Settings
                   </button>
 
                   <button
                     onClick={handleLogout}
-                    className="w-full text-left px-3 py-2 rounded text-red-600 hover:bg-gray-200 dark:hover:bg-gray-600"
+                    className="w-full text-left px-3 py-2 rounded text-red-600 hover:bg-gray-200 dark:hover:bg-gray-700"
                   >
                     Logout
                   </button>
@@ -170,18 +171,20 @@ export default function Navbar() {
                 <>
                   <p className="font-semibold mb-2 text-center">Settings</p>
 
+                  {/* CENTERED TEXT */}
                   <button
                     onClick={() => setEditProfileOpen(true)}
-                    className="w-full px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
+                    className="w-full text-center px-3 py-2 rounded
+                               hover:bg-gray-200 dark:hover:bg-gray-700"
                   >
                     Edit Profile
                   </button>
 
-                  {/* ✅ THEME BUTTON — NORMAL THEME COLOR */}
+                  {/* NORMAL THEME BUTTON */}
                   <button
                     onClick={toggleTheme}
                     className="w-full px-3 py-2 rounded
-                               hover:bg-gray-200 dark:hover:bg-gray-600"
+                               hover:bg-gray-200 dark:hover:bg-gray-700"
                   >
                     Switch to {theme === "light" ? "Dark" : "Light"} Mode
                   </button>
@@ -195,22 +198,16 @@ export default function Navbar() {
 
                   <button
                     onClick={() => setSettingsOpen(false)}
-                    className="w-full px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
+                    className="w-full text-left px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
                   >
                     ← Back
                   </button>
                 </>
               ) : (
-                /* ✅ EDIT PROFILE BOX */
-                <div className="border rounded-lg p-3
-                                bg-gray-50 dark:bg-gray-900
-                                border-gray-200 dark:border-gray-700">
-                  {/* ✅ CENTERED TITLE */}
-                  <p className="font-semibold mb-3 text-center">
-                    Edit Profile
-                  </p>
+                <>
+                  <p className="font-semibold mb-3 text-center">Edit Profile</p>
 
-                  <div className="flex gap-2 mb-3 justify-center">
+                  <div className="flex justify-center gap-2 mb-3">
                     {avatars.map((a) => (
                       <img
                         key={a}
@@ -249,11 +246,11 @@ export default function Navbar() {
 
                   <button
                     onClick={() => setEditProfileOpen(false)}
-                    className="w-full px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
+                    className="w-full text-left px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
                   >
                     ← Back
                   </button>
-                </div>
+                </>
               )}
             </div>
           </div>
