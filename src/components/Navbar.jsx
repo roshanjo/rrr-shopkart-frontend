@@ -102,6 +102,7 @@ export default function Navbar() {
             <img src="/logo.png" alt="Logo" className="h-12" />
           </Link>
 
+          {/* SEARCH (FIXED DARK MODE) */}
           <div className="flex-1 mx-6">
             {showSearch && (
               <form onSubmit={handleSearch}>
@@ -109,7 +110,10 @@ export default function Navbar() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search products…"
-                  className="w-full px-6 py-2 rounded-full bg-white text-black"
+                  className="w-full px-6 py-2 rounded-full
+                             bg-white text-black
+                             dark:bg-gray-800 dark:text-white
+                             placeholder-gray-400 dark:placeholder-gray-500"
                 />
               </form>
             )}
@@ -142,7 +146,8 @@ export default function Navbar() {
                   <Link
                     to="/my-orders"
                     onClick={() => setMenuOpen(false)}
-                    className="block px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    className="block px-3 py-2 rounded
+                               hover:bg-gray-200 dark:hover:bg-gray-600"
                   >
                     My Orders
                   </Link>
@@ -150,21 +155,24 @@ export default function Navbar() {
                   <Link
                     to="/wishlist"
                     onClick={() => setMenuOpen(false)}
-                    className="block px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    className="block px-3 py-2 rounded
+                               hover:bg-gray-200 dark:hover:bg-gray-600"
                   >
                     My Wishlist
                   </Link>
 
                   <button
                     onClick={() => setSettingsOpen(true)}
-                    className="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    className="w-full text-left px-3 py-2 rounded
+                               hover:bg-gray-200 dark:hover:bg-gray-600"
                   >
                     Settings
                   </button>
 
                   <button
                     onClick={handleLogout}
-                    className="w-full text-left px-3 py-2 text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    className="w-full text-left px-3 py-2 rounded
+                               text-red-600 hover:bg-gray-200 dark:hover:bg-gray-600"
                   >
                     Logout
                   </button>
@@ -175,28 +183,32 @@ export default function Navbar() {
 
                   <button
                     onClick={() => setEditProfileOpen(true)}
-                    className="w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    className="w-full text-left px-3 py-2 rounded
+                               hover:bg-gray-200 dark:hover:bg-gray-600"
                   >
                     Edit Profile
                   </button>
 
                   <button
                     onClick={toggleTheme}
-                    className="w-full bg-gray-200 dark:bg-gray-700 py-1 rounded mb-2"
+                    className="w-full px-3 py-2 rounded
+                               bg-gray-200 dark:bg-gray-700
+                               hover:bg-gray-300 dark:hover:bg-gray-600"
                   >
                     Switch to {theme === "light" ? "Dark" : "Light"} Mode
                   </button>
 
                   <button
                     onClick={handleSaveSettings}
-                    className="w-full bg-green-600 text-white py-1 rounded mb-2"
+                    className="w-full bg-green-600 text-white py-2 rounded mt-2"
                   >
                     Save Changes
                   </button>
 
                   <button
                     onClick={() => setSettingsOpen(false)}
-                    className="w-full text-left px-3 py-1 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    className="w-full text-left px-3 py-2 rounded
+                               hover:bg-gray-200 dark:hover:bg-gray-600"
                   >
                     ← Back
                   </button>
@@ -205,6 +217,7 @@ export default function Navbar() {
                 <>
                   <p className="font-semibold mb-2">Edit Profile</p>
 
+                  {/* AVATAR PICKER */}
                   <div className="flex gap-2 mb-3">
                     {avatars.map((a) => (
                       <img
@@ -221,20 +234,23 @@ export default function Navbar() {
                   <input
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="w-full p-2 border rounded mb-2 dark:bg-gray-700"
+                    className="w-full p-2 border rounded mb-2
+                               bg-white dark:bg-gray-700"
                     placeholder="Change name"
                   />
 
                   <input
                     type="password"
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full p-2 border rounded mb-2 dark:bg-gray-700"
+                    className="w-full p-2 border rounded mb-2
+                               bg-white dark:bg-gray-700"
                     placeholder="Change password"
                   />
 
                   <button
                     onClick={() => setEditProfileOpen(false)}
-                    className="w-full text-left px-3 py-1 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    className="w-full text-left px-3 py-2 rounded
+                               hover:bg-gray-200 dark:hover:bg-gray-600"
                   >
                     ← Back
                   </button>
