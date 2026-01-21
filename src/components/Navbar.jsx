@@ -168,18 +168,20 @@ export default function Navbar() {
                 </>
               ) : !editProfileOpen ? (
                 <>
-                  <p className="font-semibold mb-2">Settings</p>
+                  <p className="font-semibold mb-2 text-center">Settings</p>
 
                   <button
                     onClick={() => setEditProfileOpen(true)}
-                    className="w-full text-left px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
+                    className="w-full px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
                   >
                     Edit Profile
                   </button>
 
+                  {/* ✅ THEME BUTTON — NORMAL THEME COLOR */}
                   <button
                     onClick={toggleTheme}
-                    className="w-full px-3 py-2 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600"
+                    className="w-full px-3 py-2 rounded
+                               hover:bg-gray-200 dark:hover:bg-gray-600"
                   >
                     Switch to {theme === "light" ? "Dark" : "Light"} Mode
                   </button>
@@ -193,7 +195,7 @@ export default function Navbar() {
 
                   <button
                     onClick={() => setSettingsOpen(false)}
-                    className="w-full text-left px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
+                    className="w-full px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
                   >
                     ← Back
                   </button>
@@ -203,9 +205,12 @@ export default function Navbar() {
                 <div className="border rounded-lg p-3
                                 bg-gray-50 dark:bg-gray-900
                                 border-gray-200 dark:border-gray-700">
-                  <p className="font-semibold mb-3">Edit Profile</p>
+                  {/* ✅ CENTERED TITLE */}
+                  <p className="font-semibold mb-3 text-center">
+                    Edit Profile
+                  </p>
 
-                  <div className="flex gap-2 mb-3">
+                  <div className="flex gap-2 mb-3 justify-center">
                     {avatars.map((a) => (
                       <img
                         key={a}
@@ -244,7 +249,7 @@ export default function Navbar() {
 
                   <button
                     onClick={() => setEditProfileOpen(false)}
-                    className="w-full text-left px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
+                    className="w-full px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
                   >
                     ← Back
                   </button>
