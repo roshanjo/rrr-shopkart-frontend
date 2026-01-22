@@ -17,7 +17,9 @@ export default function Address() {
     pincode: "",
   });
 
-  // ✅ Load saved address if exists
+  /* ===============================
+     LOAD SAVED ADDRESS
+     =============================== */
   useEffect(() => {
     if (!token) {
       navigate("/login");
@@ -30,17 +32,18 @@ export default function Address() {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        if (res.data) {
+        if (res.data && res.data.length > 0) {
+          const a = res.data[0];
           setAddress({
-            fullName: res.data.fullName || "",
-            phone: res.data.phone || "",
-            street: res.data.street || "",
-            city: res.data.city || "",
-            state: res.data.state || "",
-            pincode: res.data.pincode || "",
+            fullName: "",
+            phone: "",
+            street: a.line1 || "",
+            city: a.city || "",
+            state: a.state || "",
+            pincode: a.pincode || "",
           });
         }
-      } catch (err) {
+      } catch {
         console.log("No saved address found");
       }
     };
@@ -52,43 +55,38 @@ export default function Address() {
     setAddress({ ...address, [e.target.name]: e.target.value });
   };
 
-  // ✅ STEP 1 → SAVE ADDRESS
-  // ✅ STEP 2 → STRIPE PAYMENT
+  /* ===============================
+     SAVE ADDRESS → STRIPE
+     =============================== */
   const handleSubmit = async () => {
     try {
-      // -------------------------
-      // SAVE ADDRESS
-      // -------------------------
-      const res = await axios.post(
-        `${API}/api/address/`,
-        address,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      // 🔁 MAP FRONTEND → BACKEND FIELDS
+      const payload = {
+        line1: address.street,
+        city: address.city,
+        state: address.state,
+        pincode: address.pincode,
+      };
 
-      // ✅ REQUIRED SMALL ADDITION (SAFE)
+      // SAVE ADDRESS
+      await axios.post(`${API}/api/address/`, payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      // ✅ REQUIRED SAFE ADDITION
       localStorage.setItem("address_data", JSON.stringify(address));
 
-      localStorage.setItem("address_id", res.data.id);
-
-      // -------------------------
-      // STRIPE PAYMENT (STEP 2)
-      // -------------------------
+      // STRIPE PAYMENT
       const total =
         JSON.parse(localStorage.getItem("cart_total")) || 1;
 
       const stripeRes = await axios.post(
         `${API}/api/create-checkout-session/`,
         { total },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // 🚀 Redirect to Stripe
       window.location.href = stripeRes.data.url;
-
     } catch (err) {
       console.error("Failed to save address or start payment:", err);
       alert("Failed to continue. Please try again.");
@@ -144,7 +142,6 @@ export default function Address() {
           </button>
         </div>
 
-        {/* STEP INDICATOR */}
         <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
           Step 2: Secure Payment (Stripe)
         </p>
