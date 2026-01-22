@@ -29,19 +29,20 @@ export default function Address() {
     const fetchAddress = async () => {
       try {
         const res = await axios.get(`${API}/api/address/`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         });
 
-        if (res.data && res.data.length > 0) {
+        if (Array.isArray(res.data) && res.data.length > 0) {
           const a = res.data[0];
-          setAddress({
-            fullName: "",
-            phone: "",
+          setAddress((prev) => ({
+            ...prev,
             street: a.line1 || "",
             city: a.city || "",
             state: a.state || "",
             pincode: a.pincode || "",
-          });
+          }));
         }
       } catch {
         console.log("No saved address found");
@@ -60,7 +61,6 @@ export default function Address() {
      =============================== */
   const handleSubmit = async () => {
     try {
-      // 🔁 MAP FRONTEND → BACKEND FIELDS
       const payload = {
         line1: address.street,
         city: address.city,
@@ -68,22 +68,28 @@ export default function Address() {
         pincode: address.pincode,
       };
 
-      // SAVE ADDRESS
+      // 🔴 CRITICAL FIX: Content-Type
       await axios.post(`${API}/api/address/`, payload, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
       });
 
-      // ✅ REQUIRED SAFE ADDITION
       localStorage.setItem("address_data", JSON.stringify(address));
 
-      // STRIPE PAYMENT
       const total =
         JSON.parse(localStorage.getItem("cart_total")) || 1;
 
       const stripeRes = await axios.post(
         `${API}/api/create-checkout-session/`,
         { total },
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
       );
 
       window.location.href = stripeRes.data.url;
