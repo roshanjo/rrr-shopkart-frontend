@@ -11,54 +11,50 @@ export default function Navbar() {
   const { theme, toggleTheme } = useTheme();
 
   const token = localStorage.getItem("token");
+  if (!token) return null;
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [editProfileOpen, setEditProfileOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
 
-  const [username, setUsername] = useState("User");
+  const [username, setUsername] = useState("");
   const [avatar, setAvatar] = useState(avatars[0]);
   const [password, setPassword] = useState("");
-
-  const [successMsg, setSuccessMsg] = useState("");
-  const [search, setSearch] = useState(localStorage.getItem("search") || "");
+  const [success, setSuccess] = useState("");
 
   const showSearch = location.pathname === "/products";
 
-  /* 🔁 SYNC USER */
+  /* FETCH USER */
   useEffect(() => {
-    if (!token) return;
-
     fetch("https://rrr-shopkart-backend.onrender.com/api/me/", {
       headers: { Authorization: `Bearer ${token}` },
     })
-      .then((res) => res.json())
-      .then((data) => {
-        setUsername(data.username || "User");
-        setAvatar(data.avatar || avatars[0]);
+      .then(res => res.json())
+      .then(data => {
+        setUsername(data.username);
+        setAvatar(data.avatar);
       });
   }, [token]);
 
-  /* CLOSE DROPDOWN */
+  /* CLOSE ON OUTSIDE CLICK */
   useEffect(() => {
     const close = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setMenuOpen(false);
         setSettingsOpen(false);
-        setEditProfileOpen(false);
+        setEditOpen(false);
       }
     };
     document.addEventListener("mousedown", close);
     return () => document.removeEventListener("mousedown", close);
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+  const logout = () => {
+    localStorage.clear();
     navigate("/");
   };
 
-  const handleSaveSettings = async () => {
+  const saveProfile = async () => {
     const body = { username, avatar };
     if (password.trim()) body.password = password;
 
@@ -76,56 +72,42 @@ export default function Navbar() {
 
     if (!res.ok) return;
 
-    setSuccessMsg("Profile updated successfully");
+    setSuccess("Profile updated");
     setPassword("");
-
-    setTimeout(() => setSuccessMsg(""), 2000);
-    setEditProfileOpen(false);
+    setTimeout(() => setSuccess(""), 2000);
+    setEditOpen(false);
     setSettingsOpen(false);
     setMenuOpen(false);
   };
 
-  if (!token) return null;
-
   return (
     <>
-      {successMsg && (
-        <div className="fixed top-20 left-1/2 -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded z-[9999]">
-          {successMsg}
+      {success && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded z-50">
+          {success}
         </div>
       )}
 
-      <nav className="fixed top-0 left-0 right-0 bg-gray-900 text-white z-50">
+      <nav className="fixed top-0 w-full bg-gray-900 text-white z-40">
         <div className="max-w-7xl mx-auto flex items-center justify-between p-4">
 
           <Link to="/products">
-            <img src="/logo.png" alt="Logo" className="h-12" />
+            <img src="/logo.png" className="h-12" />
           </Link>
 
-          <div className="flex-1 mx-6 hidden sm:block">
-            {showSearch && (
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    localStorage.setItem("search", search);
-                    navigate("/products");
-                  }
-                }}
-                placeholder="Search products…"
-                className="w-full px-6 py-2 rounded-full bg-white text-black dark:bg-gray-800 dark:text-white"
-              />
-            )}
-          </div>
+          {showSearch && (
+            <input
+              placeholder="Search products..."
+              className="hidden sm:block w-1/2 px-5 py-2 rounded-full text-black"
+            />
+          )}
 
-          {/* PROFILE */}
           <div ref={dropdownRef} className="relative">
             <button
               onClick={() => {
                 setMenuOpen(!menuOpen);
                 setSettingsOpen(false);
-                setEditProfileOpen(false);
+                setEditOpen(false);
               }}
               className="flex items-center gap-2"
             >
@@ -134,66 +116,67 @@ export default function Navbar() {
             </button>
 
             {menuOpen && (
-              <div className="absolute right-0 top-12 w-64 bg-white dark:bg-gray-800 text-black dark:text-white rounded shadow-lg p-3">
+              <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 text-black dark:text-white rounded shadow-lg p-3">
 
-                {!settingsOpen ? (
+                {!settingsOpen && (
                   <>
-                    <Link to="/my-orders" className="block px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700">
+                    <Link to="/my-orders" className="block px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">
                       My Orders
+                    </Link>
+
+                    <Link to="/wishlist" className="block px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">
+                      My Wishlist
                     </Link>
 
                     <button
                       onClick={() => setSettingsOpen(true)}
-                      className="w-full text-left px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
+                      className="w-full text-left px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"
                     >
                       Settings
                     </button>
 
                     <button
-                      onClick={handleLogout}
-                      className="w-full text-left px-3 py-2 rounded text-red-600 hover:bg-gray-200 dark:hover:bg-gray-700"
+                      onClick={logout}
+                      className="w-full text-left px-3 py-2 text-red-600 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"
                     >
                       Logout
                     </button>
                   </>
-                ) : !editProfileOpen ? (
+                )}
+
+                {settingsOpen && !editOpen && (
                   <>
-                    <p className="font-semibold mb-2 text-center">Settings</p>
+                    <p className="text-center font-semibold mb-2">Settings</p>
 
                     <button
-                      onClick={() => setEditProfileOpen(true)}
-                      className="w-full px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
+                      onClick={() => setEditOpen(true)}
+                      className="w-full px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"
                     >
                       Edit Profile
                     </button>
 
                     <button
                       onClick={toggleTheme}
-                      className="w-full px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
+                      className="w-full px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"
                     >
                       Switch to {theme === "light" ? "Dark" : "Light"} Mode
                     </button>
 
                     <button
-                      onClick={handleSaveSettings}
-                      className="w-full bg-green-600 text-white py-2 rounded mt-2"
-                    >
-                      Save Changes
-                    </button>
-
-                    <button
                       onClick={() => setSettingsOpen(false)}
-                      className="w-full px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
+                      className="w-full px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"
                     >
                       ← Back
                     </button>
                   </>
-                ) : (
+                )}
+
+                {editOpen && (
                   <>
-                    <p className="font-semibold mb-3 text-center">Edit Profile</p>
+                    <p className="text-center font-semibold mb-3">Edit Profile</p>
 
                     <div className="flex justify-center gap-2 mb-3">
-                      {avatars.map((a) => (
+                      {avatars.map(a => (
                         <img
                           key={a}
                           src={a}
@@ -207,27 +190,35 @@ export default function Navbar() {
 
                     <input
                       value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      className="w-full p-2 rounded mb-2 bg-white dark:bg-gray-700"
-                      placeholder="Change username"
+                      onChange={e => setUsername(e.target.value)}
+                      className="w-full p-2 mb-2 rounded bg-gray-100 dark:bg-gray-700"
+                      placeholder="Username"
                     />
 
                     <input
                       type="password"
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="w-full p-2 rounded mb-3 bg-white dark:bg-gray-700"
-                      placeholder="Change password"
+                      onChange={e => setPassword(e.target.value)}
+                      className="w-full p-2 mb-3 rounded bg-gray-100 dark:bg-gray-700"
+                      placeholder="New password"
                     />
 
                     <button
-                      onClick={() => setEditProfileOpen(false)}
-                      className="w-full px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
+                      onClick={saveProfile}
+                      className="w-full bg-green-600 text-white py-2 rounded mb-2"
+                    >
+                      Save Changes
+                    </button>
+
+                    <button
+                      onClick={() => setEditOpen(false)}
+                      className="w-full px-3 py-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"
                     >
                       ← Back
                     </button>
                   </>
                 )}
+
               </div>
             )}
           </div>
