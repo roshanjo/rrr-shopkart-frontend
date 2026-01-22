@@ -19,26 +19,27 @@ export default function Navbar() {
   const [username, setUsername] = useState("User");
   const [avatar, setAvatar] = useState(avatars[0]);
   const [password, setPassword] = useState("");
+
   const [successMsg, setSuccessMsg] = useState("");
   const [search, setSearch] = useState(localStorage.getItem("search") || "");
 
   const showSearch = location.pathname === "/products";
 
-  /* 🔁 Sync user */
+  /* 🔁 SYNC USER */
   useEffect(() => {
     if (!token) return;
 
     fetch("https://rrr-shopkart-backend.onrender.com/api/me/", {
       headers: { Authorization: `Bearer ${token}` },
     })
-      .then((r) => r.json())
-      .then((d) => {
-        setUsername(d.username || "User");
-        setAvatar(d.avatar || avatars[0]);
+      .then((res) => res.json())
+      .then((data) => {
+        setUsername(data.username || "User");
+        setAvatar(data.avatar || avatars[0]);
       });
   }, [token]);
 
-  /* Close dropdown */
+  /* CLOSE DROPDOWN */
   useEffect(() => {
     const close = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -51,32 +52,37 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", close);
   }, []);
 
-  const handleSave = async () => {
-    const body = { username, avatar };
-    if (password) body.password = password;
-
-    await fetch("https://rrr-shopkart-backend.onrender.com/api/profile/", {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    });
-
-    setSuccessMsg("Profile updated");
-    setPassword("");
-    setTimeout(() => setSuccessMsg(""), 2000);
-
-    setMenuOpen(false);
-    setSettingsOpen(false);
-    setEditProfileOpen(false);
-  };
-
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     navigate("/");
+  };
+
+  const handleSaveSettings = async () => {
+    const body = { username, avatar };
+    if (password.trim()) body.password = password;
+
+    const res = await fetch(
+      "https://rrr-shopkart-backend.onrender.com/api/profile/",
+      {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      }
+    );
+
+    if (!res.ok) return;
+
+    setSuccessMsg("Profile updated successfully");
+    setPassword("");
+
+    setTimeout(() => setSuccessMsg(""), 2000);
+    setEditProfileOpen(false);
+    setSettingsOpen(false);
+    setMenuOpen(false);
   };
 
   if (!token) return null;
@@ -90,15 +96,13 @@ export default function Navbar() {
       )}
 
       <nav className="fixed top-0 left-0 right-0 bg-gray-900 text-white z-50">
-        <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-3">
+        <div className="max-w-7xl mx-auto flex items-center justify-between p-4">
 
-          {/* LEFT */}
           <Link to="/products">
             <img src="/logo.png" alt="Logo" className="h-12" />
           </Link>
 
-          {/* CENTER SEARCH */}
-          <div className="flex-1 px-6 hidden sm:block">
+          <div className="flex-1 mx-6 hidden sm:block">
             {showSearch && (
               <input
                 value={search}
@@ -115,7 +119,7 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* RIGHT PROFILE */}
+          {/* PROFILE */}
           <div ref={dropdownRef} className="relative">
             <button
               onClick={() => {
@@ -130,32 +134,71 @@ export default function Navbar() {
             </button>
 
             {menuOpen && (
-              <div className="absolute right-0 mt-3 w-64 bg-white dark:bg-gray-800 text-black dark:text-white rounded shadow-lg p-4">
+              <div className="absolute right-0 top-12 w-64 bg-white dark:bg-gray-800 text-black dark:text-white rounded shadow-lg p-3">
+
                 {!settingsOpen ? (
                   <>
-                    <Link to="/my-orders" className="block py-2">My Orders</Link>
-                    <button onClick={() => setSettingsOpen(true)} className="block w-full py-2">Settings</button>
-                    <button onClick={handleLogout} className="block w-full py-2 text-red-600">Logout</button>
+                    <Link to="/my-orders" className="block px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700">
+                      My Orders
+                    </Link>
+
+                    <button
+                      onClick={() => setSettingsOpen(true)}
+                      className="w-full text-left px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
+                    >
+                      Settings
+                    </button>
+
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-3 py-2 rounded text-red-600 hover:bg-gray-200 dark:hover:bg-gray-700"
+                    >
+                      Logout
+                    </button>
                   </>
                 ) : !editProfileOpen ? (
                   <>
-                    <button onClick={() => setEditProfileOpen(true)} className="block w-full py-2">Edit Profile</button>
-                    <button onClick={toggleTheme} className="block w-full py-2">
+                    <p className="font-semibold mb-2 text-center">Settings</p>
+
+                    <button
+                      onClick={() => setEditProfileOpen(true)}
+                      className="w-full px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
+                    >
+                      Edit Profile
+                    </button>
+
+                    <button
+                      onClick={toggleTheme}
+                      className="w-full px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
+                    >
                       Switch to {theme === "light" ? "Dark" : "Light"} Mode
                     </button>
-                    <button onClick={handleSave} className="w-full bg-green-600 text-white py-2 mt-2 rounded">
+
+                    <button
+                      onClick={handleSaveSettings}
+                      className="w-full bg-green-600 text-white py-2 rounded mt-2"
+                    >
                       Save Changes
+                    </button>
+
+                    <button
+                      onClick={() => setSettingsOpen(false)}
+                      className="w-full px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
+                    >
+                      ← Back
                     </button>
                   </>
                 ) : (
                   <>
+                    <p className="font-semibold mb-3 text-center">Edit Profile</p>
+
                     <div className="flex justify-center gap-2 mb-3">
                       {avatars.map((a) => (
                         <img
                           key={a}
                           src={a}
                           onClick={() => setAvatar(a)}
-                          className={`h-10 w-10 rounded-full cursor-pointer ${
+                          className={`h-9 w-9 rounded-full cursor-pointer ${
                             avatar === a ? "ring-2 ring-green-500" : ""
                           }`}
                         />
@@ -166,15 +209,23 @@ export default function Navbar() {
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       className="w-full p-2 rounded mb-2 bg-white dark:bg-gray-700"
+                      placeholder="Change username"
                     />
 
                     <input
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="New password"
-                      className="w-full p-2 rounded bg-white dark:bg-gray-700"
+                      className="w-full p-2 rounded mb-3 bg-white dark:bg-gray-700"
+                      placeholder="Change password"
                     />
+
+                    <button
+                      onClick={() => setEditProfileOpen(false)}
+                      className="w-full px-3 py-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
+                    >
+                      ← Back
+                    </button>
                   </>
                 )}
               </div>
