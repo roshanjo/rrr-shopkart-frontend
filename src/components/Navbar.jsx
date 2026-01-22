@@ -11,6 +11,7 @@ export default function Navbar() {
   const { theme, toggleTheme } = useTheme();
 
   const token = localStorage.getItem("token");
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [editProfileOpen, setEditProfileOpen] = useState(false);
@@ -23,6 +24,7 @@ export default function Navbar() {
 
   const showSearch = location.pathname === "/products";
 
+  /* 🔁 Sync user */
   useEffect(() => {
     if (!token) return;
 
@@ -33,10 +35,10 @@ export default function Navbar() {
       .then((d) => {
         setUsername(d.username || "User");
         setAvatar(d.avatar || avatars[0]);
-        localStorage.setItem("user", JSON.stringify(d));
       });
   }, [token]);
 
+  /* Close dropdown */
   useEffect(() => {
     const close = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -65,59 +67,114 @@ export default function Navbar() {
     setSuccessMsg("Profile updated");
     setPassword("");
     setTimeout(() => setSuccessMsg(""), 2000);
+
     setMenuOpen(false);
     setSettingsOpen(false);
     setEditProfileOpen(false);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/");
   };
 
   if (!token) return null;
 
   return (
     <>
-      {successMsg && <div className="fixed top-20 left-1/2 -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded">{successMsg}</div>}
+      {successMsg && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded z-[9999]">
+          {successMsg}
+        </div>
+      )}
 
-      <nav className="fixed top-0 w-full bg-gray-900 text-white z-50">
-        <div className="max-w-7xl mx-auto flex items-center justify-between p-4">
-          <Link to="/products"><img src="/logo.png" className="h-12" /></Link>
+      <nav className="fixed top-0 left-0 right-0 bg-gray-900 text-white z-50">
+        <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-3">
 
-          {showSearch && (
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && navigate("/products")}
-              className="hidden sm:block px-6 py-2 rounded-full bg-white text-black dark:bg-gray-800 dark:text-white"
-            />
-          )}
+          {/* LEFT */}
+          <Link to="/products">
+            <img src="/logo.png" alt="Logo" className="h-12" />
+          </Link>
 
+          {/* CENTER SEARCH */}
+          <div className="flex-1 px-6 hidden sm:block">
+            {showSearch && (
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    localStorage.setItem("search", search);
+                    navigate("/products");
+                  }
+                }}
+                placeholder="Search products…"
+                className="w-full px-6 py-2 rounded-full bg-white text-black dark:bg-gray-800 dark:text-white"
+              />
+            )}
+          </div>
+
+          {/* RIGHT PROFILE */}
           <div ref={dropdownRef} className="relative">
-            <button onClick={() => setMenuOpen(!menuOpen)} className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                setMenuOpen(!menuOpen);
+                setSettingsOpen(false);
+                setEditProfileOpen(false);
+              }}
+              className="flex items-center gap-2"
+            >
               <img src={avatar} className="h-8 w-8 rounded-full" />
               <span className="hidden sm:inline">Hi, {username}</span>
             </button>
 
             {menuOpen && (
-              <div className="absolute right-0 mt-3 w-64 bg-white dark:bg-gray-800 text-black dark:text-white rounded shadow p-4">
+              <div className="absolute right-0 mt-3 w-64 bg-white dark:bg-gray-800 text-black dark:text-white rounded shadow-lg p-4">
                 {!settingsOpen ? (
                   <>
                     <Link to="/my-orders" className="block py-2">My Orders</Link>
                     <button onClick={() => setSettingsOpen(true)} className="block w-full py-2">Settings</button>
+                    <button onClick={handleLogout} className="block w-full py-2 text-red-600">Logout</button>
                   </>
                 ) : !editProfileOpen ? (
                   <>
                     <button onClick={() => setEditProfileOpen(true)} className="block w-full py-2">Edit Profile</button>
-                    <button onClick={toggleTheme} className="block w-full py-2">Switch Theme</button>
-                    <button onClick={handleSave} className="bg-green-600 text-white w-full py-2 mt-2 rounded">Save</button>
+                    <button onClick={toggleTheme} className="block w-full py-2">
+                      Switch to {theme === "light" ? "Dark" : "Light"} Mode
+                    </button>
+                    <button onClick={handleSave} className="w-full bg-green-600 text-white py-2 mt-2 rounded">
+                      Save Changes
+                    </button>
                   </>
                 ) : (
                   <>
                     <div className="flex justify-center gap-2 mb-3">
                       {avatars.map((a) => (
-                        <img key={a} src={a} onClick={() => setAvatar(a)} className={`h-10 w-10 rounded-full cursor-pointer ${avatar === a ? "ring-2 ring-green-500" : ""}`} />
+                        <img
+                          key={a}
+                          src={a}
+                          onClick={() => setAvatar(a)}
+                          className={`h-10 w-10 rounded-full cursor-pointer ${
+                            avatar === a ? "ring-2 ring-green-500" : ""
+                          }`}
+                        />
                       ))}
                     </div>
 
-                    <input value={username} onChange={(e) => setUsername(e.target.value)} className="w-full p-2 rounded mb-2 bg-white dark:bg-gray-700" />
-                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full p-2 rounded mb-2 bg-white dark:bg-gray-700" placeholder="New password" />
+                    <input
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      className="w-full p-2 rounded mb-2 bg-white dark:bg-gray-700"
+                    />
+
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="New password"
+                      className="w-full p-2 rounded bg-white dark:bg-gray-700"
+                    />
                   </>
                 )}
               </div>
@@ -125,6 +182,7 @@ export default function Navbar() {
           </div>
         </div>
       </nav>
+
       <div className="h-20" />
     </>
   );
