@@ -97,7 +97,7 @@ export default function Navbar() {
       const res = await fetch(
         "https://rrr-shopkart-backend.onrender.com/api/profile/",
         {
-          method: "PUT",
+          method: "PATCH",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
