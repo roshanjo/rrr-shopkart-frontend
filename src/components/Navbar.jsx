@@ -16,14 +16,13 @@ export default function Navbar() {
   const { theme, toggleTheme } = useTheme();
 
   const token = localStorage.getItem("token");
-  const storedUser = JSON.parse(localStorage.getItem("user")) || {};
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [editProfileOpen, setEditProfileOpen] = useState(false);
 
-  const [username, setUsername] = useState(storedUser.username || "User");
-  const [avatar, setAvatar] = useState(storedUser.avatar || avatars[0]);
+  const [username, setUsername] = useState("User");
+  const [avatar, setAvatar] = useState(avatars[0]);
   const [password, setPassword] = useState("");
 
   const [successMsg, setSuccessMsg] = useState("");
@@ -32,27 +31,46 @@ export default function Navbar() {
   const isLoggedIn = !!token;
   const showSearch = location.pathname === "/products";
 
-  /* 🔁 SYNC USER FROM BACKEND */
+  /* ===============================
+     🔁 SYNC USER FROM BACKEND
+     =============================== */
   useEffect(() => {
     if (!token) return;
 
-    fetch("https://rrr-shopkart-backend.onrender.com/api/me/", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.ok && res.json())
-      .then((data) => {
-        if (!data) return;
-        setUsername(data.username);
-        setAvatar(data.avatar);
+    const fetchUser = async () => {
+      try {
+        const res = await fetch(
+          "https://rrr-shopkart-backend.onrender.com/api/me/",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        if (!res.ok) return;
+
+        const data = await res.json();
+
+        setUsername(data.username || "User");
+        setAvatar(data.avatar || avatars[0]);
+
         localStorage.setItem(
           "user",
-          JSON.stringify({ username: data.username, avatar: data.avatar })
+          JSON.stringify({
+            username: data.username,
+            avatar: data.avatar,
+          })
         );
-      })
-      .catch(() => {});
+      } catch (err) {
+        console.error("User sync failed", err);
+      }
+    };
+
+    fetchUser();
   }, [token]);
 
-  /* CLOSE DROPDOWN */
+  /* ===============================
+     CLOSE DROPDOWN ON OUTSIDE CLICK
+     =============================== */
   useEffect(() => {
     const close = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -71,40 +89,51 @@ export default function Navbar() {
     navigate("/");
   };
 
-  /* 💾 SAVE PROFILE */
+  /* ===============================
+     💾 SAVE PROFILE (WORKING)
+     =============================== */
   const handleSaveSettings = async () => {
     try {
-      const body = { username, avatar };
-      if (password.trim()) body.password = password;
-
       const res = await fetch(
         "https://rrr-shopkart-backend.onrender.com/api/profile/",
         {
-          method: "PATCH", // ✅ backend-compatible
+          method: "PUT",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(body),
+          body: JSON.stringify({
+            username,
+            avatar,
+            password: password || undefined,
+          }),
         }
       );
 
-      if (!res.ok) throw new Error();
+      if (!res.ok) throw new Error("Save failed");
+
+      const data = await res.json();
+
+      setUsername(data.username);
+      setAvatar(data.avatar);
+      setPassword("");
 
       localStorage.setItem(
         "user",
-        JSON.stringify({ username, avatar })
+        JSON.stringify({
+          username: data.username,
+          avatar: data.avatar,
+        })
       );
 
       setSuccessMsg("Profile updated successfully");
-      setPassword("");
-
       setTimeout(() => setSuccessMsg(""), 2000);
+
       setEditProfileOpen(false);
       setSettingsOpen(false);
       setMenuOpen(false);
-    } catch {
-      console.error("Profile update failed");
+    } catch (err) {
+      console.error("Profile save error", err);
     }
   };
 
@@ -125,12 +154,13 @@ export default function Navbar() {
         </div>
       )}
 
-      <nav className="fixed top-0 left-0 right-0 z-[9998] bg-gray-900 text-white">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-gray-900 text-white">
         <div className="flex items-center justify-between p-4 max-w-7xl mx-auto">
           <Link to="/products">
             <img src="/logo.png" alt="Logo" className="h-12" />
           </Link>
 
+          {/* SEARCH */}
           <div className="flex-1 mx-6 hidden sm:block">
             {showSearch && (
               <form onSubmit={handleSearch}>
@@ -140,7 +170,8 @@ export default function Navbar() {
                   placeholder="Search products…"
                   className="w-full px-6 py-2 rounded-full
                              bg-white text-black
-                             dark:bg-gray-800 dark:text-white"
+                             dark:bg-gray-800 dark:text-white
+                             placeholder-gray-400 dark:placeholder-gray-500"
                 />
               </form>
             )}
@@ -160,50 +191,83 @@ export default function Navbar() {
               <span className="hidden sm:inline">Hi, {username}</span>
             </button>
 
+            {/* DROPDOWN */}
             <div
               className={`absolute right-0 top-12 w-screen sm:w-64
-                bg-white dark:bg-gray-800
-                text-black dark:text-white
-                shadow-lg p-4 transition
-                ${menuOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+              bg-white dark:bg-gray-800 text-black dark:text-white
+              shadow-lg p-4 transition
+              ${
+                menuOpen
+                  ? "opacity-100 scale-100"
+                  : "opacity-0 scale-95 pointer-events-none"
+              }`}
             >
               {!settingsOpen ? (
                 <>
-                  <Link to="/my-orders" className="block py-2">My Orders</Link>
-                  <Link to="/wishlist" className="block py-2">My Wishlist</Link>
-                  <button onClick={() => setSettingsOpen(true)} className="block w-full py-2 text-left">
+                  <Link to="/my-orders" className="block py-2 text-center sm:text-left">
+                    My Orders
+                  </Link>
+                  <Link to="/wishlist" className="block py-2 text-center sm:text-left">
+                    My Wishlist
+                  </Link>
+                  <button
+                    onClick={() => setSettingsOpen(true)}
+                    className="w-full py-2 text-center sm:text-left"
+                  >
                     Settings
                   </button>
-                  <button onClick={handleLogout} className="block w-full py-2 text-left text-red-600">
+                  <button
+                    onClick={handleLogout}
+                    className="w-full py-2 text-red-600 text-center sm:text-left"
+                  >
                     Logout
                   </button>
                 </>
               ) : !editProfileOpen ? (
                 <>
-                  <p className="font-semibold mb-2">Settings</p>
-                  <button onClick={() => setEditProfileOpen(true)} className="block w-full py-2 text-left">
+                  <p className="font-semibold mb-2 text-center">Settings</p>
+
+                  <button
+                    onClick={() => setEditProfileOpen(true)}
+                    className="w-full py-2 text-center"
+                  >
                     Edit Profile
                   </button>
-                  <button onClick={toggleTheme} className="block w-full py-2 text-left">
+
+                  <button
+                    onClick={toggleTheme}
+                    className="w-full py-2 text-center"
+                  >
                     Switch to {theme === "light" ? "Dark" : "Light"} Mode
                   </button>
-                  <button onClick={handleSaveSettings} className="w-full bg-green-600 text-white py-2 rounded mt-2">
+
+                  <button
+                    onClick={handleSaveSettings}
+                    className="w-full bg-green-600 text-white py-2 rounded mt-2"
+                  >
                     Save Changes
+                  </button>
+
+                  <button
+                    onClick={() => setSettingsOpen(false)}
+                    className="w-full py-2 text-center"
+                  >
+                    ← Back
                   </button>
                 </>
               ) : (
                 <>
-                  <p className="font-semibold mb-2">Edit Profile</p>
+                  <p className="font-semibold mb-3 text-center">Edit Profile</p>
 
-                  <div className="flex gap-3 mb-3">
+                  <div className="flex justify-center gap-3 mb-3">
                     {avatars.map((a) => (
                       <img
                         key={a}
                         src={a}
+                        onClick={() => setAvatar(a)}
                         className={`h-10 w-10 rounded-full cursor-pointer ${
                           avatar === a ? "ring-2 ring-green-500" : ""
                         }`}
-                        onClick={() => setAvatar(a)}
                       />
                     ))}
                   </div>
@@ -219,9 +283,16 @@ export default function Navbar() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full p-2 rounded bg-white dark:bg-gray-700"
+                    className="w-full p-2 rounded mb-2 bg-white dark:bg-gray-700"
                     placeholder="New password (optional)"
                   />
+
+                  <button
+                    onClick={() => setEditProfileOpen(false)}
+                    className="w-full py-2 text-center"
+                  >
+                    ← Back
+                  </button>
                 </>
               )}
             </div>
