@@ -29,9 +29,7 @@ export default function Navbar() {
       : "User"
   );
 
-  const [password, setPassword] = useState("");
   const [avatar, setAvatar] = useState(storedUser.avatar || avatars[0]);
-
   const [successMsg, setSuccessMsg] = useState("");
   const [search, setSearch] = useState(localStorage.getItem("search") || "");
 
@@ -45,27 +43,24 @@ export default function Navbar() {
 
     const fetchUser = async () => {
       try {
-        const res = await fetch("/api/user/me", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const res = await fetch(
+          "https://rrr-shopkart-backend.onrender.com/api/me/",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         if (!res.ok) return;
 
         const data = await res.json();
+        if (!data.username) return;
 
-        if (data.username) setUsername(data.username);
-        if (data.avatar) setAvatar(data.avatar);
+        setUsername(data.username);
+        setAvatar(data.avatar);
 
-        localStorage.setItem(
-          "user",
-          JSON.stringify({
-            ...storedUser,
-            username: data.username,
-            avatar: data.avatar,
-          })
-        );
+        localStorage.setItem("user", JSON.stringify(data));
       } catch (err) {
         console.error("Failed to sync user", err);
       }
@@ -89,6 +84,7 @@ export default function Navbar() {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
     navigate("/");
   };
 
@@ -97,14 +93,17 @@ export default function Navbar() {
      =============================== */
   const handleSaveSettings = async () => {
     try {
-      await fetch("/api/user/profile", {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, avatar, password }),
-      });
+      await fetch(
+        "https://rrr-shopkart-backend.onrender.com/api/profile/",
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username, avatar }),
+        }
+      );
 
       localStorage.setItem(
         "user",
@@ -175,7 +174,7 @@ export default function Navbar() {
               <span className="hidden sm:inline">Hi, {username}</span>
             </button>
 
-            {/* ✅ CLEANER MOBILE DROPDOWN (DESKTOP UNCHANGED) */}
+            {/* ✅ CLEANER MOBILE DROPDOWN */}
             <div
               className={`absolute right-0 top-12
               w-screen sm:w-64 sm:rounded
@@ -263,13 +262,6 @@ export default function Navbar() {
                     onChange={(e) => setUsername(e.target.value)}
                     className="w-full p-2 rounded mb-2 bg-white dark:bg-gray-700"
                     placeholder="Change name"
-                  />
-
-                  <input
-                    type="password"
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full p-2 rounded mb-3 bg-white dark:bg-gray-700"
-                    placeholder="Change password"
                   />
 
                   <button
