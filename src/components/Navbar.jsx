@@ -13,7 +13,6 @@ export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const dropdownRef = useRef(null);
-
   const { theme, toggleTheme } = useTheme();
 
   const token = localStorage.getItem("token");
@@ -23,20 +22,18 @@ export default function Navbar() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [editProfileOpen, setEditProfileOpen] = useState(false);
 
-  const [username, setUsername] = useState(
-    storedUser.username && !storedUser.username.includes("@")
-      ? storedUser.username
-      : "User"
-  );
-
+  const [username, setUsername] = useState(storedUser.username || "User");
   const [avatar, setAvatar] = useState(storedUser.avatar || avatars[0]);
+  const [password, setPassword] = useState("");
+
   const [successMsg, setSuccessMsg] = useState("");
   const [search, setSearch] = useState(localStorage.getItem("search") || "");
 
   const isLoggedIn = !!token;
+  const showSearch = location.pathname === "/products";
 
   /* ===============================
-     ✅ BACKEND → FRONTEND SYNC
+     🔁 SYNC USER FROM BACKEND
      =============================== */
   useEffect(() => {
     if (!token) return;
@@ -46,30 +43,30 @@ export default function Navbar() {
         const res = await fetch(
           "https://rrr-shopkart-backend.onrender.com/api/me/",
           {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
           }
         );
 
         if (!res.ok) return;
-
         const data = await res.json();
-        if (!data.username) return;
 
-        setUsername(data.username);
-        setAvatar(data.avatar);
+        const cleanUser = {
+          username: data.username || data.email || "User",
+          avatar: data.avatar || avatars[0],
+        };
 
-        localStorage.setItem("user", JSON.stringify(data));
+        setUsername(cleanUser.username);
+        setAvatar(cleanUser.avatar);
+        localStorage.setItem("user", JSON.stringify(cleanUser));
       } catch (err) {
-        console.error("Failed to sync user", err);
+        console.error("User sync failed", err);
       }
     };
 
     fetchUser();
   }, [token]);
 
-  /* ✅ CLOSE DROPDOWN ON OUTSIDE CLICK */
+  /* CLOSE DROPDOWN */
   useEffect(() => {
     const close = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -89,11 +86,20 @@ export default function Navbar() {
   };
 
   /* ===============================
-     ✅ SAVE → BACKEND + LOCAL
+     💾 SAVE PROFILE (USERNAME + AVATAR + PASSWORD)
      =============================== */
   const handleSaveSettings = async () => {
     try {
-      await fetch(
+      const body = {
+        username,
+        avatar,
+      };
+
+      if (password.trim()) {
+        body.password = password;
+      }
+
+      const res = await fetch(
         "https://rrr-shopkart-backend.onrender.com/api/profile/",
         {
           method: "PUT",
@@ -101,23 +107,26 @@ export default function Navbar() {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ username, avatar }),
+          body: JSON.stringify(body),
         }
       );
 
+      if (!res.ok) throw new Error("Update failed");
+
       localStorage.setItem(
         "user",
-        JSON.stringify({ ...storedUser, username, avatar })
+        JSON.stringify({ username, avatar })
       );
 
-      setSuccessMsg("Settings updated successfully");
-      setTimeout(() => setSuccessMsg(""), 2000);
+      setSuccessMsg("Profile updated successfully");
+      setPassword("");
 
+      setTimeout(() => setSuccessMsg(""), 2000);
       setEditProfileOpen(false);
       setSettingsOpen(false);
       setMenuOpen(false);
     } catch (err) {
-      console.error("Failed to save profile", err);
+      console.error("Save failed", err);
     }
   };
 
@@ -129,7 +138,6 @@ export default function Navbar() {
   };
 
   if (!isLoggedIn) return null;
-  const showSearch = location.pathname === "/products";
 
   return (
     <>
@@ -152,16 +160,14 @@ export default function Navbar() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search products…"
-                  className="w-full px-6 py-2 rounded-full
-                             bg-white text-black
-                             dark:bg-gray-800 dark:text-white"
+                  className="w-full px-6 py-2 rounded-full bg-white text-black dark:bg-gray-800 dark:text-white"
                 />
               </form>
             )}
           </div>
 
           {/* PROFILE */}
-          <div ref={dropdownRef} className="relative z-[9999]">
+          <div ref={dropdownRef} className="relative">
             <button
               onClick={() => {
                 setMenuOpen(!menuOpen);
@@ -174,69 +180,35 @@ export default function Navbar() {
               <span className="hidden sm:inline">Hi, {username}</span>
             </button>
 
-            {/* ✅ CLEANER MOBILE DROPDOWN */}
             <div
-              className={`absolute right-0 top-12
-              w-screen sm:w-64 sm:rounded
-              bg-white text-black dark:bg-gray-800 dark:text-white
-              shadow-lg p-4 sm:p-3
-              transition-all duration-150
-              ${
-                menuOpen
-                  ? "opacity-100 scale-100"
-                  : "opacity-0 scale-95 pointer-events-none"
+              className={`absolute right-0 top-12 w-screen sm:w-64 bg-white dark:bg-gray-800 text-black dark:text-white shadow-lg p-4 transition ${
+                menuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
               }`}
             >
               {!settingsOpen ? (
                 <>
-                  <Link to="/my-orders" className="block py-3 sm:py-2 text-center sm:text-left">
-                    My Orders
-                  </Link>
-                  <Link to="/wishlist" className="block py-3 sm:py-2 text-center sm:text-left">
-                    My Wishlist
-                  </Link>
-                  <button
-                    onClick={() => setSettingsOpen(true)}
-                    className="w-full py-3 sm:py-2 text-center sm:text-left"
-                  >
+                  <Link to="/my-orders" className="block py-2 text-center sm:text-left">My Orders</Link>
+                  <Link to="/wishlist" className="block py-2 text-center sm:text-left">My Wishlist</Link>
+                  <button onClick={() => setSettingsOpen(true)} className="w-full py-2 text-center sm:text-left">
                     Settings
                   </button>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full py-3 sm:py-2 text-center sm:text-left text-red-600"
-                  >
+                  <button onClick={handleLogout} className="w-full py-2 text-red-600 text-center sm:text-left">
                     Logout
                   </button>
                 </>
               ) : !editProfileOpen ? (
                 <>
                   <p className="font-semibold mb-2 text-center">Settings</p>
-
-                  <button
-                    onClick={() => setEditProfileOpen(true)}
-                    className="w-full py-3 sm:py-2 text-center"
-                  >
+                  <button onClick={() => setEditProfileOpen(true)} className="w-full py-2 text-center">
                     Edit Profile
                   </button>
-
-                  <button
-                    onClick={toggleTheme}
-                    className="w-full py-3 sm:py-2 text-center"
-                  >
+                  <button onClick={toggleTheme} className="w-full py-2 text-center">
                     Switch to {theme === "light" ? "Dark" : "Light"} Mode
                   </button>
-
-                  <button
-                    onClick={handleSaveSettings}
-                    className="w-full bg-green-600 text-white py-3 rounded mt-2"
-                  >
+                  <button onClick={handleSaveSettings} className="w-full bg-green-600 text-white py-2 rounded mt-2">
                     Save Changes
                   </button>
-
-                  <button
-                    onClick={() => setSettingsOpen(false)}
-                    className="w-full py-3 sm:py-2 text-center"
-                  >
+                  <button onClick={() => setSettingsOpen(false)} className="w-full py-2 text-center">
                     ← Back
                   </button>
                 </>
@@ -261,13 +233,18 @@ export default function Navbar() {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     className="w-full p-2 rounded mb-2 bg-white dark:bg-gray-700"
-                    placeholder="Change name"
+                    placeholder="Change username"
                   />
 
-                  <button
-                    onClick={() => setEditProfileOpen(false)}
-                    className="w-full py-3 text-center"
-                  >
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full p-2 rounded mb-2 bg-white dark:bg-gray-700"
+                    placeholder="New password (optional)"
+                  />
+
+                  <button onClick={() => setEditProfileOpen(false)} className="w-full py-2 text-center">
                     ← Back
                   </button>
                 </>
