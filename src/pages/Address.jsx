@@ -34,17 +34,17 @@ export default function Address() {
           },
         });
 
-        if (Array.isArray(res.data) && res.data.length > 0) {
-          const a = res.data[0];
-          setAddress((prev) => ({
-            ...prev,
-            street: a.line1 || "",
-            city: a.city || "",
-            state: a.state || "",
-            pincode: a.pincode || "",
-          }));
+        if (res.data && res.data.street) {
+          setAddress({
+            fullName: res.data.full_name || "",
+            phone: res.data.phone || "",
+            street: res.data.street || "",
+            city: res.data.city || "",
+            state: res.data.state || "",
+            pincode: res.data.pincode || "",
+          });
         }
-      } catch {
+      } catch (err) {
         console.log("No saved address found");
       }
     };
@@ -61,6 +61,8 @@ export default function Address() {
      =============================== */
   const handleSubmit = async () => {
     if (
+      !address.fullName.trim() ||
+      !address.phone.trim() ||
       !address.street.trim() ||
       !address.city.trim() ||
       !address.state.trim() ||
@@ -71,8 +73,11 @@ export default function Address() {
     }
 
     try {
+      // ✅ MATCHES DJANGO MODEL EXACTLY
       const payload = {
-        line1: address.street,
+        full_name: address.fullName,
+        phone: address.phone,
+        street: address.street,
         city: address.city,
         state: address.state,
         pincode: address.pincode,
@@ -88,7 +93,6 @@ export default function Address() {
       localStorage.setItem("address_data", JSON.stringify(address));
 
       const total = Number(localStorage.getItem("cart_total")) || 1;
-
 
       const stripeRes = await axios.post(
         `${API}/api/create-checkout-session/`,
