@@ -60,6 +60,16 @@ export default function Address() {
      SAVE ADDRESS → STRIPE
      =============================== */
   const handleSubmit = async () => {
+    if (
+      !address.street.trim() ||
+      !address.city.trim() ||
+      !address.state.trim() ||
+      !address.pincode.trim()
+    ) {
+      alert("Please fill all address fields");
+      return;
+    }
+
     try {
       const payload = {
         line1: address.street,
@@ -68,7 +78,6 @@ export default function Address() {
         pincode: address.pincode,
       };
 
-      // 🔴 CRITICAL FIX: Content-Type
       await axios.post(`${API}/api/address/`, payload, {
         headers: {
           Authorization: `Bearer ${token}`,
