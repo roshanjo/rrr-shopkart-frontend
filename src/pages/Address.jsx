@@ -87,8 +87,8 @@ export default function Address() {
 
       localStorage.setItem("address_data", JSON.stringify(address));
 
-      const total =
-        JSON.parse(localStorage.getItem("cart_total")) || 1;
+      const total = Number(localStorage.getItem("cart_total")) || 1;
+
 
       const stripeRes = await axios.post(
         `${API}/api/create-checkout-session/`,
