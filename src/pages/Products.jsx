@@ -112,7 +112,7 @@ export default function Products() {
     category === "all"
       ? products
       : products.filter(p =>
-          p.category.toLowerCase().includes(category)
+          p.category.toLowerCase() === category
         );
 
   if (search) {
