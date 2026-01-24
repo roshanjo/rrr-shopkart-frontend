@@ -11,32 +11,73 @@ export default function Wishlist() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  /* FETCH FAKESTORE PRODUCTS */
+  /* ===============================
+     FETCH WISHLIST PRODUCTS
+     (FakeStore + DummyJSON)
+     =============================== */
   useEffect(() => {
-    if (wishlist.length === 0) {
-      setItems([]); // ✅ FIX: clear old items immediately
-      setLoading(false);
-      return;
-    }
+    const loadWishlist = async () => {
+      if (wishlist.length === 0) {
+        setItems([]);
+        setLoading(false);
+        return;
+      }
 
-    setLoading(true);
-    fetch("https://fakestoreapi.com/products")
-      .then(res => res.json())
-      .then(data => {
-        const filtered = data.filter(p =>
-          wishlist.includes(String(p.id))
-        );
-        setItems(filtered);
-        setLoading(false);
-      })
-      .catch(() => {
-        toast.error("Failed to load wishlist");
-        setLoading(false);
-      });
+      setLoading(true);
+      const results = [];
+
+      for (const wid of wishlist) {
+        try {
+          // 🔹 FakeStore
+          if (wid.startsWith("fs-")) {
+            const id = wid.replace("fs-", "");
+            const res = await fetch(
+              `https://fakestoreapi.com/products/${id}`
+            );
+            const p = await res.json();
+
+            results.push({
+              id: wid,
+              title: p.title,
+              price: p.price,
+              image: p.image,
+              category: p.category,
+            });
+          }
+
+          // 🔹 DummyJSON
+          if (wid.startsWith("dj-")) {
+            const id = wid.replace("dj-", "");
+            const res = await fetch(
+              `https://dummyjson.com/products/${id}`
+            );
+            const p = await res.json();
+
+            results.push({
+              id: wid,
+              title: p.title,
+              price: p.price,
+              image: p.thumbnail,
+              category: p.category,
+            });
+          }
+        } catch {
+          console.error("Wishlist item failed:", wid);
+        }
+      }
+
+      setItems(results);
+      setLoading(false);
+    };
+
+    loadWishlist();
   }, [wishlist]);
 
+  /* ===============================
+     REMOVE FROM WISHLIST
+     =============================== */
   const removeFromWishlist = (id) => {
-    const updated = wishlist.filter(i => String(i) !== String(id));
+    const updated = wishlist.filter(i => i !== id);
     setWishlist(updated);
     localStorage.setItem("wishlist", JSON.stringify(updated));
     toast("Removed from wishlist");
@@ -97,9 +138,7 @@ export default function Wishlist() {
 
                 <div className="flex gap-2">
                   <button
-                    onClick={() =>
-                      navigate(`/product/${p.id}`)
-                    }
+                    onClick={() => navigate(`/product/${p.id}`)}
                     className="flex-1 bg-green-600 text-white py-1 rounded"
                   >
                     View
