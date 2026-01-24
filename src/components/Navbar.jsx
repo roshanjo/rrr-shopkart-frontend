@@ -30,10 +30,9 @@ export default function Navbar() {
 
   const isLoggedIn = !!token;
   const showSearch = location.pathname === "/products";
-  
 
   /* ===============================
-     🔁 SYNC USER FROM BACKEND
+     🔁 SYNC USER
      =============================== */
   useEffect(() => {
     if (!token) return;
@@ -48,19 +47,10 @@ export default function Navbar() {
         );
 
         if (!res.ok) return;
-
         const data = await res.json();
 
         setUsername(data.username || "User");
         setAvatar(data.avatar || avatars[0]);
-
-        localStorage.setItem(
-          "user",
-          JSON.stringify({
-            username: data.username,
-            avatar: data.avatar,
-          })
-        );
       } catch (err) {
         console.error("User sync failed", err);
       }
@@ -70,7 +60,7 @@ export default function Navbar() {
   }, [token]);
 
   /* ===============================
-     CLOSE DROPDOWN ON OUTSIDE CLICK
+     CLOSE DROPDOWN
      =============================== */
   useEffect(() => {
     const close = (e) => {
@@ -90,9 +80,6 @@ export default function Navbar() {
     navigate("/");
   };
 
-  /* ===============================
-     💾 SAVE PROFILE (WORKING)
-     =============================== */
   const handleSaveSettings = async () => {
     try {
       const res = await fetch(
@@ -114,18 +101,9 @@ export default function Navbar() {
       if (!res.ok) throw new Error("Save failed");
 
       const data = await res.json();
-
       setUsername(data.username);
       setAvatar(data.avatar);
       setPassword("");
-
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          username: data.username,
-          avatar: data.avatar,
-        })
-      );
 
       setSuccessMsg("Profile updated successfully");
       setTimeout(() => setSuccessMsg(""), 2000);
@@ -155,25 +133,22 @@ export default function Navbar() {
         </div>
       )}
 
+      {/* NAVBAR */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-gray-900 text-white">
         <div className="flex items-center justify-between p-4 max-w-7xl mx-auto">
           <Link to="/products">
             <img src="/logo.png" alt="Logo" className="h-12" />
           </Link>
 
-          {/* SEARCH */}
-          <div className="flex-1 mx-6 block">
-
+          {/* DESKTOP SEARCH */}
+          <div className="flex-1 mx-6 hidden sm:block">
             {showSearch && (
               <form onSubmit={handleSearch}>
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search products…"
-                  className="w-full px-6 py-2 rounded-full
-                             bg-white text-black
-                             dark:bg-gray-800 dark:text-white
-                             placeholder-gray-400 dark:placeholder-gray-500"
+                  className="w-full px-6 py-2 rounded-full bg-white text-black placeholder-gray-400"
                 />
               </form>
             )}
@@ -190,7 +165,7 @@ export default function Navbar() {
               className="flex items-center gap-2"
             >
               <img src={avatar} className="h-8 w-8 rounded-full" />
-              <span className="inline text-sm ml-1">Hi, {username}</span>
+              <span className="text-sm">Hi, {username}</span>
             </button>
 
             {/* DROPDOWN */}
@@ -301,22 +276,23 @@ export default function Navbar() {
           </div>
         </div>
       </nav>
+
       {/* MOBILE SEARCH */}
-{showSearch && (
-  <div className="sm:hidden px-4 py-2 bg-gray-900">
-    <form onSubmit={handleSearch}>
-      <input
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        placeholder="Search products…"
-        className="w-full px-4 py-2 rounded-full
-                   bg-white text-black
-                   placeholder-gray-400"
-      />
-    </form>
-  </div>
-)}
-      <div className="h-20" />
+      {showSearch && (
+        <div className="sm:hidden px-4 py-2 bg-gray-900">
+          <form onSubmit={handleSearch}>
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search products…"
+              className="w-full px-4 py-2 rounded-full bg-white text-black placeholder-gray-400"
+            />
+          </form>
+        </div>
+      )}
+
+      {/* SPACER */}
+      <div className="h-24 sm:h-20" />
     </>
   );
 }
