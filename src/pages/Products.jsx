@@ -1,22 +1,40 @@
 import { useEffect, useState, useRef } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import ProductSkeleton from "../components/ProductSkeleton";
 import Seo from "../components/Seo";
 
+const CACHE_KEY = "products_cache_v1";
+const SCROLL_KEY = "products_scroll_y";
+
 export default function Products() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const observerRef = useRef(null);
 
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+  /* ===============================
+     URL CATEGORY SYNC (SOURCE OF TRUTH)
+     =============================== */
+  const urlCategory = searchParams.get("category");
 
   const [category, setCategory] = useState(
-    localStorage.getItem("category") || "all"
+    urlCategory ||
+      localStorage.getItem("category") ||
+      "all"
   );
+
+  const [products, setProducts] = useState(() => {
+    const cached = sessionStorage.getItem(CACHE_KEY);
+    return cached ? JSON.parse(cached) : [];
+  });
+
+  const [page, setPage] = useState(
+    Number(sessionStorage.getItem("products_page")) || 1
+  );
+
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(products.length === 0);
 
   const [cart, setCart] = useState(
     JSON.parse(localStorage.getItem("cart")) || []
@@ -29,18 +47,20 @@ export default function Products() {
   const [search, setSearch] = useState("");
 
   /* ===============================
-     FETCH PRODUCTS (FS + DUMMYJSON)
+     FETCH PRODUCTS (WITH CACHE)
      =============================== */
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
 
+        let newProducts = [];
+
         if (page === 1) {
           const res = await fetch("https://fakestoreapi.com/products");
           const data = await res.json();
 
-          const normalized = data.map(p => ({
+          newProducts = data.map(p => ({
             id: `fs-${p.id}`,
             title: p.title,
             price: p.price,
@@ -48,9 +68,6 @@ export default function Products() {
             category: p.category,
             rating: p.rating,
           }));
-
-          setProducts(normalized);
-          setHasMore(true);
         } else {
           const limit = 12;
           const skip = (page - 2) * limit;
@@ -60,7 +77,7 @@ export default function Products() {
           );
           const data = await res.json();
 
-          const normalized = data.products.map(p => ({
+          newProducts = data.products.map(p => ({
             id: `dj-${p.id}`,
             title: p.title,
             price: p.price,
@@ -69,9 +86,15 @@ export default function Products() {
             rating: { rate: p.rating },
           }));
 
-          setProducts(prev => [...prev, ...normalized]);
           setHasMore(data.products.length === limit);
         }
+
+        setProducts(prev => {
+          const merged = page === 1 ? newProducts : [...prev, ...newProducts];
+          sessionStorage.setItem(CACHE_KEY, JSON.stringify(merged));
+          sessionStorage.setItem("products_page", page);
+          return merged;
+        });
       } catch {
         toast.error("Failed to load products");
       } finally {
@@ -82,21 +105,48 @@ export default function Products() {
     fetchProducts();
   }, [page]);
 
-  /* KEEP CART SYNC */
+  /* ===============================
+     RESTORE SCROLL POSITION
+     =============================== */
   useEffect(() => {
-    setCart(JSON.parse(localStorage.getItem("cart")) || []);
-  }, [location.key]);
+    const savedY = sessionStorage.getItem(SCROLL_KEY);
+    if (savedY) {
+      setTimeout(() => {
+        window.scrollTo(0, Number(savedY));
+      }, 100);
+    }
+  }, []);
 
   useEffect(() => {
+    const saveScroll = () => {
+      sessionStorage.setItem(SCROLL_KEY, window.scrollY);
+    };
+    window.addEventListener("scroll", saveScroll);
+    return () => window.removeEventListener("scroll", saveScroll);
+  }, []);
+
+  /* ===============================
+     STATE SYNC
+     =============================== */
+  useEffect(() => {
+    setCart(JSON.parse(localStorage.getItem("cart")) || []);
+    setWishlist(JSON.parse(localStorage.getItem("wishlist")) || []);
     setSearch(localStorage.getItem("search") || "");
   }, [location.key]);
 
+  /* ===============================
+     CATEGORY → URL + LOCAL STORAGE
+     =============================== */
   useEffect(() => {
     localStorage.setItem("category", category);
-  }, [category]);
+    setSearchParams(
+      category === "all" ? {} : { category },
+      { replace: true }
+    );
+  }, [category, setSearchParams]);
 
   /* ===============================
-     FILTERS + COUNTS (SAFE)
+     FILTERS + COUNTS
      =============================== */
   const allCategories = [
     "all",
@@ -156,15 +206,9 @@ export default function Products() {
      =============================== */
   const toggleWishlist = id => {
     const pid = String(id);
-    let updated;
-
-    if (wishlist.includes(pid)) {
-      updated = wishlist.filter(i => i !== pid);
-      toast("Removed from wishlist");
-    } else {
-      updated = [...wishlist, pid];
-      toast.success("Added to wishlist ❤️");
-    }
+    const updated = wishlist.includes(pid)
+      ? wishlist.filter(i => i !== pid)
+      : [...wishlist, pid];
 
     setWishlist(updated);
     localStorage.setItem("wishlist", JSON.stringify(updated));
@@ -173,7 +217,7 @@ export default function Products() {
   const totalItems = cart.reduce((s, i) => s + (i.qty || 1), 0);
 
   /* ===============================
-     INFINITE SCROLL (REPLACES LOAD MORE)
+     INFINITE SCROLL
      =============================== */
   useEffect(() => {
     if (!hasMore || loading) return;
@@ -190,7 +234,7 @@ export default function Products() {
 
   return (
     <>
-      <Seo title="Products | AIKart" description="Buy best products online" />
+      <Seo title="Products | AIKart" />
 
       <div className="min-h-screen bg-gray-100 dark:bg-gray-900 px-4 pt-6 pb-32">
         {/* CATEGORY */}
@@ -221,10 +265,10 @@ export default function Products() {
           </div>
         </div>
 
-        {/* PRODUCTS + DESKTOP CART */}
+        {/* PRODUCTS + CART */}
         <div className="flex gap-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 flex-1">
-            {loading && page === 1
+            {loading && products.length === 0
               ? Array.from({ length: 6 }).map((_, i) => (
                   <ProductSkeleton key={i} />
                 ))
@@ -244,7 +288,6 @@ export default function Products() {
 
                     <img
                       src={p.image}
-                      alt={p.title}
                       onClick={() => navigate(`/product/${p.id}`)}
                       className="h-44 w-full object-contain my-4 cursor-pointer"
                     />
@@ -252,10 +295,6 @@ export default function Products() {
                     <h3 className="font-semibold text-sm line-clamp-2">
                       {p.title}
                     </h3>
-
-                    <p className="text-yellow-500 text-sm">
-                      ⭐ {p.rating?.rate || 4} / 5
-                    </p>
 
                     <p className="text-lg font-bold mb-3">
                       ₹ {Math.round(p.price * 80)}
@@ -271,15 +310,10 @@ export default function Products() {
                 ))}
           </div>
 
-          {/* DESKTOP CART SIDEBAR (UNCHANGED) */}
           {cart.length > 0 && (
-            <div className="hidden lg:block w-72 sticky top-24
-                            bg-gray-100 dark:bg-gray-800
-                            p-4 rounded-xl h-fit">
+            <div className="hidden lg:block w-72 sticky top-24 bg-gray-100 dark:bg-gray-800 p-4 rounded-xl h-fit">
               <h3 className="font-bold mb-3">🛒 Cart</h3>
-              <p className="text-sm mb-3">
-                Items: <b>{totalItems}</b>
-              </p>
+              <p className="text-sm mb-3">Items: {totalItems}</p>
               <button
                 onClick={() => navigate("/cart")}
                 className="w-full bg-purple-600 text-white py-2 rounded"
@@ -290,25 +324,8 @@ export default function Products() {
           )}
         </div>
 
-        {/* INFINITE SCROLL TARGET */}
         {hasMore && <div ref={observerRef} className="h-10 mt-10" />}
       </div>
-
-      {/* MOBILE CART (UNCHANGED) */}
-      {totalItems > 0 && (
-        <button
-          onClick={() => navigate("/cart")}
-          className="lg:hidden fixed bottom-20 right-4 z-50
-                     bg-green-600 text-white w-14 h-14 rounded-full
-                     flex items-center justify-center shadow-xl"
-        >
-          🛒
-          <span className="absolute -top-1 -right-1 bg-red-600 text-white
-                           text-xs w-5 h-5 rounded-full flex items-center justify-center">
-            {totalItems}
-          </span>
-        </button>
-      )}
     </>
   );
 }
