@@ -29,7 +29,8 @@ export default function Navbar() {
   const [search, setSearch] = useState(localStorage.getItem("search") || "");
 
   const isLoggedIn = !!token;
-  const showSearch = location.pathname === "/products";
+  const showSearch = ["/products","/wishlist","/my-orders"].includes(location.pathname);
+
 
   /* ===============================
      🔁 SYNC USER FROM BACKEND
