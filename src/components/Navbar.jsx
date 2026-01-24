@@ -162,7 +162,8 @@ export default function Navbar() {
           </Link>
 
           {/* SEARCH */}
-          <div className="flex-1 mx-6 hidden sm:block">
+          <div className="flex-1 mx-6 block">
+
             {showSearch && (
               <form onSubmit={handleSearch}>
                 <input
