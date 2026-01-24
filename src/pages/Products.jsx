@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
 import ProductSkeleton from "../components/ProductSkeleton";
@@ -7,6 +7,7 @@ import Seo from "../components/Seo";
 export default function Products() {
   const navigate = useNavigate();
   const location = useLocation();
+  const observerRef = useRef(null);
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -81,21 +82,23 @@ export default function Products() {
     fetchProducts();
   }, [page]);
 
-  /* ✅ KEEP CART IN SYNC (FIX) */
+  /* KEEP CART SYNC */
   useEffect(() => {
-    const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
-    setCart(storedCart);
+    setCart(JSON.parse(localStorage.getItem("cart")) || []);
+  }, [location.key]);
+
+  useEffect(() => {
+    setSearch(localStorage.getItem("search") || "");
   }, [location.key]);
 
   useEffect(() => {
     localStorage.setItem("category", category);
   }, [category]);
 
-  useEffect(() => {
-    setSearch(localStorage.getItem("search") || "");
-  }, [location.key]);
-
-  const categories = [
+  /* ===============================
+     FILTERS + COUNTS (SAFE)
+     =============================== */
+  const allCategories = [
     "all",
     "electronics",
     "men's clothing",
@@ -108,12 +111,19 @@ export default function Products() {
     "home-decoration",
   ];
 
+  const categoryCounts = products.reduce((acc, p) => {
+    acc[p.category] = (acc[p.category] || 0) + 1;
+    return acc;
+  }, {});
+
+  const visibleCategories = allCategories.filter(
+    c => c === "all" || categoryCounts[c]
+  );
+
   let filtered =
     category === "all"
       ? products
-      : products.filter(p =>
-          p.category.toLowerCase() === category
-        );
+      : products.filter(p => p.category === category);
 
   if (search) {
     filtered = filtered.filter(
@@ -162,6 +172,22 @@ export default function Products() {
 
   const totalItems = cart.reduce((s, i) => s + (i.qty || 1), 0);
 
+  /* ===============================
+     INFINITE SCROLL (REPLACES LOAD MORE)
+     =============================== */
+  useEffect(() => {
+    if (!hasMore || loading) return;
+
+    const observer = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) {
+        setPage(p => p + 1);
+      }
+    });
+
+    if (observerRef.current) observer.observe(observerRef.current);
+    return () => observer.disconnect();
+  }, [hasMore, loading]);
+
   return (
     <>
       <Seo title="Products | AIKart" description="Buy best products online" />
@@ -170,7 +196,7 @@ export default function Products() {
         {/* CATEGORY */}
         <div className="mb-6 border-b pb-4">
           <div className="flex gap-3 overflow-x-auto">
-            {categories.map(c => (
+            {visibleCategories.map(c => (
               <button
                 key={c}
                 onClick={() => {
@@ -178,13 +204,18 @@ export default function Products() {
                   localStorage.removeItem("search");
                   setSearch("");
                 }}
-                className={`px-4 py-2 rounded-full text-sm font-semibold ${
+                className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap ${
                   category === c
                     ? "bg-green-600 text-white"
                     : "bg-gray-200 dark:bg-gray-800"
                 }`}
               >
                 {c.toUpperCase()}
+                {c !== "all" && (
+                  <span className="ml-1 opacity-70">
+                    ({categoryCounts[c]})
+                  </span>
+                )}
               </button>
             ))}
           </div>
@@ -240,7 +271,7 @@ export default function Products() {
                 ))}
           </div>
 
-          {/* ✅ DESKTOP CART SIDEBAR (RESTORED) */}
+          {/* DESKTOP CART SIDEBAR (UNCHANGED) */}
           {cart.length > 0 && (
             <div className="hidden lg:block w-72 sticky top-24
                             bg-gray-100 dark:bg-gray-800
@@ -259,21 +290,11 @@ export default function Products() {
           )}
         </div>
 
-        {/* LOAD MORE */}
-        {hasMore && !loading && (
-          <div className="flex justify-center mt-10">
-            <button
-              onClick={() => setPage(p => p + 1)}
-              className="px-6 py-3 bg-black dark:bg-white
-                         text-white dark:text-black rounded-full"
-            >
-              Load More Products
-            </button>
-          </div>
-        )}
+        {/* INFINITE SCROLL TARGET */}
+        {hasMore && <div ref={observerRef} className="h-10 mt-10" />}
       </div>
 
-      {/* MOBILE CART */}
+      {/* MOBILE CART (UNCHANGED) */}
       {totalItems > 0 && (
         <button
           onClick={() => navigate("/cart")}
