@@ -35,7 +35,6 @@ export default function Products() {
       try {
         setLoading(true);
 
-        // PAGE 1 → FakeStore
         if (page === 1) {
           const res = await fetch("https://fakestoreapi.com/products");
           const data = await res.json();
@@ -51,10 +50,7 @@ export default function Products() {
 
           setProducts(normalized);
           setHasMore(true);
-        }
-
-        // PAGE 2+ → DummyJSON
-        else {
+        } else {
           const limit = 12;
           const skip = (page - 2) * limit;
 
@@ -84,6 +80,12 @@ export default function Products() {
 
     fetchProducts();
   }, [page]);
+
+  /* ✅ KEEP CART IN SYNC (FIX) */
+  useEffect(() => {
+    const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
+    setCart(storedCart);
+  }, [location.key]);
 
   useEffect(() => {
     localStorage.setItem("category", category);
@@ -186,61 +188,75 @@ export default function Products() {
               </button>
             ))}
           </div>
-
-          {search && (
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-              Showing results for <b>"{search}"</b>
-            </p>
-          )}
         </div>
 
-        {/* PRODUCTS */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {loading && page === 1
-            ? Array.from({ length: 6 }).map((_, i) => (
-                <ProductSkeleton key={i} />
-              ))
-            : filtered.map(p => (
-                <div
-                  key={p.id}
-                  className="bg-white dark:bg-gray-800 p-5 rounded-xl shadow hover:shadow-xl transition"
-                >
-                  <div className="flex justify-between">
-                    <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">
-                      {p.category}
-                    </span>
-                    <button onClick={() => toggleWishlist(p.id)}>
-                      {wishlist.includes(String(p.id)) ? "❤️" : "🤍"}
+        {/* PRODUCTS + DESKTOP CART */}
+        <div className="flex gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 flex-1">
+            {loading && page === 1
+              ? Array.from({ length: 6 }).map((_, i) => (
+                  <ProductSkeleton key={i} />
+                ))
+              : filtered.map(p => (
+                  <div
+                    key={p.id}
+                    className="bg-white dark:bg-gray-800 p-5 rounded-xl shadow"
+                  >
+                    <div className="flex justify-between">
+                      <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">
+                        {p.category}
+                      </span>
+                      <button onClick={() => toggleWishlist(p.id)}>
+                        {wishlist.includes(String(p.id)) ? "❤️" : "🤍"}
+                      </button>
+                    </div>
+
+                    <img
+                      src={p.image}
+                      alt={p.title}
+                      onClick={() => navigate(`/product/${p.id}`)}
+                      className="h-44 w-full object-contain my-4 cursor-pointer"
+                    />
+
+                    <h3 className="font-semibold text-sm line-clamp-2">
+                      {p.title}
+                    </h3>
+
+                    <p className="text-yellow-500 text-sm">
+                      ⭐ {p.rating?.rate || 4} / 5
+                    </p>
+
+                    <p className="text-lg font-bold mb-3">
+                      ₹ {Math.round(p.price * 80)}
+                    </p>
+
+                    <button
+                      onClick={() => addToCart(p)}
+                      className="w-full bg-green-600 text-white py-2 rounded"
+                    >
+                      Add to Cart
                     </button>
                   </div>
+                ))}
+          </div>
 
-                  <img
-                    src={p.image}
-                    alt={p.title}
-                    onClick={() => navigate(`/product/${p.id}`)}
-                    className="h-44 w-full object-contain my-4 cursor-pointer"
-                  />
-
-                  <h3 className="font-semibold text-sm line-clamp-2">
-                    {p.title}
-                  </h3>
-
-                  <p className="text-yellow-500 text-sm">
-                    ⭐ {p.rating?.rate || 4} / 5
-                  </p>
-
-                  <p className="text-lg font-bold mb-3">
-                    ₹ {Math.round(p.price * 80)}
-                  </p>
-
-                  <button
-                    onClick={() => addToCart(p)}
-                    className="w-full bg-green-600 text-white py-2 rounded"
-                  >
-                    Add to Cart
-                  </button>
-                </div>
-              ))}
+          {/* ✅ DESKTOP CART SIDEBAR (RESTORED) */}
+          {cart.length > 0 && (
+            <div className="hidden lg:block w-72 sticky top-24
+                            bg-gray-100 dark:bg-gray-800
+                            p-4 rounded-xl h-fit">
+              <h3 className="font-bold mb-3">🛒 Cart</h3>
+              <p className="text-sm mb-3">
+                Items: <b>{totalItems}</b>
+              </p>
+              <button
+                onClick={() => navigate("/cart")}
+                className="w-full bg-purple-600 text-white py-2 rounded"
+              >
+                Go to Cart
+              </button>
+            </div>
+          )}
         </div>
 
         {/* LOAD MORE */}
