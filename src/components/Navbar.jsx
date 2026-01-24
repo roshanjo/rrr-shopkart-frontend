@@ -190,7 +190,7 @@ export default function Navbar() {
               className="flex items-center gap-2"
             >
               <img src={avatar} className="h-8 w-8 rounded-full" />
-              <span className="hidden sm:inline">Hi, {username}</span>
+              <span className="inline text-sm ml-1">Hi, {username}</span>
             </button>
 
             {/* DROPDOWN */}
