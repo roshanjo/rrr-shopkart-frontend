@@ -299,7 +299,21 @@ export default function Navbar() {
           </div>
         </div>
       </nav>
-
+      {/* MOBILE SEARCH */}
+{showSearch && (
+  <div className="sm:hidden px-4 py-2 bg-gray-900">
+    <form onSubmit={handleSearch}>
+      <input
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder="Search products…"
+        className="w-full px-4 py-2 rounded-full
+                   bg-white text-black
+                   placeholder-gray-400"
+      />
+    </form>
+  </div>
+)}
       <div className="h-20" />
     </>
   );
