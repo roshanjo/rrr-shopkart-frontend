@@ -8,28 +8,32 @@ import toast from "react-hot-toast";
 import ProductSkeleton from "../components/ProductSkeleton";
 import Seo from "../components/Seo";
 
-const CACHE_KEY = "products_cache_v2";
-const PAGE_KEY = "products_page_v2";
-const SCROLL_KEY = "products_scroll_y_v2";
-
-const ITEM_HEIGHT = 360; // virtualization height
+/* ===============================
+   CONSTANTS
+================================ */
+const CACHE_KEY = "products_cache_v3";
+const PAGE_KEY = "products_page_v3";
+const SCROLL_KEY = "products_scroll_y_v3";
+const ITEM_HEIGHT = 360;
+const VISIBLE_COUNT = 12;
 
 export default function Products() {
   const navigate = useNavigate();
   const location = useLocation();
   const [params, setParams] = useSearchParams();
+
   const observerRef = useRef(null);
+  const containerRef = useRef(null);
 
   /* ===============================
      URL CATEGORY (SOURCE OF TRUTH)
-     =============================== */
+  ================================ */
   const urlCategory = params.get("cat") || "all";
-
   const [category, setCategory] = useState(urlCategory);
 
   /* ===============================
      STATE
-     =============================== */
+  ================================ */
   const [products, setProducts] = useState(() => {
     const cached = sessionStorage.getItem(CACHE_KEY);
     return cached ? JSON.parse(cached) : [];
@@ -54,7 +58,7 @@ export default function Products() {
 
   /* ===============================
      FETCH PRODUCTS (CACHE SAFE)
-     =============================== */
+  ================================ */
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -111,8 +115,8 @@ export default function Products() {
   }, [page]);
 
   /* ===============================
-     SCROLL RESTORE (BACK ONLY)
-     =============================== */
+     SCROLL RESTORE (BACK)
+  ================================ */
   useEffect(() => {
     const saved = sessionStorage.getItem(SCROLL_KEY);
     if (saved) {
@@ -131,15 +135,13 @@ export default function Products() {
 
   /* ===============================
      URL ↔ STATE SYNC
-     =============================== */
+  ================================ */
   useEffect(() => {
     setCategory(urlCategory);
   }, [urlCategory]);
 
   useEffect(() => {
-    setParams(category === "all" ? {} : { cat: category }, {
-      replace: true,
-    });
+    setParams(category === "all" ? {} : { cat: category }, { replace: true });
   }, [category, setParams]);
 
   useEffect(() => {
@@ -149,8 +151,8 @@ export default function Products() {
   }, [location.key]);
 
   /* ===============================
-     FILTERS (STABLE)
-     =============================== */
+     FILTERS + COUNTS
+  ================================ */
   const allCategories = [
     "all",
     "electronics",
@@ -187,22 +189,31 @@ export default function Products() {
   }
 
   /* ===============================
-     VIRTUALIZED LIST
-     =============================== */
-  const [scrollY, setScrollY] = useState(0);
+     ✅ STABLE VIRTUALIZATION
+  ================================ */
+  const [startIndex, setStartIndex] = useState(0);
 
   useEffect(() => {
-    const onScroll = () => setScrollY(window.scrollY);
+    const onScroll = () => {
+      if (!containerRef.current) return;
+
+      const offsetTop = containerRef.current.offsetTop;
+      const relativeScroll = Math.max(0, window.scrollY - offsetTop);
+      setStartIndex(Math.floor(relativeScroll / ITEM_HEIGHT));
+    };
+
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const startIndex = Math.floor(scrollY / ITEM_HEIGHT);
-  const visibleItems = filtered.slice(startIndex, startIndex + 12);
+  const visibleItems = filtered.slice(
+    startIndex,
+    startIndex + VISIBLE_COUNT
+  );
 
   /* ===============================
      CART / WISHLIST
-     =============================== */
+  ================================ */
   const addToCart = p => {
     const updated = [...cart, { ...p, qty: 1 }];
     setCart(updated);
@@ -224,7 +235,7 @@ export default function Products() {
 
   /* ===============================
      INFINITE SCROLL
-     =============================== */
+  ================================ */
   useEffect(() => {
     if (!hasMore || loading) return;
 
@@ -253,7 +264,7 @@ export default function Products() {
                   setCategory(c);
                   setPage(1);
                 }}
-                className={`px-4 py-2 rounded-full text-sm font-semibold ${
+                className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap ${
                   category === c
                     ? "bg-green-600 text-white"
                     : "bg-gray-200 dark:bg-gray-800"
@@ -270,45 +281,61 @@ export default function Products() {
           </div>
         </div>
 
-        {/* PRODUCTS */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {loading && products.length === 0
-            ? Array.from({ length: 6 }).map((_, i) => (
-                <ProductSkeleton key={i} />
-              ))
-            : visibleItems.map(p => (
-                <div key={p.id} className="bg-white dark:bg-gray-800 p-5 rounded-xl">
-                  <div className="flex justify-between">
-                    <span className="text-xs bg-blue-100 px-2 py-1 rounded">
-                      {p.category}
-                    </span>
-                    <button onClick={() => toggleWishlist(p.id)}>
-                      {wishlist.includes(String(p.id)) ? "❤️" : "🤍"}
+        {/* PRODUCTS (VIRTUALIZED) */}
+        <div
+          ref={containerRef}
+          style={{
+            height: filtered.length * ITEM_HEIGHT,
+            position: "relative",
+          }}
+        >
+          <div
+            style={{
+              transform: `translateY(${startIndex * ITEM_HEIGHT}px)`,
+            }}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            {loading && products.length === 0
+              ? Array.from({ length: 6 }).map((_, i) => (
+                  <ProductSkeleton key={i} />
+                ))
+              : visibleItems.map(p => (
+                  <div
+                    key={p.id}
+                    className="bg-white dark:bg-gray-800 p-5 rounded-xl shadow"
+                  >
+                    <div className="flex justify-between">
+                      <span className="text-xs bg-blue-100 px-2 py-1 rounded">
+                        {p.category}
+                      </span>
+                      <button onClick={() => toggleWishlist(p.id)}>
+                        {wishlist.includes(String(p.id)) ? "❤️" : "🤍"}
+                      </button>
+                    </div>
+
+                    <img
+                      src={p.image}
+                      onClick={() => navigate(`/product/${p.id}`)}
+                      className="h-44 w-full object-contain my-4 cursor-pointer"
+                    />
+
+                    <h3 className="font-semibold text-sm line-clamp-2">
+                      {p.title}
+                    </h3>
+
+                    <p className="text-lg font-bold mb-3">
+                      ₹ {Math.round(p.price * 80)}
+                    </p>
+
+                    <button
+                      onClick={() => addToCart(p)}
+                      className="w-full bg-green-600 text-white py-2 rounded"
+                    >
+                      Add to Cart
                     </button>
                   </div>
-
-                  <img
-                    src={p.image}
-                    onClick={() => navigate(`/product/${p.id}`)}
-                    className="h-44 w-full object-contain my-4 cursor-pointer"
-                  />
-
-                  <h3 className="font-semibold text-sm line-clamp-2">
-                    {p.title}
-                  </h3>
-
-                  <p className="text-lg font-bold mb-3">
-                    ₹ {Math.round(p.price * 80)}
-                  </p>
-
-                  <button
-                    onClick={() => addToCart(p)}
-                    className="w-full bg-green-600 text-white py-2 rounded"
-                  >
-                    Add to Cart
-                  </button>
-                </div>
-              ))}
+                ))}
+          </div>
         </div>
 
         {hasMore && <div ref={observerRef} className="h-12 mt-10" />}
