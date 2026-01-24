@@ -18,19 +18,57 @@ export default function ProductDetail() {
     JSON.parse(localStorage.getItem("cart"))?.length || 0
   );
 
-  /* FETCH PRODUCT FROM FAKESTORE */
+  /* ===============================
+     FETCH PRODUCT (FS + DUMMYJSON)
+     =============================== */
   useEffect(() => {
-    setLoading(true);
-    fetch(`https://fakestoreapi.com/products/${id}`)
-      .then(res => res.json())
-      .then(data => {
-        setProduct(data);
-        setLoading(false);
-      })
-      .catch(() => {
+    const fetchProduct = async () => {
+      try {
+        setLoading(true);
+
+        // FakeStore product
+        if (id.startsWith("fs-")) {
+          const realId = id.replace("fs-", "");
+          const res = await fetch(
+            `https://fakestoreapi.com/products/${realId}`
+          );
+          const data = await res.json();
+          setProduct(data);
+        }
+
+        // DummyJSON product
+        else if (id.startsWith("dj-")) {
+          const realId = id.replace("dj-", "");
+          const res = await fetch(
+            `https://dummyjson.com/products/${realId}`
+          );
+          const data = await res.json();
+
+          // normalize DummyJSON → FakeStore shape
+          setProduct({
+            id: id,
+            title: data.title,
+            price: data.price,
+            description: data.description,
+            category: data.category,
+            image: data.thumbnail,
+            rating: { rate: data.rating },
+          });
+        }
+
+        else {
+          throw new Error("Invalid product");
+        }
+
+      } catch {
         toast.error("Product not found");
         navigate("/products");
-      });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
   }, [id, navigate]);
 
   if (loading) {
@@ -49,7 +87,7 @@ export default function ProductDetail() {
     );
   }
 
-  const productId = String(product.id);
+  const productId = String(id);
   const name = product.title;
   const price = Math.round(product.price * 80);
 
@@ -60,7 +98,7 @@ export default function ProductDetail() {
       name,
       price,
       image: product.image,
-      qty: 1
+      qty: 1,
     });
     localStorage.setItem("cart", JSON.stringify(cart));
     setCartCount(cart.length);
@@ -85,7 +123,6 @@ export default function ProductDetail() {
     <>
       <Seo title={`${name} | AIKart`} description={product.description} />
 
-      {/* MAIN PAGE */}
       <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6 pb-32">
         <div className="max-w-5xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow p-6">
 
@@ -111,7 +148,7 @@ export default function ProductDetail() {
               <h1 className="text-2xl font-bold mt-2">{name}</h1>
 
               <p className="text-yellow-500 mt-1">
-                ⭐ {product.rating?.rate} / 5
+                ⭐ {product.rating?.rate || 4} / 5
               </p>
 
               <p className="text-2xl text-green-600 font-bold mt-3">
@@ -122,7 +159,6 @@ export default function ProductDetail() {
                 {product.description}
               </p>
 
-              {/* DESKTOP ACTIONS (UNCHANGED) */}
               <div className="hidden md:flex gap-4 mt-6">
                 <button
                   onClick={addToCart}
@@ -147,13 +183,10 @@ export default function ProductDetail() {
         </div>
       </div>
 
-      {/* ✅ OLD-STYLE MOBILE STICKY (UNCHANGED & WORKING) */}
+      {/* MOBILE STICKY BAR */}
       <div className="md:hidden sticky bottom-0 z-40 bg-white dark:bg-gray-800 border-t">
         <div className="flex items-center justify-between px-4 py-4">
-          <p className="text-lg font-bold text-green-600">
-            ₹ {price}
-          </p>
-
+          <p className="text-lg font-bold text-green-600">₹ {price}</p>
           <button
             onClick={addToCart}
             className="bg-green-600 text-white px-6 py-2 rounded"
@@ -163,7 +196,7 @@ export default function ProductDetail() {
         </div>
       </div>
 
-      {/* ✅ FLOATING MOBILE CART ICON (NEW, NON-BREAKING) */}
+      {/* FLOATING CART */}
       {cartCount > 0 && (
         <button
           onClick={() => navigate("/cart")}
@@ -172,10 +205,8 @@ export default function ProductDetail() {
                      flex items-center justify-center shadow-lg"
         >
           🛒
-          <span
-            className="absolute -top-1 -right-1 bg-red-600 text-white
-                       text-xs w-5 h-5 rounded-full flex items-center justify-center"
-          >
+          <span className="absolute -top-1 -right-1 bg-red-600 text-white
+                           text-xs w-5 h-5 rounded-full flex items-center justify-center">
             {cartCount}
           </span>
         </button>
