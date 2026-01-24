@@ -141,7 +141,7 @@ export default function Navbar() {
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Search products…"
-                    className="w-full px-6 py-2 rounded-full bg-white text-black placeholder-gray-400"
+                    className="w-full px-6 py-2 rounded-full bg-white text-black placeholder-gray-400 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
                   />
                 </form>
               )}
@@ -158,11 +158,8 @@ export default function Navbar() {
                 className="flex items-center gap-2"
               >
                 <img src={avatar} className="h-8 w-8 rounded-full" />
-                <span className="hidden sm:inline text-sm">
-                  Hi, {username}
-                </span>
+                <span className="text-xs sm:text-sm">Hi, {username}</span>
               </button>
-
               {/* DROPDOWN */}
               <div
                 className={`absolute right-0 top-12 w-screen sm:w-64
