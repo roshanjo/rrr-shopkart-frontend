@@ -276,7 +276,7 @@ export default function Navbar() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search products…"
-                  className="w-full px-4 py-2 rounded-full bg-white text-black placeholder-gray-400"
+                  className="w-full px-4 py-2 rounded-full bg-white text-black placeholder-gray-400 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
                 />
               </form>
             </div>
