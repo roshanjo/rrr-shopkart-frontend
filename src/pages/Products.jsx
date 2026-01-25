@@ -150,9 +150,7 @@ export default function Products() {
     }, {});
   }, [products]);
 
-  const visibleCategories = allCategories.filter(
-    c => c === "all" || categoryCounts[c]
-  );
+  const visibleCategories = allCategories.filter(c => c === "all" || categoryCounts[c]);
 
   let filtered = category === "all"
     ? products
@@ -228,7 +226,7 @@ export default function Products() {
 
       <div className="min-h-screen bg-gray-100 dark:bg-gray-900 px-4 pt-6 pb-32">
         {/* CATEGORY FILTERS */}
-        <div className="mb-6 sm:mb-0 sm:w-1/4 sticky top-16 sm:block hidden">
+        <div className="lg:w-1/4 sm:w-full mb-6 sm:mb-0 sm:flex sm:flex-col sm:gap-4 sticky top-0">
           <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md">
             <h3 className="font-bold text-lg mb-4">Filter by Category</h3>
             <div className="space-y-2">
@@ -239,11 +237,8 @@ export default function Products() {
                     setCategory(c);
                     setPage(1);
                   }}
-                  className={`px-4 py-2 rounded-full text-sm font-semibold w-full text-left ${
-                    category === c
-                      ? "bg-green-600 text-white"
-                      : "bg-gray-200 dark:bg-gray-800"
-                  }`}
+                  className={`px-4 py-2 rounded-full text-sm font-semibold w-full text-left 
+                    ${category === c ? "bg-green-600 text-white" : "bg-gray-200 dark:bg-gray-800"}`}
                 >
                   {c.toUpperCase()}
                   {c !== "all" && (
