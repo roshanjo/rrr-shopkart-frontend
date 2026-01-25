@@ -226,7 +226,28 @@ export default function Products() {
       <Seo title="Products | AIKart" />
 
       <div className="min-h-screen bg-gray-100 dark:bg-gray-900 px-4 pt-6 pb-32">
-        {/* CATEGORY FILTERS (Responsive - Amazon Style) */}
+        {/* MOBILE FILTER: Horizontal scrolling at top */}
+        <div className="lg:hidden mb-6">
+          <div className="flex gap-4 overflow-x-auto">
+            {visibleCategories.map(c => (
+              <button
+                key={c}
+                onClick={() => {
+                  setCategory(c);
+                  setPage(1);
+                }}
+                className={`px-4 py-2 rounded-full text-sm font-semibold ${category === c ? "bg-green-600 text-white" : "bg-gray-200 dark:bg-gray-800"}`}
+              >
+                {c.toUpperCase()}
+                {c !== "all" && (
+                  <span className="ml-1 opacity-70">({categoryCounts[c]})</span>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* DESKTOP FILTER: Sidebar style */}
         <div className="lg:w-1/4 sm:w-full mb-6 sm:mb-0 sm:flex sm:flex-col sm:gap-4 sticky top-0 z-10">
           <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md">
             <h3 className="font-bold text-lg mb-4">Filter by Category</h3>
@@ -238,14 +259,11 @@ export default function Products() {
                     setCategory(c);
                     setPage(1);
                   }}
-                  className={`px-4 py-2 rounded-full text-sm font-semibold w-full text-left 
-                    ${category === c ? "bg-green-600 text-white" : "bg-gray-200 dark:bg-gray-800"}`}
+                  className={`px-4 py-2 rounded-full text-sm font-semibold w-full text-left ${category === c ? "bg-green-600 text-white" : "bg-gray-200 dark:bg-gray-800"}`}
                 >
                   {c.toUpperCase()}
                   {c !== "all" && (
-                    <span className="ml-1 opacity-70">
-                      ({categoryCounts[c]})
-                    </span>
+                    <span className="ml-1 opacity-70">({categoryCounts[c]})</span>
                   )}
                 </button>
               ))}
