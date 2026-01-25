@@ -1,22 +1,22 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import Seo from "../components/Seo";
-import ProductCard from "../components/ProductCard";
 import toast from "react-hot-toast";
 
-const PAGE_SIZE = 12;
+const FAKESTORE_URL = "https://fakestoreapi.com/products";
+const DUMMY_URL = "https://dummyjson.com/products";
 
-const ALL_CATEGORIES = [
-  "all",
-  "electronics",
-  "men's clothing",
-  "women's clothing",
-  "smartphones",
-  "laptops",
-  "fragrances",
-  "groceries",
-  "home-decoration"
-];
+const CATEGORY_MAP = {
+  electronics: "electronics",
+  "men's clothing": "men's clothing",
+  "women's clothing": "women's clothing",
+  jewelery: "jewelery",
+
+  smartphones: "smartphones",
+  laptops: "laptops",
+  fragrances: "fragrances",
+  groceries: "groceries",
+  "home-decoration": "home-decoration",
+};
 
 export default function Products() {
   const navigate = useNavigate();
@@ -26,156 +26,200 @@ export default function Products() {
   const category = params.get("cat") || "all";
 
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
-  /* ================= FETCH ================= */
+  const [cart, setCart] = useState(
+    JSON.parse(localStorage.getItem("cart")) || []
+  );
+
+  /* ---------------- FETCH PRODUCTS ---------------- */
+
   useEffect(() => {
-    async function load() {
+    async function fetchProducts() {
+      setLoading(true);
       try {
-        setLoading(true);
-
-        let mapped = [];
-
-        // PAGE 1 → FakeStore
         if (page === 1) {
-          const res = await fetch("https://fakestoreapi.com/products");
+          const res = await fetch(FAKESTORE_URL);
           const data = await res.json();
-
-          mapped = data.map(p => ({
-            id: `fs-${p.id}`,
-            title: p.title,
-            price: p.price,
-            image: p.image,
-            category: p.category
-          }));
-        }
-
-        // PAGE 2+ → DummyJSON
-        else {
-          const skip = (page - 2) * PAGE_SIZE;
+          setProducts(data);
+        } else {
           const res = await fetch(
-            `https://dummyjson.com/products?limit=${PAGE_SIZE}&skip=${skip}`
+            `${DUMMY_URL}?limit=20&skip=${(page - 2) * 20}`
           );
           const data = await res.json();
-
-          mapped = data.products.map(p => ({
-            id: `dj-${p.id}`,
-            title: p.title,
-            price: p.price,
-            image: p.thumbnail,
-            category: p.category
-          }));
+          setProducts(data.products);
         }
-
-        setProducts(mapped);
-      } catch {
+      } catch (err) {
         toast.error("Failed to load products");
       } finally {
         setLoading(false);
       }
     }
 
-    load();
+    fetchProducts();
   }, [page]);
 
-  /* ================= FILTER ================= */
+  /* ---------------- FILTER PRODUCTS ---------------- */
+
   const filteredProducts = useMemo(() => {
     if (category === "all") return products;
-    return products.filter(p => p.category === category);
-  }, [products, category]);
 
-  const changeCategory = c => {
-    setParams({
-      page: 1,
-      ...(c !== "all" && { cat: c })
-    });
-  };
+    return products.filter((p) => {
+      const cat =
+        page === 1 ? p.category : p.category?.toLowerCase();
 
-  const changePage = p => {
-    setParams({
-      page: p,
-      ...(category !== "all" && { cat: category })
+      return cat === category.toLowerCase();
     });
-  };
+  }, [products, category, page]);
+
+  /* ---------------- AUTO RESET INVALID FILTER ---------------- */
+
+  useEffect(() => {
+    if (category !== "all" && filteredProducts.length === 0) {
+      setParams({ page });
+    }
+  }, [filteredProducts, category, page, setParams]);
+
+  /* ---------------- ADD TO CART ---------------- */
+
+  function addToCart(product) {
+    const updated = [...cart, { ...product, qty: 1 }];
+    setCart(updated);
+    localStorage.setItem("cart", JSON.stringify(updated));
+    toast.success("Added to cart");
+  }
+
+  /* ---------------- UI ---------------- */
 
   return (
-    <>
-      <Seo title="Products | AIKart" />
+    <div className="flex gap-6 px-4 lg:px-10 pt-6">
 
-      {/* MOBILE FILTER BAR (AMAZON STYLE) */}
-      <div className="lg:hidden sticky top-0 z-20 bg-white border-b">
-        <div className="flex gap-2 px-3 py-3 overflow-x-auto">
-          {ALL_CATEGORIES.map(c => (
+      {/* ---------- LEFT FILTER (DESKTOP) ---------- */}
+      <aside className="hidden lg:block w-64 shrink-0">
+        <h3 className="font-semibold mb-4">Category</h3>
+
+        <ul className="space-y-2">
+          {Object.keys(CATEGORY_MAP).map((cat) => (
+            <li key={cat}>
+              <button
+                onClick={() => setParams({ page, cat })}
+                className={`w-full text-left px-3 py-2 rounded
+                  ${
+                    category === cat
+                      ? "bg-yellow-400 text-black"
+                      : "hover:bg-gray-700"
+                  }`}
+              >
+                {cat.toUpperCase()}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </aside>
+
+      {/* ---------- MAIN CONTENT ---------- */}
+      <main className="flex-1">
+
+        {/* MOBILE FILTER BAR */}
+        <div className="lg:hidden flex gap-2 overflow-x-auto mb-4">
+          {Object.keys(CATEGORY_MAP).map((cat) => (
             <button
-              key={c}
-              onClick={() => changeCategory(c)}
+              key={cat}
+              onClick={() => setParams({ page, cat })}
               className={`px-4 py-2 rounded-full text-sm whitespace-nowrap
-                ${category === c
-                  ? "bg-yellow-400"
-                  : "border bg-gray-50"}`}
+                ${
+                  category === cat
+                    ? "bg-yellow-400 text-black"
+                    : "bg-gray-800"
+                }`}
             >
-              {c.toUpperCase()}
+              {cat}
             </button>
           ))}
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-6 flex gap-6">
-        {/* DESKTOP FILTER */}
-        <aside className="hidden lg:block w-64 shrink-0">
-          <div className="bg-white dark:bg-gray-900 p-4 rounded shadow sticky top-24">
-            <h3 className="font-bold mb-4">Category</h3>
-            <div className="space-y-2">
-              {ALL_CATEGORIES.map(c => (
-                <button
-                  key={c}
-                  onClick={() => changeCategory(c)}
-                  className={`block w-full text-left px-3 py-2 rounded
-                    ${category === c
-                      ? "bg-yellow-300"
-                      : "hover:bg-gray-100 dark:hover:bg-gray-800"}`}
-                >
-                  {c.toUpperCase()}
-                </button>
-              ))}
-            </div>
-          </div>
-        </aside>
-
-        {/* PRODUCTS */}
-        <main className="flex-1">
-          {loading ? (
-            <p>Loading...</p>
-          ) : filteredProducts.length === 0 ? (
-            <p>No products found.</p>
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
-              {filteredProducts.map(p => (
-                <ProductCard
-                  key={p.id}
-                  product={p}
-                  onAdd={() => toast.success("Added to cart")}
-                  onView={(id) => navigate(`/product/${id}`)}
-                />
-              ))}
-            </div>
-          )}
-
-          {/* PAGINATION */}
-          <div className="flex justify-center gap-2 mt-12">
-            {[1, 2, 3, 4].map(p => (
-              <button
-                key={p}
-                onClick={() => changePage(p)}
-                className={`px-4 py-2 border rounded
-                  ${page === p ? "bg-black text-white" : ""}`}
+        {/* PRODUCTS GRID */}
+        {loading ? (
+          <p className="text-center py-10">Loading...</p>
+        ) : filteredProducts.length === 0 ? (
+          <p className="text-center py-10">No products found.</p>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {filteredProducts.map((p) => (
+              <div
+                key={p.id}
+                className="bg-gray-900 rounded p-3 flex flex-col"
               >
-                {p}
-              </button>
+                <img
+                  src={p.thumbnail || p.image}
+                  alt={p.title}
+                  className="h-40 object-contain mb-2"
+                />
+
+                <h4 className="text-sm line-clamp-2">{p.title}</h4>
+
+                <p className="mt-auto font-semibold">
+                  ₹{p.price}
+                </p>
+
+                <button
+                  onClick={() => addToCart(p)}
+                  className="mt-2 bg-green-600 hover:bg-green-700 py-1 rounded"
+                >
+                  Add to Cart
+                </button>
+              </div>
             ))}
           </div>
-        </main>
-      </div>
-    </>
+        )}
+
+        {/* PAGINATION */}
+        <div className="flex justify-center gap-2 my-8">
+          {[1, 2, 3, 4].map((p) => (
+            <button
+              key={p}
+              onClick={() => setParams({ page: p })}
+              className={`px-4 py-2 border rounded
+                ${page === p ? "bg-white text-black" : ""}`}
+            >
+              {p}
+            </button>
+          ))}
+        </div>
+      </main>
+
+      {/* ---------- STICKY CART ---------- */}
+      {cart.length > 0 && (
+        <>
+          {/* MOBILE */}
+          <button
+            onClick={() => navigate("/cart")}
+            className="lg:hidden fixed bottom-20 right-4 z-50
+                       bg-green-600 text-white w-14 h-14 rounded-full
+                       flex items-center justify-center shadow-xl"
+          >
+            🛒
+            <span className="absolute -top-1 -right-1 bg-red-600 text-xs
+                             w-5 h-5 rounded-full flex items-center justify-center">
+              {cart.length}
+            </span>
+          </button>
+
+          {/* DESKTOP */}
+          <button
+            onClick={() => navigate("/cart")}
+            className="hidden lg:flex fixed bottom-10 right-10 z-50
+                       bg-green-600 text-white w-16 h-16 rounded-full
+                       items-center justify-center shadow-xl"
+          >
+            🛒
+            <span className="absolute -top-1 -right-1 bg-red-600 text-xs
+                             w-5 h-5 rounded-full flex items-center justify-center">
+              {cart.length}
+            </span>
+          </button>
+        </>
+      )}
+    </div>
   );
 }
