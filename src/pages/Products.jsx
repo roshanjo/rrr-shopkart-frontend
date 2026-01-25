@@ -1,54 +1,59 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import Seo from "../components/Seo";
 import toast from "react-hot-toast";
 
-const FAKESTORE_URL = "https://fakestoreapi.com/products";
-const DUMMY_URL = "https://dummyjson.com/products";
+const PAGE_SIZE = 12;
 
-const CATEGORY_MAP = {
-  electronics: "electronics",
-  "men's clothing": "men's clothing",
-  "women's clothing": "women's clothing",
-  jewelery: "jewelery",
-
-  smartphones: "smartphones",
-  laptops: "laptops",
-  fragrances: "fragrances",
-  groceries: "groceries",
-  "home-decoration": "home-decoration",
-};
+/* DummyJSON categories (REAL ones) */
+const CATEGORIES = [
+  "all",
+  "smartphones",
+  "laptops",
+  "fragrances",
+  "groceries",
+  "home-decoration",
+  "mens-shirts",
+  "mens-shoes",
+  "mens-watches",
+  "womens-dresses",
+  "womens-shoes",
+  "womens-watches",
+  "womens-bags",
+  "womens-jewellery",
+  "sunglasses",
+  "automotive",
+  "motorcycle",
+  "lighting",
+];
 
 export default function Products() {
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
 
-  const page = Number(params.get("page")) || 1;
+  const page = Number(params.get("page") || 1);
   const category = params.get("cat") || "all";
 
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const [cart, setCart] = useState(
-    JSON.parse(localStorage.getItem("cart")) || []
-  );
-
-  /* ---------------- FETCH PRODUCTS ---------------- */
-
+  /* ================= FETCH (DummyJSON ONLY) ================= */
   useEffect(() => {
-    async function fetchProducts() {
-      setLoading(true);
+    async function load() {
       try {
-        if (page === 1) {
-          const res = await fetch(FAKESTORE_URL);
-          const data = await res.json();
-          setProducts(data);
-        } else {
-          const res = await fetch(
-            `${DUMMY_URL}?limit=20&skip=${(page - 2) * 20}`
-          );
-          const data = await res.json();
-          setProducts(data.products);
-        }
+        setLoading(true);
+
+        const skip = (page - 1) * PAGE_SIZE;
+
+        const url =
+          category === "all"
+            ? `https://dummyjson.com/products?limit=${PAGE_SIZE}&skip=${skip}`
+            : `https://dummyjson.com/products/category/${category}?limit=${PAGE_SIZE}&skip=${skip}`;
+
+        const res = await fetch(url);
+        const data = await res.json();
+
+        setProducts(data.products || []);
       } catch (err) {
         toast.error("Failed to load products");
       } finally {
@@ -56,170 +61,139 @@ export default function Products() {
       }
     }
 
-    fetchProducts();
-  }, [page]);
+    load();
+  }, [page, category]);
 
-  /* ---------------- FILTER PRODUCTS ---------------- */
-
-  const filteredProducts = useMemo(() => {
-    if (category === "all") return products;
-
-    return products.filter((p) => {
-      const cat =
-        page === 1 ? p.category : p.category?.toLowerCase();
-
-      return cat === category.toLowerCase();
+  const changePage = p => {
+    setParams({
+      page: p,
+      ...(category !== "all" && { cat: category }),
     });
-  }, [products, category, page]);
+  };
 
-  /* ---------------- AUTO RESET INVALID FILTER ---------------- */
-
-  useEffect(() => {
-    if (category !== "all" && filteredProducts.length === 0) {
-      setParams({ page });
-    }
-  }, [filteredProducts, category, page, setParams]);
-
-  /* ---------------- ADD TO CART ---------------- */
-
-  function addToCart(product) {
-    const updated = [...cart, { ...product, qty: 1 }];
-    setCart(updated);
-    localStorage.setItem("cart", JSON.stringify(updated));
-    toast.success("Added to cart");
-  }
-
-  /* ---------------- UI ---------------- */
+  const changeCategory = c => {
+    setParams({
+      page: 1,
+      ...(c !== "all" && { cat: c }),
+    });
+  };
 
   return (
-    <div className="flex gap-6 px-4 lg:px-10 pt-6">
+    <>
+      <Seo title="Products | AIKart" />
 
-      {/* ---------- LEFT FILTER (DESKTOP) ---------- */}
-      <aside className="hidden lg:block w-64 shrink-0">
-        <h3 className="font-semibold mb-4">Category</h3>
-
-        <ul className="space-y-2">
-          {Object.keys(CATEGORY_MAP).map((cat) => (
-            <li key={cat}>
+      <div className="max-w-7xl mx-auto px-3 py-6">
+        {/* MOBILE CATEGORY BAR */}
+        <div className="lg:hidden sticky top-0 z-20 bg-slate-900 py-3">
+          <div className="flex gap-2 overflow-x-auto">
+            {CATEGORIES.map(c => (
               <button
-                onClick={() => setParams({ page, cat })}
-                className={`w-full text-left px-3 py-2 rounded
-                  ${
-                    category === cat
-                      ? "bg-yellow-400 text-black"
-                      : "hover:bg-gray-700"
-                  }`}
-              >
-                {cat.toUpperCase()}
-              </button>
-            </li>
-          ))}
-        </ul>
-      </aside>
-
-      {/* ---------- MAIN CONTENT ---------- */}
-      <main className="flex-1">
-
-        {/* MOBILE FILTER BAR */}
-        <div className="lg:hidden flex gap-2 overflow-x-auto mb-4">
-          {Object.keys(CATEGORY_MAP).map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setParams({ page, cat })}
-              className={`px-4 py-2 rounded-full text-sm whitespace-nowrap
+                key={c}
+                onClick={() => changeCategory(c)}
+                className={`px-4 py-2 rounded-full text-xs whitespace-nowrap
                 ${
-                  category === cat
+                  category === c
                     ? "bg-yellow-400 text-black"
-                    : "bg-gray-800"
+                    : "bg-slate-800 text-white"
                 }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-
-        {/* PRODUCTS GRID */}
-        {loading ? (
-          <p className="text-center py-10">Loading...</p>
-        ) : filteredProducts.length === 0 ? (
-          <p className="text-center py-10">No products found.</p>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {filteredProducts.map((p) => (
-              <div
-                key={p.id}
-                className="bg-gray-900 rounded p-3 flex flex-col"
               >
-                <img
-                  src={p.thumbnail || p.image}
-                  alt={p.title}
-                  className="h-40 object-contain mb-2"
-                />
-
-                <h4 className="text-sm line-clamp-2">{p.title}</h4>
-
-                <p className="mt-auto font-semibold">
-                  ₹{p.price}
-                </p>
-
-                <button
-                  onClick={() => addToCart(p)}
-                  className="mt-2 bg-green-600 hover:bg-green-700 py-1 rounded"
-                >
-                  Add to Cart
-                </button>
-              </div>
+                {c.replace("-", " ").toUpperCase()}
+              </button>
             ))}
           </div>
-        )}
-
-        {/* PAGINATION */}
-        <div className="flex justify-center gap-2 my-8">
-          {[1, 2, 3, 4].map((p) => (
-            <button
-              key={p}
-              onClick={() => setParams({ page: p })}
-              className={`px-4 py-2 border rounded
-                ${page === p ? "bg-white text-black" : ""}`}
-            >
-              {p}
-            </button>
-          ))}
         </div>
-      </main>
 
-      {/* ---------- STICKY CART ---------- */}
-      {cart.length > 0 && (
-        <>
-          {/* MOBILE */}
-          <button
-            onClick={() => navigate("/cart")}
-            className="lg:hidden fixed bottom-20 right-4 z-50
-                       bg-green-600 text-white w-14 h-14 rounded-full
-                       flex items-center justify-center shadow-xl"
-          >
-            🛒
-            <span className="absolute -top-1 -right-1 bg-red-600 text-xs
-                             w-5 h-5 rounded-full flex items-center justify-center">
-              {cart.length}
-            </span>
-          </button>
+        <div className="flex gap-6 mt-6">
+          {/* DESKTOP CATEGORY */}
+          <aside className="hidden lg:block w-64">
+            <div className="bg-slate-900 p-4 rounded">
+              <h3 className="font-bold mb-4 text-white">Category</h3>
+              <div className="space-y-2">
+                {CATEGORIES.map(c => (
+                  <button
+                    key={c}
+                    onClick={() => changeCategory(c)}
+                    className={`block w-full text-left px-3 py-2 rounded text-sm
+                    ${
+                      category === c
+                        ? "bg-yellow-400 text-black"
+                        : "text-gray-300 hover:bg-slate-800"
+                    }`}
+                  >
+                    {c.replace("-", " ").toUpperCase()}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </aside>
 
-          {/* DESKTOP */}
-          <button
-            onClick={() => navigate("/cart")}
-            className="hidden lg:flex fixed bottom-10 right-10 z-50
-                       bg-green-600 text-white w-16 h-16 rounded-full
-                       items-center justify-center shadow-xl"
-          >
-            🛒
-            <span className="absolute -top-1 -right-1 bg-red-600 text-xs
-                             w-5 h-5 rounded-full flex items-center justify-center">
-              {cart.length}
-            </span>
-          </button>
-        </>
-      )}
-    </div>
+          {/* PRODUCTS GRID */}
+          <main className="flex-1">
+            {loading ? (
+              <p className="text-center text-gray-400">Loading...</p>
+            ) : products.length === 0 ? (
+              <p className="text-center text-gray-400">No products found.</p>
+            ) : (
+              <div
+                className="
+                grid
+                grid-cols-1
+                md:grid-cols-2
+                lg:grid-cols-3
+                gap-6
+              "
+              >
+                {products.map(p => (
+                  <div
+                    key={p.id}
+                    className="bg-slate-900 rounded-lg p-4 shadow hover:shadow-lg transition"
+                  >
+                    <img
+                      src={p.thumbnail}
+                      alt={p.title}
+                      className="h-48 w-full object-contain cursor-pointer"
+                      onClick={() => navigate(`/product/${p.id}`)}
+                    />
+
+                    <h3 className="mt-3 text-sm font-semibold text-white line-clamp-2">
+                      {p.title}
+                    </h3>
+
+                    <p className="font-bold mt-1 text-yellow-400">
+                      ₹ {Math.round(p.price * 80)}
+                    </p>
+
+                    <button
+                      onClick={() => navigate(`/product/${p.id}`)}
+                      className="mt-3 w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded"
+                    >
+                      View
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* PAGINATION */}
+            <div className="flex justify-center gap-2 mt-10">
+              {[1, 2, 3, 4].map(p => (
+                <button
+                  key={p}
+                  onClick={() => changePage(p)}
+                  className={`px-4 py-2 rounded border
+                  ${
+                    page === p
+                      ? "bg-white text-black"
+                      : "text-white border-gray-500"
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+          </main>
+        </div>
+      </div>
+    </>
   );
 }
