@@ -50,6 +50,7 @@ export default function Products() {
         let newProducts = [];
 
         if (page === 1) {
+          // Fetching from FakeStore for the first page
           const res = await fetch("https://fakestoreapi.com/products");
           const data = await res.json();
           newProducts = data.map(p => ({
@@ -63,6 +64,7 @@ export default function Products() {
         } else {
           const limit = 12;
           const skip = (page - 2) * limit;
+          // Fetching from DummyJSON for page 2 and beyond
           const res = await fetch(`https://dummyjson.com/products?limit=${limit}&skip=${skip}`);
           const data = await res.json();
           newProducts = data.products.map(p => ({
@@ -104,8 +106,7 @@ export default function Products() {
   }, []);
 
   useEffect(() => {
-    const save = () =>
-      sessionStorage.setItem(SCROLL_KEY, window.scrollY);
+    const save = () => sessionStorage.setItem(SCROLL_KEY, window.scrollY);
     window.addEventListener("scroll", save);
     return () => window.removeEventListener("scroll", save);
   }, []);
@@ -152,14 +153,10 @@ export default function Products() {
 
   const visibleCategories = allCategories.filter(c => c === "all" || categoryCounts[c]);
 
-  let filtered = category === "all"
-    ? products
-    : products.filter(p => p.category === category);
+  let filtered = category === "all" ? products : products.filter(p => p.category === category);
 
   if (search) {
-    filtered = filtered.filter(p =>
-      p.title.toLowerCase().includes(search.toLowerCase())
-    );
+    filtered = filtered.filter(p => p.title.toLowerCase().includes(search.toLowerCase()));
   }
 
   /* ===============================
@@ -225,7 +222,7 @@ export default function Products() {
       <Seo title="Products | AIKart" />
 
       <div className="min-h-screen bg-gray-100 dark:bg-gray-900 px-4 pt-6 pb-32">
-        {/* CATEGORY FILTERS */}
+        {/* FILTERS (ONLY LEFT SIDE) */}
         <div className="lg:w-1/4 sm:w-full mb-6 sm:mb-0 sm:flex sm:flex-col sm:gap-4 sticky top-0">
           <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md">
             <h3 className="font-bold text-lg mb-4">Filter by Category</h3>
@@ -316,9 +313,7 @@ export default function Products() {
       {totalItems > 0 && (
         <button
           onClick={() => navigate("/cart")}
-          className="lg:hidden fixed bottom-20 right-4 z-50
-                     bg-green-600 text-white w-14 h-14 rounded-full
-                     flex items-center justify-center shadow-xl"
+          className="lg:hidden fixed bottom-20 right-4 z-50 bg-green-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-xl"
         >
           🛒
           <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
@@ -331,9 +326,7 @@ export default function Products() {
       {totalItems > 0 && (
         <button
           onClick={() => navigate("/cart")}
-          className="hidden lg:flex fixed bottom-10 right-10 z-50
-                     bg-green-600 text-white w-16 h-16 rounded-full
-                     items-center justify-center shadow-xl"
+          className="hidden lg:flex fixed bottom-10 right-10 z-50 bg-green-600 text-white w-16 h-16 rounded-full items-center justify-center shadow-xl"
         >
           🛒
           <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
