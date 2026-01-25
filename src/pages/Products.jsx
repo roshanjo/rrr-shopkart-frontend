@@ -1,27 +1,19 @@
 import { useEffect, useState, useRef, useMemo } from "react";
-import {
-  useNavigate,
-  useLocation,
-  useSearchParams,
-} from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import ProductSkeleton from "../components/ProductSkeleton";
 import Seo from "../components/Seo";
 
-/* ===============================
-   CONSTANTS
-================================ */
 const CACHE_KEY = "products_cache_v3";
 const PAGE_KEY = "products_page_v3";
 const SCROLL_KEY = "products_scroll_y_v3";
-const ITEM_HEIGHT = 360;
-const VISIBLE_COUNT = 12;
+const ITEM_HEIGHT = 360; // height of each product card
+const VISIBLE_COUNT = 12; // number of items to render per page
 
 export default function Products() {
   const navigate = useNavigate();
   const location = useLocation();
   const [params, setParams] = useSearchParams();
-
   const observerRef = useRef(null);
   const containerRef = useRef(null);
 
@@ -350,8 +342,7 @@ export default function Products() {
                      flex items-center justify-center shadow-xl"
         >
           🛒
-          <span className="absolute -top-1 -right-1 bg-red-600 text-white
-                           text-xs w-5 h-5 rounded-full flex items-center justify-center">
+          <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
             {totalItems}
           </span>
         </button>
