@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import ProductSkeleton from "../components/ProductSkeleton";
 import Seo from "../components/Seo";
 
+// Constants
 const CACHE_KEY = "products_cache_v3";
 const PAGE_KEY = "products_page_v3";
 const SCROLL_KEY = "products_scroll_y_v3";
@@ -31,21 +32,12 @@ export default function Products() {
     return cached ? JSON.parse(cached) : [];
   });
 
-  const [page, setPage] = useState(
-    Number(sessionStorage.getItem(PAGE_KEY)) || 1
-  );
-
+  const [page, setPage] = useState(Number(sessionStorage.getItem(PAGE_KEY)) || 1);
   const [loading, setLoading] = useState(products.length === 0);
   const [hasMore, setHasMore] = useState(true);
 
-  const [cart, setCart] = useState(
-    JSON.parse(localStorage.getItem("cart")) || []
-  );
-
-  const [wishlist, setWishlist] = useState(
-    JSON.parse(localStorage.getItem("wishlist")) || []
-  );
-
+  const [cart, setCart] = useState(JSON.parse(localStorage.getItem("cart")) || []);
+  const [wishlist, setWishlist] = useState(JSON.parse(localStorage.getItem("wishlist")) || []);
   const [search, setSearch] = useState("");
 
   /* ===============================
@@ -60,7 +52,6 @@ export default function Products() {
         if (page === 1) {
           const res = await fetch("https://fakestoreapi.com/products");
           const data = await res.json();
-
           newProducts = data.map(p => ({
             id: `fs-${p.id}`,
             title: p.title,
@@ -68,17 +59,12 @@ export default function Products() {
             image: p.image,
             category: p.category,
           }));
-
           setHasMore(true);
         } else {
           const limit = 12;
           const skip = (page - 2) * limit;
-
-          const res = await fetch(
-            `https://dummyjson.com/products?limit=${limit}&skip=${skip}`
-          );
+          const res = await fetch(`https://dummyjson.com/products?limit=${limit}&skip=${skip}`);
           const data = await res.json();
-
           newProducts = data.products.map(p => ({
             id: `dj-${p.id}`,
             title: p.title,
@@ -86,7 +72,6 @@ export default function Products() {
             image: p.thumbnail,
             category: p.category,
           }));
-
           setHasMore(data.products.length === limit);
         }
 
@@ -169,10 +154,9 @@ export default function Products() {
     c => c === "all" || categoryCounts[c]
   );
 
-  let filtered =
-    category === "all"
-      ? products
-      : products.filter(p => p.category === category);
+  let filtered = category === "all"
+    ? products
+    : products.filter(p => p.category === category);
 
   if (search) {
     filtered = filtered.filter(p =>
@@ -198,10 +182,7 @@ export default function Products() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const visibleItems = filtered.slice(
-    startIndex,
-    startIndex + VISIBLE_COUNT
-  );
+  const visibleItems = filtered.slice(startIndex, startIndex + VISIBLE_COUNT);
 
   /* ===============================
      CART / WISHLIST
@@ -246,30 +227,33 @@ export default function Products() {
       <Seo title="Products | AIKart" />
 
       <div className="min-h-screen bg-gray-100 dark:bg-gray-900 px-4 pt-6 pb-32">
-        {/* CATEGORY BAR */}
-        <div className="mb-6 border-b pb-4">
-          <div className="flex gap-3 overflow-x-auto">
-            {visibleCategories.map(c => (
-              <button
-                key={c}
-                onClick={() => {
-                  setCategory(c);
-                  setPage(1);
-                }}
-                className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap ${
-                  category === c
-                    ? "bg-green-600 text-white"
-                    : "bg-gray-200 dark:bg-gray-800"
-                }`}
-              >
-                {c.toUpperCase()}
-                {c !== "all" && (
-                  <span className="ml-1 opacity-70">
-                    ({categoryCounts[c]})
-                  </span>
-                )}
-              </button>
-            ))}
+        {/* CATEGORY FILTERS */}
+        <div className="mb-6 sm:mb-0 sm:w-1/4 sticky top-16 sm:block hidden">
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md">
+            <h3 className="font-bold text-lg mb-4">Filter by Category</h3>
+            <div className="space-y-2">
+              {visibleCategories.map(c => (
+                <button
+                  key={c}
+                  onClick={() => {
+                    setCategory(c);
+                    setPage(1);
+                  }}
+                  className={`px-4 py-2 rounded-full text-sm font-semibold w-full text-left ${
+                    category === c
+                      ? "bg-green-600 text-white"
+                      : "bg-gray-200 dark:bg-gray-800"
+                  }`}
+                >
+                  {c.toUpperCase()}
+                  {c !== "all" && (
+                    <span className="ml-1 opacity-70">
+                      ({categoryCounts[c]})
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
