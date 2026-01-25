@@ -221,8 +221,8 @@ export default function Products() {
     <>
       <Seo title="Products | AIKart" />
 
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 px-4 pt-6 pb-32">
-        {/* FILTERS (ONLY LEFT SIDE) */}
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 px-4 pt-6 pb-32 flex gap-6">
+        {/* FILTER (LEFT SIDE) */}
         <div className="lg:w-1/4 sm:w-full mb-6 sm:mb-0 sm:flex sm:flex-col sm:gap-4 sticky top-0">
           <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md">
             <h3 className="font-bold text-lg mb-4">Filter by Category</h3>
