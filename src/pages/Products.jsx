@@ -50,7 +50,6 @@ export default function Products() {
         let newProducts = [];
 
         if (page === 1) {
-          // Fetching from FakeStore for the first page
           const res = await fetch("https://fakestoreapi.com/products");
           const data = await res.json();
           newProducts = data.map(p => ({
@@ -64,7 +63,6 @@ export default function Products() {
         } else {
           const limit = 12;
           const skip = (page - 2) * limit;
-          // Fetching from DummyJSON for page 2 and beyond
           const res = await fetch(`https://dummyjson.com/products?limit=${limit}&skip=${skip}`);
           const data = await res.json();
           newProducts = data.products.map(p => ({
@@ -106,7 +104,8 @@ export default function Products() {
   }, []);
 
   useEffect(() => {
-    const save = () => sessionStorage.setItem(SCROLL_KEY, window.scrollY);
+    const save = () =>
+      sessionStorage.setItem(SCROLL_KEY, window.scrollY);
     window.addEventListener("scroll", save);
     return () => window.removeEventListener("scroll", save);
   }, []);
@@ -153,10 +152,15 @@ export default function Products() {
 
   const visibleCategories = allCategories.filter(c => c === "all" || categoryCounts[c]);
 
-  let filtered = category === "all" ? products : products.filter(p => p.category === category);
+  let filtered =
+    category === "all"
+      ? products
+      : products.filter(p => p.category === category);
 
   if (search) {
-    filtered = filtered.filter(p => p.title.toLowerCase().includes(search.toLowerCase()));
+    filtered = filtered.filter(p =>
+      p.title.toLowerCase().includes(search.toLowerCase())
+    );
   }
 
   /* ===============================
@@ -202,19 +206,28 @@ export default function Products() {
   const totalItems = cart.reduce((s, i) => s + (i.qty || 1), 0);
 
   /* ===============================
-     PAGINATION (Page 1, Page 2, Page 3, ...)
+     INFINITE SCROLL
   ================================ */
-  const handlePageChange = (newPage) => {
-    setPage(newPage);
-  };
+  useEffect(() => {
+    if (!hasMore || loading) return;
+
+    const observer = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) {
+        setPage(p => p + 1);
+      }
+    });
+
+    if (observerRef.current) observer.observe(observerRef.current);
+    return () => observer.disconnect();
+  }, [hasMore, loading]);
 
   return (
     <>
       <Seo title="Products | AIKart" />
 
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 px-4 pt-6 pb-32 flex gap-6">
-        {/* FILTER (LEFT SIDE - DESKTOP) */}
-        <div className="lg:w-1/4 sm:w-full mb-6 sm:mb-0 sm:flex sm:flex-col sm:gap-4 sticky top-0">
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 px-4 pt-6 pb-32">
+        {/* CATEGORY FILTERS (Responsive - Amazon Style) */}
+        <div className="lg:w-1/4 sm:w-full mb-6 sm:mb-0 sm:flex sm:flex-col sm:gap-4 sticky top-0 z-10">
           <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md">
             <h3 className="font-bold text-lg mb-4">Filter by Category</h3>
             <div className="space-y-2">
@@ -238,23 +251,6 @@ export default function Products() {
               ))}
             </div>
           </div>
-        </div>
-
-        {/* MOBILE FILTER (TOP) */}
-        <div className="lg:hidden flex gap-4 mb-6">
-          {visibleCategories.map(c => (
-            <button
-              key={c}
-              onClick={() => {
-                setCategory(c);
-                setPage(1);
-              }}
-              className={`px-4 py-2 rounded-full text-sm font-semibold w-full text-left 
-                ${category === c ? "bg-green-600 text-white" : "bg-gray-200 dark:bg-gray-800"}`}
-            >
-              {c.toUpperCase()}
-            </button>
-          ))}
         </div>
 
         {/* PRODUCTS (VIRTUALIZED) */}
@@ -315,19 +311,6 @@ export default function Products() {
         </div>
 
         {hasMore && <div ref={observerRef} className="h-12 mt-10" />}
-      </div>
-
-      {/* PAGINATION */}
-      <div className="flex justify-center mt-6">
-        {[...Array(5)].map((_, index) => (
-          <button
-            key={index}
-            onClick={() => handlePageChange(index + 1)}
-            className={`px-4 py-2 ${page === index + 1 ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-800'} rounded-full`}
-          >
-            {index + 1}
-          </button>
-        ))}
       </div>
 
       {/* MOBILE CART */}
