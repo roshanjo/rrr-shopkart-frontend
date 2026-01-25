@@ -1,136 +1,72 @@
-import { useEffect, useState, useRef, useMemo } from "react";
-import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
-import toast from "react-hot-toast";
-import ProductSkeleton from "../components/ProductSkeleton";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import Seo from "../components/Seo";
+import toast from "react-hot-toast";
 
-// Constants
-const CACHE_KEY = "products_cache_v3";
-const PAGE_KEY = "products_page_v3";
-const SCROLL_KEY = "products_scroll_y_v3";
-const ITEM_HEIGHT = 360; // height of each product card
-const VISIBLE_COUNT = 12; // number of items to render per page
+const PAGE_SIZE = 12;
 
 export default function Products() {
   const navigate = useNavigate();
-  const location = useLocation();
   const [params, setParams] = useSearchParams();
-  const observerRef = useRef(null);
-  const containerRef = useRef(null);
 
-  /* ===============================
-     URL CATEGORY (SOURCE OF TRUTH)
-  ================================ */
-  const urlCategory = params.get("cat") || "all";
-  const [category, setCategory] = useState(urlCategory);
+  const page = Number(params.get("page") || 1);
+  const category = params.get("cat") || "all";
 
-  /* ===============================
-     STATE
-  ================================ */
-  const [products, setProducts] = useState(() => {
-    const cached = sessionStorage.getItem(CACHE_KEY);
-    return cached ? JSON.parse(cached) : [];
-  });
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const [page, setPage] = useState(Number(sessionStorage.getItem(PAGE_KEY)) || 1);
-  const [loading, setLoading] = useState(products.length === 0);
-  const [hasMore, setHasMore] = useState(true);
-
-  const [cart, setCart] = useState(JSON.parse(localStorage.getItem("cart")) || []);
-  const [wishlist, setWishlist] = useState(JSON.parse(localStorage.getItem("wishlist")) || []);
-  const [search, setSearch] = useState("");
-
-  /* ===============================
-     FETCH PRODUCTS (CACHE SAFE)
-  ================================ */
+  /* ================= FETCH ================= */
   useEffect(() => {
-    const fetchProducts = async () => {
+    async function load() {
       try {
         setLoading(true);
-        let newProducts = [];
 
+        // PAGE 1 → FakeStore
         if (page === 1) {
           const res = await fetch("https://fakestoreapi.com/products");
           const data = await res.json();
-          newProducts = data.map(p => ({
-            id: `fs-${p.id}`,
-            title: p.title,
-            price: p.price,
-            image: p.image,
-            category: p.category,
-          }));
-          setHasMore(true);
-        } else {
-          const limit = 12;
-          const skip = (page - 2) * limit;
-          const res = await fetch(`https://dummyjson.com/products?limit=${limit}&skip=${skip}`);
-          const data = await res.json();
-          newProducts = data.products.map(p => ({
-            id: `dj-${p.id}`,
-            title: p.title,
-            price: p.price,
-            image: p.thumbnail,
-            category: p.category,
-          }));
-          setHasMore(data.products.length === limit);
+
+          setProducts(
+            data.map(p => ({
+              id: `fs-${p.id}`,
+              title: p.title,
+              price: p.price,
+              image: p.image,
+              category: p.category
+            }))
+          );
         }
 
-        setProducts(prev => {
-          const merged = page === 1 ? newProducts : [...prev, ...newProducts];
-          sessionStorage.setItem(CACHE_KEY, JSON.stringify(merged));
-          sessionStorage.setItem(PAGE_KEY, page);
-          return merged;
-        });
+        // PAGE 2+ → DummyJSON
+        else {
+          const skip = (page - 2) * PAGE_SIZE;
+          const res = await fetch(
+            `https://dummyjson.com/products?limit=${PAGE_SIZE}&skip=${skip}`
+          );
+          const data = await res.json();
+
+          setProducts(
+            data.products.map(p => ({
+              id: `dj-${p.id}`,
+              title: p.title,
+              price: p.price,
+              image: p.thumbnail,
+              category: p.category
+            }))
+          );
+        }
       } catch {
         toast.error("Failed to load products");
       } finally {
         setLoading(false);
       }
-    };
+    }
 
-    fetchProducts();
+    load();
   }, [page]);
 
-  /* ===============================
-     SCROLL RESTORE (BACK)
-  ================================ */
-  useEffect(() => {
-    const saved = sessionStorage.getItem(SCROLL_KEY);
-    if (saved) {
-      requestAnimationFrame(() => {
-        window.scrollTo(0, Number(saved));
-      });
-    }
-  }, []);
-
-  useEffect(() => {
-    const save = () =>
-      sessionStorage.setItem(SCROLL_KEY, window.scrollY);
-    window.addEventListener("scroll", save);
-    return () => window.removeEventListener("scroll", save);
-  }, []);
-
-  /* ===============================
-     URL ↔ STATE SYNC
-  ================================ */
-  useEffect(() => {
-    setCategory(urlCategory);
-  }, [urlCategory]);
-
-  useEffect(() => {
-    setParams(category === "all" ? {} : { cat: category }, { replace: true });
-  }, [category, setParams]);
-
-  useEffect(() => {
-    setCart(JSON.parse(localStorage.getItem("cart")) || []);
-    setWishlist(JSON.parse(localStorage.getItem("wishlist")) || []);
-    setSearch(localStorage.getItem("search") || "");
-  }, [location.key]);
-
-  /* ===============================
-     FILTERS + COUNTS
-  ================================ */
-  const allCategories = [
+  /* ================= FILTERS ================= */
+  const ALL_CATEGORIES = [
     "all",
     "electronics",
     "men's clothing",
@@ -138,224 +74,111 @@ export default function Products() {
     "smartphones",
     "laptops",
     "fragrances",
-    "skincare",
     "groceries",
-    "home-decoration",
+    "home-decoration"
   ];
 
-  const categoryCounts = useMemo(() => {
-    return products.reduce((acc, p) => {
-      acc[p.category] = (acc[p.category] || 0) + 1;
-      return acc;
-    }, {});
-  }, [products]);
+  const filtered = useMemo(() => {
+    if (category === "all") return products;
+    return products.filter(p => p.category === category);
+  }, [products, category]);
 
-  const visibleCategories = allCategories.filter(c => c === "all" || categoryCounts[c]);
-
-  let filtered =
-    category === "all"
-      ? products
-      : products.filter(p => p.category === category);
-
-  if (search) {
-    filtered = filtered.filter(p =>
-      p.title.toLowerCase().includes(search.toLowerCase())
-    );
-  }
-
-  /* ===============================
-     ✅ STABLE VIRTUALIZATION
-  ================================ */
-  const [startIndex, setStartIndex] = useState(0);
-
-  useEffect(() => {
-    const onScroll = () => {
-      if (!containerRef.current) return;
-
-      const offsetTop = containerRef.current.offsetTop;
-      const relativeScroll = Math.max(0, window.scrollY - offsetTop);
-      setStartIndex(Math.floor(relativeScroll / ITEM_HEIGHT));
-    };
-
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  const visibleItems = filtered.slice(startIndex, startIndex + VISIBLE_COUNT);
-
-  /* ===============================
-     CART / WISHLIST
-  ================================ */
-  const addToCart = p => {
-    const updated = [...cart, { ...p, qty: 1 }];
-    setCart(updated);
-    localStorage.setItem("cart", JSON.stringify(updated));
-    toast.success("Added to cart");
+  const changePage = p => {
+    setParams({ page: p, cat: category !== "all" ? category : undefined });
   };
 
-  const toggleWishlist = id => {
-    const pid = String(id);
-    const updated = wishlist.includes(pid)
-      ? wishlist.filter(i => i !== pid)
-      : [...wishlist, pid];
-
-    setWishlist(updated);
-    localStorage.setItem("wishlist", JSON.stringify(updated));
+  const changeCategory = c => {
+    setParams({ page: 1, cat: c !== "all" ? c : undefined });
   };
-
-  const totalItems = cart.reduce((s, i) => s + (i.qty || 1), 0);
-
-  /* ===============================
-     INFINITE SCROLL
-  ================================ */
-  useEffect(() => {
-    if (!hasMore || loading) return;
-
-    const observer = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting) {
-        setPage(p => p + 1);
-      }
-    });
-
-    if (observerRef.current) observer.observe(observerRef.current);
-    return () => observer.disconnect();
-  }, [hasMore, loading]);
 
   return (
     <>
       <Seo title="Products | AIKart" />
 
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 px-4 pt-6 pb-32">
-        {/* MOBILE FILTER: Horizontal scrolling at top */}
-        <div className="lg:hidden mb-6">
-          <div className="flex gap-4 overflow-x-auto">
-            {visibleCategories.map(c => (
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        {/* MOBILE FILTER BAR */}
+        <div className="lg:hidden sticky top-0 z-20 bg-gray-100 py-3">
+          <div className="flex gap-2 overflow-x-auto">
+            {ALL_CATEGORIES.map(c => (
               <button
                 key={c}
-                onClick={() => {
-                  setCategory(c);
-                  setPage(1);
-                }}
-                className={`px-4 py-2 rounded-full text-sm font-semibold ${category === c ? "bg-green-600 text-white" : "bg-gray-200 dark:bg-gray-800"}`}
+                onClick={() => changeCategory(c)}
+                className={`px-4 py-2 rounded-full text-sm whitespace-nowrap
+                ${category === c ? "bg-yellow-400" : "bg-white border"}`}
               >
                 {c.toUpperCase()}
-                {c !== "all" && (
-                  <span className="ml-1 opacity-70">({categoryCounts[c]})</span>
-                )}
               </button>
             ))}
           </div>
         </div>
 
-        {/* DESKTOP FILTER: Sidebar style */}
-        <div className="lg:w-1/4 sm:w-full mb-6 sm:mb-0 sm:flex sm:flex-col sm:gap-4 sticky top-0 z-10">
-          <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md">
-            <h3 className="font-bold text-lg mb-4">Filter by Category</h3>
-            <div className="space-y-2">
-              {visibleCategories.map(c => (
-                <button
-                  key={c}
-                  onClick={() => {
-                    setCategory(c);
-                    setPage(1);
-                  }}
-                  className={`px-4 py-2 rounded-full text-sm font-semibold w-full text-left ${category === c ? "bg-green-600 text-white" : "bg-gray-200 dark:bg-gray-800"}`}
-                >
-                  {c.toUpperCase()}
-                  {c !== "all" && (
-                    <span className="ml-1 opacity-70">({categoryCounts[c]})</span>
-                  )}
-                </button>
-              ))}
+        <div className="flex gap-6 mt-6">
+          {/* DESKTOP FILTER */}
+          <aside className="hidden lg:block w-64">
+            <div className="bg-white p-4 rounded shadow">
+              <h3 className="font-bold mb-4">Category</h3>
+              <div className="space-y-2">
+                {ALL_CATEGORIES.map(c => (
+                  <button
+                    key={c}
+                    onClick={() => changeCategory(c)}
+                    className={`block w-full text-left px-3 py-2 rounded
+                    ${category === c ? "bg-yellow-300" : "hover:bg-gray-100"}`}
+                  >
+                    {c.toUpperCase()}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
-        </div>
+          </aside>
 
-        {/* PRODUCTS (VIRTUALIZED) */}
-        <div
-          ref={containerRef}
-          style={{
-            height: filtered.length * ITEM_HEIGHT,
-            position: "relative",
-          }}
-        >
-          <div
-            style={{
-              transform: `translateY(${startIndex * ITEM_HEIGHT}px)`,
-            }}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-          >
-            {loading && products.length === 0
-              ? Array.from({ length: 6 }).map((_, i) => (
-                  <ProductSkeleton key={i} />
-                ))
-              : visibleItems.map(p => (
+          {/* PRODUCTS */}
+          <main className="flex-1">
+            {loading ? (
+              <p>Loading...</p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filtered.map(p => (
                   <div
                     key={p.id}
-                    className="bg-white dark:bg-gray-800 p-5 rounded-xl shadow"
+                    className="bg-white p-4 rounded shadow"
                   >
-                    <div className="flex justify-between">
-                      <span className="text-xs bg-blue-100 px-2 py-1 rounded">
-                        {p.category}
-                      </span>
-                      <button onClick={() => toggleWishlist(p.id)}>
-                        {wishlist.includes(String(p.id)) ? "❤️" : "🤍"}
-                      </button>
-                    </div>
-
                     <img
                       src={p.image}
+                      className="h-44 mx-auto object-contain cursor-pointer"
                       onClick={() => navigate(`/product/${p.id}`)}
-                      className="h-44 w-full object-contain my-4 cursor-pointer"
                     />
-
-                    <h3 className="font-semibold text-sm line-clamp-2">
+                    <h3 className="mt-2 text-sm font-semibold line-clamp-2">
                       {p.title}
                     </h3>
-
-                    <p className="text-lg font-bold mb-3">
-                      ₹ {Math.round(p.price * 80)}
-                    </p>
-
+                    <p className="font-bold mt-1">₹ {Math.round(p.price * 80)}</p>
                     <button
-                      onClick={() => addToCart(p)}
-                      className="w-full bg-green-600 text-white py-2 rounded"
+                      onClick={() => navigate(`/product/${p.id}`)}
+                      className="mt-3 w-full bg-yellow-400 py-2 rounded"
                     >
-                      Add to Cart
+                      View
                     </button>
                   </div>
                 ))}
-          </div>
+              </div>
+            )}
+
+            {/* PAGINATION */}
+            <div className="flex justify-center gap-2 mt-10">
+              {[1, 2, 3, 4].map(p => (
+                <button
+                  key={p}
+                  onClick={() => changePage(p)}
+                  className={`px-4 py-2 border rounded
+                  ${page === p ? "bg-black text-white" : ""}`}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+          </main>
         </div>
-
-        {hasMore && <div ref={observerRef} className="h-12 mt-10" />}
       </div>
-
-      {/* MOBILE CART */}
-      {totalItems > 0 && (
-        <button
-          onClick={() => navigate("/cart")}
-          className="lg:hidden fixed bottom-20 right-4 z-50 bg-green-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-xl"
-        >
-          🛒
-          <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
-            {totalItems}
-          </span>
-        </button>
-      )}
-
-      {/* DESKTOP CART BUTTON */}
-      {totalItems > 0 && (
-        <button
-          onClick={() => navigate("/cart")}
-          className="hidden lg:flex fixed bottom-10 right-10 z-50 bg-green-600 text-white w-16 h-16 rounded-full items-center justify-center shadow-xl"
-        >
-          🛒
-          <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
-            {totalItems}
-          </span>
-        </button>
-      )}
     </>
   );
 }
