@@ -202,20 +202,11 @@ export default function Products() {
   const totalItems = cart.reduce((s, i) => s + (i.qty || 1), 0);
 
   /* ===============================
-     INFINITE SCROLL
+     PAGINATION (Page 1, Page 2, Page 3, ...)
   ================================ */
-  useEffect(() => {
-    if (!hasMore || loading) return;
-
-    const observer = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting) {
-        setPage(p => p + 1);
-      }
-    });
-
-    if (observerRef.current) observer.observe(observerRef.current);
-    return () => observer.disconnect();
-  }, [hasMore, loading]);
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+  };
 
   return (
     <>
@@ -334,6 +325,19 @@ export default function Products() {
           </span>
         </button>
       )}
+      
+      {/* PAGINATION */}
+      <div className="flex justify-center mt-6">
+        {[...Array(5)].map((_, index) => (
+          <button
+            key={index}
+            onClick={() => handlePageChange(index + 1)}
+            className={`px-4 py-2 ${page === index + 1 ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-800'} rounded-full`}
+          >
+            {index + 1}
+          </button>
+        ))}
+      </div>
     </>
   );
 }
