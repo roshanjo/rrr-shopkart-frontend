@@ -1,62 +1,71 @@
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import Seo from "../components/Seo";
 
 export default function ProductDetail() {
   const { id } = useParams();
-  const [params] = useSearchParams();
-  const source = params.get("source"); // 👈 THIS WAS MISSING
+  const [searchParams] = useSearchParams();
+  const source = searchParams.get("source"); // fs | dj
   const navigate = useNavigate();
 
   const [product, setProduct] = useState(null);
+  const [activeImage, setActiveImage] = useState("");
   const [loading, setLoading] = useState(true);
 
-  const [wishlist, setWishlist] = useState(
-    JSON.parse(localStorage.getItem("wishlist")) || []
-  );
+  // Variants (mocked like Amazon)
+  const colors = ["Black", "Blue", "Silver"];
+  const storages = ["128GB", "256GB", "512GB"];
+  const [selectedColor, setSelectedColor] = useState(colors[0]);
+  const [selectedStorage, setSelectedStorage] = useState(storages[0]);
+  const [qty, setQty] = useState(1);
 
-  const [cartCount, setCartCount] = useState(
-    JSON.parse(localStorage.getItem("cart"))?.length || 0
-  );
-
-  /* ================= FETCH PRODUCT ================= */
+  /* ============================
+     FETCH PRODUCT
+     ============================ */
   useEffect(() => {
-    async function fetchProduct() {
+    const loadProduct = async () => {
       try {
         setLoading(true);
 
-        // 🟡 FakeStore
-        if (source === "fake") {
+        let data;
+
+        if (source === "fs") {
           const res = await fetch(
             `https://fakestoreapi.com/products/${id}`
           );
-          const data = await res.json();
-          setProduct(data);
-        }
+          data = await res.json();
 
-        // 🔵 DummyJSON
-        else if (source === "dummy") {
-          const res = await fetch(
-            `https://dummyjson.com/products/${id}`
-          );
-          const data = await res.json();
-
-          // normalize to FakeStore shape
           setProduct({
             id: data.id,
             title: data.title,
             price: data.price,
             description: data.description,
-            category: data.category,
-            image: data.thumbnail,
-            rating: { rate: data.rating },
+            images: [data.image],
+            rating: data.rating?.rate || 4,
           });
+
+          setActiveImage(data.image);
         }
 
-        else {
-          throw new Error("Invalid source");
+        if (source === "dj") {
+          const res = await fetch(
+            `https://dummyjson.com/products/${id}`
+          );
+          data = await res.json();
+
+          setProduct({
+            id: data.id,
+            title: data.title,
+            price: data.price,
+            description: data.description,
+            images: data.images,
+            rating: data.rating || 4,
+          });
+
+          setActiveImage(data.images[0]);
         }
+
+        if (!source) throw new Error("Invalid source");
 
       } catch (err) {
         toast.error("Product not found");
@@ -64,152 +73,177 @@ export default function ProductDetail() {
       } finally {
         setLoading(false);
       }
-    }
+    };
 
-    fetchProduct();
+    loadProduct();
   }, [id, source, navigate]);
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center text-xl">
         Loading product...
       </div>
     );
   }
 
-  if (!product) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        Product not found
-      </div>
-    );
-  }
+  if (!product) return null;
 
-  const productId = `${source}-${id}`;
-  const name = product.title;
-  const price = Math.round(product.price * 80);
+  const priceINR = Math.round(product.price * 80);
 
-  /* ================= CART ================= */
+  /* ============================
+     CART
+     ============================ */
   const addToCart = () => {
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
     cart.push({
-      id: productId,
-      name,
-      price,
-      image: product.image,
-      qty: 1,
+      id: product.id,
+      title: product.title,
+      price: priceINR,
+      image: activeImage,
+      qty,
+      color: selectedColor,
+      storage: selectedStorage,
     });
     localStorage.setItem("cart", JSON.stringify(cart));
-    setCartCount(cart.length);
     toast.success("Added to cart");
   };
 
-  /* ================= WISHLIST ================= */
-  const toggleWishlist = () => {
-    let updated;
-    if (wishlist.includes(productId)) {
-      updated = wishlist.filter(i => i !== productId);
-      toast("Removed from wishlist");
-    } else {
-      updated = [...wishlist, productId];
-      toast.success("Added to wishlist ❤️");
-    }
-    setWishlist(updated);
-    localStorage.setItem("wishlist", JSON.stringify(updated));
-  };
-
+  /* ============================
+     UI
+     ============================ */
   return (
-    <>
-      <Seo title={`${name} | AIKart`} description={product.description} />
+    <div className="bg-gray-100 dark:bg-gray-900 min-h-screen p-4 md:p-8">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
 
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6 pb-32">
-        <div className="max-w-5xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow p-6">
+        {/* LEFT – IMAGE GALLERY */}
+        <div className="lg:col-span-4 flex gap-4">
+          <div className="flex flex-col gap-2">
+            {product.images.map((img, i) => (
+              <img
+                key={i}
+                src={img}
+                onClick={() => setActiveImage(img)}
+                className={`w-16 h-16 object-contain border cursor-pointer ${
+                  activeImage === img ? "border-yellow-500" : "border-gray-300"
+                }`}
+              />
+            ))}
+          </div>
 
-          <button
-            onClick={() => navigate(-1)}
-            className="mb-4 text-sm text-blue-600"
-          >
-            ← Back
-          </button>
+          <img
+            src={activeImage}
+            className="w-full h-96 object-contain bg-white p-4"
+          />
+        </div>
 
-          <div className="grid md:grid-cols-2 gap-8">
-            <img
-              src={product.image}
-              alt={name}
-              className="h-72 object-contain mx-auto"
-            />
+        {/* CENTER – PRODUCT INFO */}
+        <div className="lg:col-span-5 space-y-4">
+          <h1 className="text-2xl font-semibold text-white">
+            {product.title}
+          </h1>
 
+          <p className="text-yellow-400">⭐ {product.rating} / 5</p>
+
+          <p className="text-2xl font-bold text-green-400">
+            ₹ {priceINR}
+          </p>
+
+          <p className="text-gray-300">{product.description}</p>
+
+          {/* VARIANTS */}
+          <div className="space-y-3">
             <div>
-              <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">
-                {product.category}
-              </span>
-
-              <h1 className="text-2xl font-bold mt-2">{name}</h1>
-
-              <p className="text-yellow-500 mt-1">
-                ⭐ {product.rating?.rate || 4} / 5
-              </p>
-
-              <p className="text-2xl text-green-600 font-bold mt-3">
-                ₹ {price}
-              </p>
-
-              <p className="mt-4 text-gray-600 dark:text-gray-300">
-                {product.description}
-              </p>
-
-              <div className="hidden md:flex gap-4 mt-6">
-                <button
-                  onClick={addToCart}
-                  className="bg-green-600 text-white px-6 py-2 rounded"
-                >
-                  Add to Cart
-                </button>
-
-                <button
-                  onClick={toggleWishlist}
-                  className={`border px-6 py-2 rounded ${
-                    wishlist.includes(productId)
-                      ? "border-red-500 text-red-500"
-                      : ""
-                  }`}
-                >
-                  ❤️ Wishlist
-                </button>
+              <p className="font-medium text-white">Colour</p>
+              <div className="flex gap-2 mt-1">
+                {colors.map(c => (
+                  <button
+                    key={c}
+                    onClick={() => setSelectedColor(c)}
+                    className={`border px-3 py-1 rounded ${
+                      selectedColor === c
+                        ? "border-yellow-500 text-yellow-400"
+                        : "border-gray-500 text-gray-300"
+                    }`}
+                  >
+                    {c}
+                  </button>
+                ))}
               </div>
             </div>
+
+            <div>
+              <p className="font-medium text-white">Storage</p>
+              <div className="flex gap-2 mt-1">
+                {storages.map(s => (
+                  <button
+                    key={s}
+                    onClick={() => setSelectedStorage(s)}
+                    className={`border px-3 py-1 rounded ${
+                      selectedStorage === s
+                        ? "border-yellow-500 text-yellow-400"
+                        : "border-gray-500 text-gray-300"
+                    }`}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT – STICKY BUY BOX */}
+        <div className="lg:col-span-3">
+          <div className="sticky top-24 bg-white dark:bg-gray-800 p-4 rounded shadow space-y-4">
+            <p className="text-2xl font-bold text-green-600">
+              ₹ {priceINR}
+            </p>
+
+            <div>
+              <label className="text-sm">Quantity</label>
+              <select
+                value={qty}
+                onChange={e => setQty(+e.target.value)}
+                className="w-full border p-2 mt-1 rounded"
+              >
+                {[1, 2, 3, 4].map(n => (
+                  <option key={n}>{n}</option>
+                ))}
+              </select>
+            </div>
+
+            <button
+              onClick={addToCart}
+              className="w-full bg-yellow-400 text-black py-3 rounded font-medium"
+            >
+              Add to Cart
+            </button>
+
+            <button
+              className="w-full bg-orange-500 text-white py-3 rounded font-medium"
+            >
+              Buy Now
+            </button>
+
+            <button className="w-full border py-2 rounded">
+              ❤️ Add to Wishlist
+            </button>
           </div>
         </div>
       </div>
 
       {/* MOBILE STICKY BAR */}
-      <div className="md:hidden sticky bottom-0 z-40 bg-white dark:bg-gray-800 border-t">
-        <div className="flex items-center justify-between px-4 py-4">
-          <p className="text-lg font-bold text-green-600">₹ {price}</p>
-          <button
-            onClick={addToCart}
-            className="bg-green-600 text-white px-6 py-2 rounded"
-          >
-            Add to Cart
-          </button>
-        </div>
-      </div>
-
-      {/* FLOATING CART */}
-      {cartCount > 0 && (
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t p-4 flex gap-4">
         <button
-          onClick={() => navigate("/cart")}
-          className="md:hidden fixed bottom-24 right-4 z-50
-                     bg-green-600 text-white w-14 h-14 rounded-full
-                     flex items-center justify-center shadow-lg"
+          onClick={addToCart}
+          className="flex-1 bg-yellow-400 text-black py-3 rounded"
         >
-          🛒
-          <span className="absolute -top-1 -right-1 bg-red-600 text-white
-                           text-xs w-5 h-5 rounded-full flex items-center justify-center">
-            {cartCount}
-          </span>
+          Add to Cart
         </button>
-      )}
-    </>
+        <button className="flex-1 bg-orange-500 text-white py-3 rounded">
+          Buy Now
+        </button>
+      </div>
+    </div>
   );
 }
