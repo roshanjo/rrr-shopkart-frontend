@@ -1,6 +1,11 @@
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import CartDrawer from "./components/CartDrawer";
+
+import { CartProvider } from "./context/CartContext";
+
 import AuthPage from "./pages/AuthPage";
 import Products from "./pages/Products";
 import Cart from "./pages/Cart";
@@ -15,6 +20,7 @@ import Address from "./pages/Address";
 
 function Layout({ children }) {
   const location = useLocation();
+
   const hideNavbar = location.pathname === "/";
   const hideFooter =
     location.pathname === "/" || location.pathname === "/success";
@@ -30,22 +36,27 @@ function Layout({ children }) {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<AuthPage />} />
-          <Route path="/products" element={<Products />} />
-          <Route path="/product/:id" element={<ProductDetail />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/admin/orders" element={<AdminOrders />} />
-          <Route path="/success" element={<Success />} />
-          <Route path="/cancel" element={<Cancel />} />
-          <Route path="/my-orders" element={<MyOrders />} />
-          <Route path="/orders/:id" element={<OrderDetails />} />
-          <Route path="/wishlist" element={<Wishlist />} />
-          <Route path="/address" element={<Address />} />
-        </Routes>
-      </Layout>
-    </BrowserRouter>
+    <CartProvider>
+      <BrowserRouter>
+        <Layout>
+          <Routes>
+            <Route path="/" element={<AuthPage />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/product/:id" element={<ProductDetail />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/admin/orders" element={<AdminOrders />} />
+            <Route path="/success" element={<Success />} />
+            <Route path="/cancel" element={<Cancel />} />
+            <Route path="/my-orders" element={<MyOrders />} />
+            <Route path="/orders/:id" element={<OrderDetails />} />
+            <Route path="/wishlist" element={<Wishlist />} />
+            <Route path="/address" element={<Address />} />
+          </Routes>
+        </Layout>
+
+        {/* 🔥 AMAZON-STYLE CART DRAWER */}
+        <CartDrawer />
+      </BrowserRouter>
+    </CartProvider>
   );
 }
