@@ -1,35 +1,41 @@
-export default function ProductCard({ product, onAdd, onView }) {
+import { Heart } from "lucide-react";
+import { useWishlist } from "../context/WishlistContext";
+
+export default function ProductCard({ product, onAdd, onOpen }) {
+  const { wishlist, toggleWishlist } = useWishlist();
+  const liked = wishlist.some(p => p.id === product.id);
+
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition overflow-hidden">
+    <div className="bg-slate-900 rounded-lg p-3 flex flex-col relative">
+      <button
+        onClick={() => toggleWishlist(product)}
+        className="absolute top-2 right-2"
+      >
+        <Heart
+          className={liked ? "fill-red-500 text-red-500" : "text-white"}
+        />
+      </button>
+
       <img
         src={product.image}
-        alt={product.title}
-        className="h-48 w-full object-contain cursor-pointer"
-        onClick={() => onView(product.id)}
+        className="h-40 object-contain cursor-pointer"
+        onClick={onOpen}
       />
 
-      <div className="p-4">
-        <h3 className="font-semibold text-sm line-clamp-2 mb-1">
-          {product.title}
-        </h3>
+      <h3 className="mt-2 text-sm font-semibold text-white line-clamp-2">
+        {product.title}
+      </h3>
 
-        <p className="text-xs text-gray-500 mb-2">
-          {product.category}
-        </p>
+      <p className="text-yellow-400 font-bold mt-1">
+        ₹{Math.round(product.price)}
+      </p>
 
-        <div className="flex justify-between items-center">
-          <span className="font-bold text-purple-600">
-            ₹ {Math.round(product.price * 80)}
-          </span>
-
-          <button
-            onClick={() => onAdd(product)}
-            className="bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700"
-          >
-            Add
-          </button>
-        </div>
-      </div>
+      <button
+        onClick={onAdd}
+        className="mt-auto bg-yellow-400 text-black py-2 rounded"
+      >
+        Add to Cart
+      </button>
     </div>
   );
 }
