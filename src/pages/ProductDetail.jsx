@@ -1,17 +1,39 @@
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { useCart } from "../context/CartContext";
-import { useNavigate } from "react-router-dom";
 
-export default function ProductDetail({ product }) {
+export default function ProductDetail() {
+  const { id } = useParams();
   const { addToCart } = useCart();
-  const navigate = useNavigate();
+  const [product, setProduct] = useState(null);
+
+  useEffect(() => {
+    async function load() {
+      const res = await fetch(`https://dummyjson.com/products/${id}`);
+      const data = await res.json();
+      setProduct(data);
+    }
+    load();
+  }, [id]);
+
+  if (!product) return <p className="text-white">Loading...</p>;
 
   return (
-    <>
-      {/* DESKTOP BUY BOX */}
-      <div className="hidden lg:block sticky top-24 bg-gray-900 p-6 rounded space-y-4">
-        <p className="text-2xl font-bold text-green-400">
+    <div className="max-w-6xl mx-auto px-4 py-8 grid lg:grid-cols-2 gap-10 text-white">
+      <div>
+        <img
+          src={product.thumbnail}
+          className="w-full max-h-[400px] object-contain bg-white rounded"
+        />
+      </div>
+
+      <div className="space-y-4">
+        <h1 className="text-2xl font-bold">{product.title}</h1>
+        <p className="text-yellow-400 text-lg">⭐ {product.rating}</p>
+        <p className="text-green-400 text-2xl font-bold">
           ₹ {Math.round(product.price * 83)}
         </p>
+        <p className="text-gray-300">{product.description}</p>
 
         <button
           onClick={() => addToCart(product)}
@@ -23,34 +45,13 @@ export default function ProductDetail({ product }) {
         <button
           onClick={() => {
             addToCart(product);
-            navigate("/checkout");
+            window.location.href = "/checkout";
           }}
-          className="w-full bg-orange-500 text-white py-3 rounded font-semibold"
+          className="w-full bg-orange-500 py-3 rounded font-semibold"
         >
           Buy Now
         </button>
       </div>
-
-      {/* MOBILE BOTTOM BAR */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-700 z-40">
-        <div className="flex gap-2 p-3">
-          <button
-            onClick={() => addToCart(product)}
-            className="bg-yellow-400 text-black py-3 rounded w-full"
-          >
-            Add to Cart
-          </button>
-          <button
-            onClick={() => {
-              addToCart(product);
-              navigate("/checkout");
-            }}
-            className="bg-orange-500 text-white py-3 rounded w-full"
-          >
-            Buy Now
-          </button>
-        </div>
-      </div>
-    </>
+    </div>
   );
 }
