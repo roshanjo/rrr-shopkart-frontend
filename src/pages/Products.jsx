@@ -1,45 +1,141 @@
-import { products } from "../data/products";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+
+const PAGE_SIZE = 12;
 
 export default function Products() {
-  const [category, setCategory] = useState("ALL");
   const navigate = useNavigate();
+  const [params, setParams] = useSearchParams();
 
-  const filtered =
-    category === "ALL"
-      ? products
-      : products.filter((p) => p.category === category);
+  const page = Number(params.get("page") || 1);
+  const category = params.get("cat") || "all";
+
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  /* ===== FETCH DUMMYJSON ===== */
+  useEffect(() => {
+    async function load() {
+      setLoading(true);
+
+      const skip = (page - 1) * PAGE_SIZE;
+      const res = await fetch(
+        `https://dummyjson.com/products?limit=${PAGE_SIZE}&skip=${skip}`
+      );
+      const data = await res.json();
+
+      setProducts(data.products);
+      setLoading(false);
+    }
+
+    load();
+  }, [page]);
+
+  /* ===== CATEGORIES ===== */
+  const categories = [
+    "all",
+    "beauty",
+    "smartphones",
+    "laptops",
+    "groceries",
+    "home-decoration"
+  ];
+
+  const filtered = useMemo(() => {
+    if (category === "all") return products;
+    return products.filter(p => p.category === category);
+  }, [products, category]);
+
+  const changeCategory = c => {
+    setParams(c === "all" ? {} : { cat: c });
+  };
+
+  const changePage = p => {
+    setParams(category === "all" ? { page: p } : { cat: category });
+  };
 
   return (
-    <div className="flex min-h-screen">
-      {/* FILTER */}
-      <aside className="w-60 p-4">
-        {["ALL", "SKINCARE"].map((c) => (
-          <button
-            key={c}
-            className="block mb-2"
-            onClick={() => setCategory(c)}
-          >
-            {c}
-          </button>
-        ))}
-      </aside>
+    <div className="max-w-7xl mx-auto px-4 py-6">
+      {/* MOBILE FILTER */}
+      <div className="lg:hidden sticky top-16 z-30 bg-black py-3">
+        <div className="flex gap-2 overflow-x-auto">
+          {categories.map(c => (
+            <button
+              key={c}
+              onClick={() => changeCategory(c)}
+              className={`px-4 py-2 rounded-full text-sm whitespace-nowrap
+              ${category === c ? "bg-yellow-400 text-black" : "bg-gray-800 text-white"}`}
+            >
+              {c.toUpperCase()}
+            </button>
+          ))}
+        </div>
+      </div>
 
-      {/* PRODUCTS */}
-      <main className="grid grid-cols-4 gap-4 p-4 flex-1">
-        {filtered.map((p) => (
-          <div
-            key={p.id}
-            className="border p-3 cursor-pointer"
-            onClick={() => navigate(`/product/${p.id}`)}
-          >
-            <img src={p.images[0]} />
-            <h3>{p.title}</h3>
-            <p>₹ {p.price}</p>
+      <div className="flex gap-6 mt-6">
+        {/* DESKTOP FILTER */}
+        <aside className="hidden lg:block w-64">
+          <div className="bg-gray-900 text-white p-4 rounded">
+            <h3 className="font-bold mb-4">Category</h3>
+            {categories.map(c => (
+              <button
+                key={c}
+                onClick={() => changeCategory(c)}
+                className={`block w-full text-left px-3 py-2 rounded mb-1
+                ${category === c ? "bg-yellow-400 text-black" : "hover:bg-gray-800"}`}
+              >
+                {c.toUpperCase()}
+              </button>
+            ))}
           </div>
-        ))}
-      </main>
+        </aside>
+
+        {/* PRODUCTS GRID */}
+        <main className="flex-1">
+          {loading ? (
+            <p className="text-white">Loading...</p>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              {filtered.map(product => (
+                <div
+                  key={product.id}
+                  className="bg-gray-900 text-white p-3 rounded cursor-pointer"
+                  onClick={() =>
+                    navigate(`/product/${product.id}?source=dummy`)
+                  }
+                >
+                  <img
+                    src={product.thumbnail}
+                    className="h-40 w-full object-contain"
+                  />
+                  <h3 className="mt-2 text-sm font-semibold line-clamp-2">
+                    {product.title}
+                  </h3>
+                  <p className="font-bold mt-1 text-yellow-400">
+                    ₹ {Math.round(product.price * 80)}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* PAGINATION ONLY FOR ALL */}
+          {category === "all" && (
+            <div className="flex justify-center gap-2 mt-10">
+              {[1, 2, 3, 4].map(p => (
+                <button
+                  key={p}
+                  onClick={() => changePage(p)}
+                  className={`px-4 py-2 border rounded
+                  ${page === p ? "bg-yellow-400 text-black" : "text-white"}`}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+          )}
+        </main>
+      </div>
     </div>
   );
 }

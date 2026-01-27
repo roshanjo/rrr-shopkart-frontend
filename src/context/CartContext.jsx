@@ -8,8 +8,8 @@ export default function CartProvider({ children }) {
   const [cart, setCart] = useState([]);
   const [open, setOpen] = useState(false);
 
-  const addToCart = (product) => {
-    setCart((prev) => [...prev, product]);
+  const addToCart = product => {
+    setCart(prev => [...prev, product]);
     setOpen(true);
   };
 

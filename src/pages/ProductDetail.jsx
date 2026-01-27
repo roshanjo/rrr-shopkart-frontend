@@ -1,64 +1,92 @@
-import { useParams } from "react-router-dom";
-import { products } from "../data/products";
+import { useParams, useSearchParams, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { useCart } from "../context/CartContext";
-import { useState } from "react";
 
 export default function ProductDetail() {
   const { id } = useParams();
-  const product = products.find((p) => p.id == id);
+  const [params] = useSearchParams();
+  const navigate = useNavigate();
   const { addToCart } = useCart();
-  const [img, setImg] = useState(product.images[0]);
 
-  if (!product) return <p>Product not found</p>;
+  const source = params.get("source");
+
+  const [product, setProduct] = useState(null);
+
+  useEffect(() => {
+    if (source !== "dummy") {
+      navigate("/products");
+      return;
+    }
+
+    fetch(`https://dummyjson.com/products/${id}`)
+      .then(res => res.json())
+      .then(setProduct);
+  }, [id, source, navigate]);
+
+  if (!product) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-white">
+        Loading product...
+      </div>
+    );
+  }
 
   return (
-    <div className="grid grid-cols-3 gap-6 min-h-screen p-6">
-      {/* Gallery */}
-      <div>
-        <img src={img} className="w-full" />
-        <div className="flex gap-2 mt-2">
-          {product.images.map((i) => (
+    <div className="max-w-7xl mx-auto p-6 pb-32 grid lg:grid-cols-3 gap-8">
+      {/* IMAGE GALLERY */}
+      <div className="lg:col-span-2">
+        <img
+          src={product.thumbnail}
+          className="w-full h-96 object-contain bg-white rounded"
+        />
+
+        <div className="flex gap-2 mt-4">
+          {product.images.map(img => (
             <img
-              key={i}
-              src={i}
-              className="w-16 cursor-pointer"
-              onClick={() => setImg(i)}
+              key={img}
+              src={img}
+              className="w-20 h-20 object-contain border rounded"
             />
           ))}
         </div>
+
+        {/* DESCRIPTION */}
+        <div className="mt-6 text-white">
+          <h2 className="text-xl font-bold">About this item</h2>
+          <p className="mt-2 text-gray-300">{product.description}</p>
+        </div>
       </div>
 
-      {/* Info */}
-      <div>
-        <h1 className="text-2xl">{product.title}</h1>
-        <p>⭐ {product.rating}</p>
-        <p>{product.description}</p>
+      {/* BUY BOX */}
+      <div className="sticky top-24 h-fit border p-6 rounded bg-white">
+        <p className="text-2xl font-bold text-green-600">
+          ₹ {Math.round(product.price * 80)}
+        </p>
 
-        <h4 className="mt-4 font-bold">Offers</h4>
-        {product.offers.map((o) => (
-          <p key={o}>✔ {o}</p>
-        ))}
+        <p className="text-sm mt-2 text-gray-600">Inclusive of all taxes</p>
 
-        <h4 className="mt-4 font-bold">Reviews</h4>
-        {product.reviews.map((r, i) => (
-          <p key={i}>
-            {r.user}: {r.comment}
-          </p>
-        ))}
-      </div>
-
-      {/* STICKY BUY BOX */}
-      <div className="sticky top-20 border p-4 h-fit">
-        <p className="text-xl">₹ {product.price}</p>
         <button
-          className="w-full bg-yellow-400 py-2 mt-2"
           onClick={() => addToCart(product)}
+          className="w-full bg-yellow-400 py-3 mt-4 rounded font-bold"
         >
           Add to Cart
         </button>
-        <button className="w-full bg-orange-500 py-2 mt-2">
+
+        <button
+          onClick={() => navigate("/address")}
+          className="w-full bg-orange-500 py-3 mt-2 rounded text-white font-bold"
+        >
           Buy Now
         </button>
+
+        {/* OFFERS */}
+        <div className="mt-4 text-sm">
+          <p className="font-semibold">Offers</p>
+          <ul className="list-disc pl-5 text-gray-700">
+            <li>No Cost EMI available</li>
+            <li>10% Instant Discount</li>
+          </ul>
+        </div>
       </div>
     </div>
   );
