@@ -11,7 +11,7 @@ export default function WishlistButton({ product }) {
   }, [wishlistId]);
 
   const toggleWishlist = e => {
-    e.stopPropagation(); // prevents product card click
+    e.stopPropagation();
 
     let list = JSON.parse(localStorage.getItem("wishlist")) || [];
 
@@ -30,7 +30,9 @@ export default function WishlistButton({ product }) {
   return (
     <button
       onClick={toggleWishlist}
-      className={`text-xl ${liked ? "text-red-500" : "text-gray-400"}`}
+      className={`text-xl transition
+        ${liked ? "text-red-500" : "text-gray-300 hover:text-gray-500"}`}
+      aria-label="Wishlist"
     >
       ♥
     </button>
