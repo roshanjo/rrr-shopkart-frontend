@@ -1,6 +1,8 @@
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useCart } from "../context/CartContext";
+import WishlistButton from "../components/WishlistButton";
+
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -49,6 +51,13 @@ export default function ProductDetail() {
             />
           ))}
         </div>
+
+<div className="flex justify-between items-center">
+  <p className="text-2xl font-bold text-green-600">
+    ₹ {Math.round(product.price * 80)}
+  </p>
+  <WishlistButton product={product} />
+</div>
 
         {/* DESCRIPTION */}
         <div className="mt-6 text-white">

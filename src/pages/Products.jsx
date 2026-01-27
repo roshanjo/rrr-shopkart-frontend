@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import WishlistButton from "../components/WishlistButton";
 
 const PAGE_SIZE = 12;
 
@@ -71,6 +72,13 @@ export default function Products() {
           ))}
         </div>
       </div>
+
+<div className="flex justify-between items-start">
+  <h3 className="mt-2 text-sm font-semibold line-clamp-2">
+    {product.title}
+  </h3>
+  <WishlistButton product={product} />
+</div>
 
       <div className="flex gap-6 mt-6">
         {/* DESKTOP FILTER */}

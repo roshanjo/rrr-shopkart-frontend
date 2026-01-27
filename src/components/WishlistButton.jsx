@@ -1,20 +1,28 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 export default function WishlistButton({ product }) {
+  const wishlistId = `dj-${product.id}`;
   const [liked, setLiked] = useState(false);
 
   useEffect(() => {
     const list = JSON.parse(localStorage.getItem("wishlist")) || [];
-    setLiked(list.some(p => p.id === product.id));
-  }, [product]);
+    setLiked(list.includes(wishlistId));
+  }, [wishlistId]);
 
-  const toggleWishlist = () => {
+  const toggleWishlist = e => {
+    e.stopPropagation(); // prevents product card click
+
     let list = JSON.parse(localStorage.getItem("wishlist")) || [];
-    if (liked) {
-      list = list.filter(p => p.id !== product.id);
+
+    if (list.includes(wishlistId)) {
+      list = list.filter(id => id !== wishlistId);
+      toast("Removed from wishlist");
     } else {
-      list.push(product);
+      list.push(wishlistId);
+      toast("Added to wishlist ❤️");
     }
+
     localStorage.setItem("wishlist", JSON.stringify(list));
     setLiked(!liked);
   };
