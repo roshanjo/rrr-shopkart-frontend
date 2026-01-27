@@ -65,20 +65,15 @@ export default function Products() {
               key={c}
               onClick={() => changeCategory(c)}
               className={`px-4 py-2 rounded-full text-sm whitespace-nowrap
-              ${category === c ? "bg-yellow-400 text-black" : "bg-gray-800 text-white"}`}
+              ${category === c
+                ? "bg-yellow-400 text-black"
+                : "bg-gray-800 text-white"}`}
             >
               {c.toUpperCase()}
             </button>
           ))}
         </div>
       </div>
-
-<div className="flex justify-between items-start">
-  <h3 className="mt-2 text-sm font-semibold line-clamp-2">
-    {product.title}
-  </h3>
-  <WishlistButton product={product} />
-</div>
 
       <div className="flex gap-6 mt-6">
         {/* DESKTOP FILTER */}
@@ -90,7 +85,9 @@ export default function Products() {
                 key={c}
                 onClick={() => changeCategory(c)}
                 className={`block w-full text-left px-3 py-2 rounded mb-1
-                ${category === c ? "bg-yellow-400 text-black" : "hover:bg-gray-800"}`}
+                ${category === c
+                  ? "bg-yellow-400 text-black"
+                  : "hover:bg-gray-800"}`}
               >
                 {c.toUpperCase()}
               </button>
@@ -107,18 +104,28 @@ export default function Products() {
               {filtered.map(product => (
                 <div
                   key={product.id}
-                  className="bg-gray-900 text-white p-3 rounded cursor-pointer"
+                  className="bg-gray-900 text-white p-3 rounded cursor-pointer relative"
                   onClick={() =>
                     navigate(`/product/${product.id}?source=dummy`)
                   }
                 >
+                  {/* ❤️ WISHLIST */}
+                  <div
+                    className="absolute top-2 right-2"
+                    onClick={e => e.stopPropagation()}
+                  >
+                    <WishlistButton product={product} />
+                  </div>
+
                   <img
                     src={product.thumbnail}
                     className="h-40 w-full object-contain"
                   />
+
                   <h3 className="mt-2 text-sm font-semibold line-clamp-2">
                     {product.title}
                   </h3>
+
                   <p className="font-bold mt-1 text-yellow-400">
                     ₹ {Math.round(product.price * 80)}
                   </p>
@@ -127,7 +134,7 @@ export default function Products() {
             </div>
           )}
 
-          {/* PAGINATION ONLY FOR ALL */}
+          {/* PAGINATION */}
           {category === "all" && (
             <div className="flex justify-center gap-2 mt-10">
               {[1, 2, 3, 4].map(p => (
@@ -135,7 +142,9 @@ export default function Products() {
                   key={p}
                   onClick={() => changePage(p)}
                   className={`px-4 py-2 border rounded
-                  ${page === p ? "bg-yellow-400 text-black" : "text-white"}`}
+                  ${page === p
+                    ? "bg-yellow-400 text-black"
+                    : "text-white"}`}
                 >
                   {p}
                 </button>
