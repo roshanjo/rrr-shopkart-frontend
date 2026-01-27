@@ -1,40 +1,26 @@
-import { Heart } from "lucide-react";
-import { useWishlist } from "../context/WishlistContext";
-
-export default function ProductCard({ product, onAdd, onOpen }) {
-  const { wishlist, toggleWishlist } = useWishlist();
-  const liked = wishlist.some(p => p.id === product.id);
-
+export default function ProductCard({ product }) {
   return (
-    <div className="bg-slate-900 rounded-lg p-3 flex flex-col relative">
-      <button
-        onClick={() => toggleWishlist(product)}
-        className="absolute top-2 right-2"
-      >
-        <Heart
-          className={liked ? "fill-red-500 text-red-500" : "text-white"}
+    <div className="border border-gray-700 rounded-lg p-4 bg-[#0f172a] text-white">
+      
+      {/* IMAGE — render ONLY if exists */}
+      {product.image && (
+        <img
+          src={product.image}
+          alt={product.title}
+          className="w-full h-40 object-contain mb-3"
         />
-      </button>
+      )}
 
-      <img
-        src={product.image}
-        className="h-40 object-contain cursor-pointer"
-        onClick={onOpen}
-      />
-
-      <h3 className="mt-2 text-sm font-semibold text-white line-clamp-2">
+      <h3 className="text-sm font-semibold mb-1 line-clamp-2">
         {product.title}
       </h3>
 
-      <p className="text-yellow-400 font-bold mt-1">
-        ₹{Math.round(product.price)}
+      <p className="text-yellow-400 font-bold mb-2">
+        ₹ {product.price}
       </p>
 
-      <button
-        onClick={onAdd}
-        className="mt-auto bg-yellow-400 text-black py-2 rounded"
-      >
-        Add to Cart
+      <button className="w-full bg-yellow-400 text-black py-2 rounded hover:bg-yellow-500">
+        View
       </button>
     </div>
   );
