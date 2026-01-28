@@ -115,18 +115,27 @@ export default function Products() {
                       navigate(`/product/${product.id}?source=dummy`)
                     }
                   >
+                    {/* ❤️ Wishlist */}
                     <div
-                      className="absolute top-2 right-2"
+                      className="absolute top-2 right-2 z-10"
                       onClick={e => e.stopPropagation()}
                     >
                       <WishlistButton product={product} />
                     </div>
 
-                    <img
-                      src={product.thumbnail}
-                      className="h-40 w-full object-contain bg-white rounded-lg"
-                      alt={product.title}
-                    />
+                    {/* 🖼️ IMAGE CONTAINER (FIXED) */}
+                    <div
+                      className="h-40 w-full rounded-lg
+                                 bg-gradient-to-br from-[#0b1220] to-[#111827]
+                                 border border-[#1f2937]
+                                 flex items-center justify-center p-3"
+                    >
+                      <img
+                        src={product.thumbnail}
+                        alt={product.title}
+                        className="max-h-full max-w-full object-contain"
+                      />
+                    </div>
 
                     <h3 className="mt-3 text-sm font-medium text-gray-100 line-clamp-2">
                       {product.title}
@@ -140,6 +149,7 @@ export default function Products() {
               </div>
             )}
 
+            {/* PAGINATION */}
             {category === "all" && (
               <div className="flex justify-center gap-2 mt-10">
                 {[1, 2, 3, 4].map(p => (
