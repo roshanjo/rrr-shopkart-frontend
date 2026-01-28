@@ -92,13 +92,12 @@ export default function Address() {
 
       localStorage.setItem("address_data", JSON.stringify(address));
 
-      // 2️⃣ Get cart total (INR)
-      const cartTotal = Number(localStorage.getItem("cart_total")) || 1;
+      // 2️⃣ Stripe checkout (BACKEND EXPECTS `total`)
+      const total = Number(localStorage.getItem("cart_total")) || 1;
 
-      // 3️⃣ Create Stripe session (SEND `total`)
       const stripeRes = await axios.post(
         `${API}/api/create-checkout-session/`,
-        { total: cartTotal }, // ✅ MUST be `total`
+        { total }, // ✅ FIXED
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -107,8 +106,9 @@ export default function Address() {
         }
       );
 
-      // 4️⃣ Redirect to Stripe
+      // 3️⃣ Redirect to Stripe
       window.location.href = stripeRes.data.url;
+
     } catch (err) {
       console.error("Stripe / Address error:", err.response?.data || err.message);
       alert("Failed to continue. Please try again.");
