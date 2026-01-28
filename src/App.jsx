@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import CartDrawer from "./components/CartDrawer";
-import CartProvider from "./context/CartContext";
+import { CartProvider } from "./context/CartContext";
 
 
 import AuthPage from "./pages/AuthPage";
