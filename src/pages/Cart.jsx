@@ -1,20 +1,15 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-const API = import.meta.env.VITE_API_URL;
-
 export default function Cart() {
   const navigate = useNavigate();
 
   const [cart, setCart] = useState([]);
-  const [address, setAddress] = useState(null);
 
   useEffect(() => {
     setCart(JSON.parse(localStorage.getItem("cart")) || []);
-    setAddress(JSON.parse(localStorage.getItem("address_data")));
   }, []);
 
-  const token = localStorage.getItem("token");
   const user = JSON.parse(localStorage.getItem("user"));
 
   const updateCart = (updated) => {
@@ -51,7 +46,6 @@ export default function Cart() {
     0
   );
 
-  // ✅ CHECKOUT FLOW (UNCHANGED)
   const proceedToCheckout = () => {
     if (!user) {
       alert("Please login first");
@@ -93,15 +87,19 @@ export default function Cart() {
                 >
                   {/* PRODUCT IMAGE */}
                   <img
-                    src={item.image}
-                    alt={item.name}
-                    className="h-24 w-24 object-cover rounded"
+                    src={item.thumbnail}
+                    alt={item.title}
+                    className="h-24 w-24 object-contain rounded bg-white"
                   />
 
                   {/* PRODUCT INFO */}
                   <div className="flex-1">
-                    <h3 className="font-semibold text-lg">{item.name}</h3>
-                    <p className="text-gray-500">₹{item.price}</p>
+                    <h3 className="font-semibold text-lg">
+                      {item.title}
+                    </h3>
+                    <p className="text-gray-500">
+                      ₹{item.price}
+                    </p>
 
                     {/* QTY CONTROLS */}
                     <div className="flex items-center gap-3 mt-3">
@@ -123,11 +121,8 @@ export default function Cart() {
                     </div>
                   </div>
 
-                  {/* PRICE + REMOVE (RIGHT SIDE) */}
-                  <div
-                    className="flex sm:flex-col items-end justify-between
-                               gap-3 min-w-[120px]"
-                  >
+                  {/* PRICE + REMOVE */}
+                  <div className="flex sm:flex-col items-end justify-between gap-3 min-w-[120px]">
                     <p className="font-semibold">
                       ₹{item.price * (item.qty || 1)}
                     </p>
@@ -144,19 +139,6 @@ export default function Cart() {
                 </div>
               ))}
             </>
-          )}
-
-          {/* ADDRESS (OPTIONAL) */}
-          {address && (
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-4">
-              <h2 className="font-semibold mb-2">Delivery Address</h2>
-              <p>{address.fullName}</p>
-              <p>{address.phone}</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                {address.street}, {address.city}, {address.state} -{" "}
-                {address.pincode}
-              </p>
-            </div>
           )}
 
           {/* ACTION BUTTONS */}
@@ -182,7 +164,9 @@ export default function Cart() {
         {/* RIGHT — ORDER SUMMARY */}
         {cart.length > 0 && (
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-5 h-fit">
-            <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
+            <h2 className="text-xl font-semibold mb-4">
+              Order Summary
+            </h2>
 
             <div className="flex justify-between mb-2">
               <span>Subtotal</span>
