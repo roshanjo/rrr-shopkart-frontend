@@ -30,9 +30,12 @@ export default function WishlistButton({ product }) {
   return (
     <button
       onClick={toggleWishlist}
-      className={`text-xl transition
-        ${liked ? "text-red-500" : "text-gray-300 hover:text-gray-500"}`}
-      aria-label="Wishlist"
+      className={`text-lg transition
+        ${
+          liked
+            ? "text-pink-500"
+            : "text-gray-400 hover:text-gray-200"
+        }`}
     >
       ♥
     </button>
