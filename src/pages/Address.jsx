@@ -44,7 +44,7 @@ export default function Address() {
             pincode: res.data.pincode || "",
           });
         }
-      } catch (err) {
+      } catch {
         console.log("No saved address found");
       }
     };
@@ -73,7 +73,6 @@ export default function Address() {
     }
 
     try {
-      // ✅ MATCHES DJANGO MODEL EXACTLY
       const payload = {
         full_name: address.fullName,
         phone: address.phone,
@@ -92,11 +91,14 @@ export default function Address() {
 
       localStorage.setItem("address_data", JSON.stringify(address));
 
-      const total = Number(localStorage.getItem("cart_total")) || 1;
+      const cartTotal = Number(localStorage.getItem("cart_total")) || 1;
+
+      // ✅ STRIPE EXPECTS AMOUNT IN PAISE
+      const amount = cartTotal * 100;
 
       const stripeRes = await axios.post(
         `${API}/api/create-checkout-session/`,
-        { total },
+        { amount },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -107,7 +109,7 @@ export default function Address() {
 
       window.location.href = stripeRes.data.url;
     } catch (err) {
-      console.error("Failed to save address or start payment:", err);
+      console.error("Stripe / Address error:", err.response?.data || err.message);
       alert("Failed to continue. Please try again.");
     }
   };
