@@ -26,6 +26,7 @@ export default function Cart() {
 
   const emptyCart = () => {
     setCart([]);
+    localStorage.removeItem("cart_total");
   };
 
   const total = cart.reduce(
@@ -33,6 +34,19 @@ export default function Cart() {
       sum + Math.round(item.price * 80) * (item.qty || 1),
     0
   );
+
+  // ✅ THIS IS THE FIX
+  const handleCheckout = () => {
+    if (total < 50) {
+      alert("Cart total must be at least ₹50 to proceed to payment.");
+      return;
+    }
+
+    // 🔑 THIS LINE IS WHY STRIPE WAS SHOWING ₹100
+    localStorage.setItem("cart_total", total);
+
+    navigate("/address");
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 px-4 py-8">
@@ -151,7 +165,7 @@ export default function Cart() {
             </div>
 
             <button
-              onClick={() => navigate("/address")}
+              onClick={handleCheckout}
               className="w-full mt-4 bg-purple-600 hover:bg-purple-700
                          text-white py-2 rounded-lg"
             >
