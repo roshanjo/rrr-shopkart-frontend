@@ -1,67 +1,44 @@
-import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useCart } from "../context/CartContext";
 
 export default function Cart() {
   const navigate = useNavigate();
-
-  const [cart, setCart] = useState([]);
-
-  useEffect(() => {
-    setCart(JSON.parse(localStorage.getItem("cart")) || []);
-  }, []);
-
-  const user = JSON.parse(localStorage.getItem("user"));
-
-  const updateCart = (updated) => {
-    setCart(updated);
-    localStorage.setItem("cart", JSON.stringify(updated));
-  };
+  const { cart, setCart } = useCart();
 
   const increaseQty = (index) => {
     const updated = [...cart];
     updated[index].qty = (updated[index].qty || 1) + 1;
-    updateCart(updated);
+    setCart(updated);
   };
 
   const decreaseQty = (index) => {
     const updated = [...cart];
     if ((updated[index].qty || 1) > 1) {
       updated[index].qty -= 1;
-      updateCart(updated);
+      setCart(updated);
     }
   };
 
   const removeItem = (index) => {
     const updated = cart.filter((_, i) => i !== index);
-    updateCart(updated);
+    setCart(updated);
   };
 
   const emptyCart = () => {
     setCart([]);
-    localStorage.removeItem("cart");
   };
 
   const total = cart.reduce(
-    (sum, item) => sum + item.price * (item.qty || 1),
+    (sum, item) =>
+      sum + Math.round(item.price * 80) * (item.qty || 1),
     0
   );
-
-  const proceedToCheckout = () => {
-    if (!user) {
-      alert("Please login first");
-      navigate("/login");
-      return;
-    }
-
-    localStorage.setItem("cart_total", total);
-    navigate("/address");
-  };
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 px-4 py-8">
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        {/* LEFT — YOUR CART */}
+        {/* LEFT */}
         <div className="lg:col-span-2 space-y-6">
           <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
             Your Cart ({cart.length} item{cart.length !== 1 && "s"})
@@ -85,23 +62,20 @@ export default function Cart() {
                   className="bg-white dark:bg-gray-800 rounded-xl shadow p-4
                              flex flex-col sm:flex-row gap-4"
                 >
-                  {/* PRODUCT IMAGE */}
                   <img
                     src={item.thumbnail}
                     alt={item.title}
                     className="h-24 w-24 object-contain rounded bg-white"
                   />
 
-                  {/* PRODUCT INFO */}
                   <div className="flex-1">
                     <h3 className="font-semibold text-lg">
                       {item.title}
                     </h3>
                     <p className="text-gray-500">
-                      ₹{item.price}
+                      ₹ {Math.round(item.price * 80)}
                     </p>
 
-                    {/* QTY CONTROLS */}
                     <div className="flex items-center gap-3 mt-3">
                       <button
                         onClick={() => decreaseQty(index)}
@@ -121,10 +95,9 @@ export default function Cart() {
                     </div>
                   </div>
 
-                  {/* PRICE + REMOVE */}
                   <div className="flex sm:flex-col items-end justify-between gap-3 min-w-[120px]">
                     <p className="font-semibold">
-                      ₹{item.price * (item.qty || 1)}
+                      ₹ {Math.round(item.price * 80) * (item.qty || 1)}
                     </p>
 
                     <button
@@ -141,7 +114,6 @@ export default function Cart() {
             </>
           )}
 
-          {/* ACTION BUTTONS */}
           {cart.length > 0 && (
             <div className="flex flex-wrap gap-3">
               <button
@@ -161,7 +133,7 @@ export default function Cart() {
           )}
         </div>
 
-        {/* RIGHT — ORDER SUMMARY */}
+        {/* RIGHT */}
         {cart.length > 0 && (
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-5 h-fit">
             <h2 className="text-xl font-semibold mb-4">
@@ -179,9 +151,9 @@ export default function Cart() {
             </div>
 
             <button
-              onClick={proceedToCheckout}
-              className="w-full mt-4 bg-purple-600
-                         hover:bg-purple-700 text-white py-2 rounded-lg"
+              onClick={() => navigate("/address")}
+              className="w-full mt-4 bg-purple-600 hover:bg-purple-700
+                         text-white py-2 rounded-lg"
             >
               Checkout
             </button>
