@@ -17,6 +17,8 @@ export default function Address() {
     pincode: "",
   });
 
+  const [loading, setLoading] = useState(false);
+
   /* ===============================
      LOAD SAVED ADDRESS
      =============================== */
@@ -44,7 +46,7 @@ export default function Address() {
             pincode: res.data.pincode || "",
           });
         }
-      } catch {
+      } catch (err) {
         console.log("No saved address found");
       }
     };
@@ -60,6 +62,9 @@ export default function Address() {
      SAVE ADDRESS → STRIPE
      =============================== */
   const handleSubmit = async () => {
+    if (loading) return;
+
+    // 1️⃣ Validate address
     if (
       !address.fullName.trim() ||
       !address.phone.trim() ||
@@ -72,8 +77,18 @@ export default function Address() {
       return;
     }
 
+    // 2️⃣ Validate cart total (Stripe minimum)
+    const total = Number(localStorage.getItem("cart_total"));
+
+    if (!total || total < 50) {
+      alert("Cart total must be at least ₹50 to proceed to payment.");
+      return;
+    }
+
     try {
-      // 1️⃣ Save address
+      setLoading(true);
+
+      // 3️⃣ Save address
       const payload = {
         full_name: address.fullName,
         phone: address.phone,
@@ -92,12 +107,10 @@ export default function Address() {
 
       localStorage.setItem("address_data", JSON.stringify(address));
 
-      // 2️⃣ Stripe checkout (BACKEND EXPECTS `total`)
-      const total = Number(localStorage.getItem("cart_total")) || 1;
-
+      // 4️⃣ Create Stripe checkout session
       const stripeRes = await axios.post(
         `${API}/api/create-checkout-session/`,
-        { total }, // ✅ FIXED
+        { total },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -106,12 +119,20 @@ export default function Address() {
         }
       );
 
-      // 3️⃣ Redirect to Stripe
-      window.location.href = stripeRes.data.url;
+      // 5️⃣ Redirect to Stripe
+      if (stripeRes.data?.url) {
+        window.location.href = stripeRes.data.url;
+      } else {
+        throw new Error("Stripe URL not received");
+      }
 
     } catch (err) {
       console.error("Stripe / Address error:", err.response?.data || err.message);
-      alert("Failed to continue. Please try again.");
+      alert(
+        err.response?.data?.error ||
+        "Failed to continue. Please try again."
+      );
+      setLoading(false);
     }
   };
 
@@ -151,16 +172,21 @@ export default function Address() {
           <button
             onClick={() => navigate("/cart")}
             className="text-gray-600 dark:text-gray-300 hover:underline"
+            disabled={loading}
           >
             ← Back
           </button>
 
           <button
             onClick={handleSubmit}
-            className="bg-purple-600 hover:bg-purple-700
-              text-white font-semibold px-6 py-2 rounded-lg"
+            disabled={loading}
+            className={`${
+              loading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-purple-600 hover:bg-purple-700"
+            } text-white font-semibold px-6 py-2 rounded-lg`}
           >
-            Continue →
+            {loading ? "Redirecting..." : "Continue →"}
           </button>
         </div>
 
