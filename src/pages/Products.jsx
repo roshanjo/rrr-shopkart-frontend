@@ -54,10 +54,11 @@ export default function Products() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0b1220]">
+    <div className="min-h-screen bg-white dark:bg-[#0b1220]">
       <div className="max-w-7xl mx-auto px-4 py-6">
+
         {/* MOBILE FILTER */}
-        <div className="lg:hidden sticky top-16 z-30 bg-[#0b1220] py-3">
+        <div className="lg:hidden sticky top-16 z-30 bg-white dark:bg-[#0b1220] py-3">
           <div className="flex gap-2 overflow-x-auto">
             {categories.map(c => (
               <button
@@ -67,7 +68,7 @@ export default function Products() {
                   ${
                     category === c
                       ? "bg-yellow-400 text-black"
-                      : "bg-[#1e293b] text-gray-200"
+                      : "bg-gray-100 text-gray-700 dark:bg-[#1e293b] dark:text-gray-200"
                   }`}
               >
                 {c.toUpperCase()}
@@ -77,10 +78,14 @@ export default function Products() {
         </div>
 
         <div className="flex gap-6 mt-6">
+
           {/* DESKTOP FILTER */}
           <aside className="hidden lg:block w-64">
-            <div className="bg-[#111827] border border-[#1f2937] p-4 rounded-lg">
-              <h3 className="font-semibold mb-4 text-gray-100">Category</h3>
+            <div className="bg-white dark:bg-[#111827] border border-gray-200 dark:border-[#1f2937] p-4 rounded-lg">
+              <h3 className="font-semibold mb-4 text-gray-900 dark:text-gray-100">
+                Category
+              </h3>
+
               {categories.map(c => (
                 <button
                   key={c}
@@ -89,7 +94,7 @@ export default function Products() {
                     ${
                       category === c
                         ? "bg-yellow-400 text-black"
-                        : "text-gray-300 hover:bg-[#1e293b]"
+                        : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-[#1e293b]"
                     }`}
                 >
                   {c.toUpperCase()}
@@ -101,16 +106,23 @@ export default function Products() {
           {/* PRODUCTS GRID */}
           <main className="flex-1">
             {loading ? (
-              <p className="text-gray-400">Loading...</p>
+              <p className="text-gray-500 dark:text-gray-400">Loading...</p>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                 {filtered.map(product => (
                   <div
                     key={product.id}
-                    className="relative bg-[#111827] border border-[#1f2937]
-                               rounded-xl p-3 cursor-pointer
-                               hover:bg-[#1e293b]
-                               transition"
+                    className="
+                      relative rounded-xl p-3 cursor-pointer transition
+
+                      /* LIGHT MODE (Amazon-like) */
+                      bg-white border border-gray-200 hover:shadow-md
+
+                      /* DARK MODE (UNCHANGED) */
+                      dark:bg-[#111827]
+                      dark:border-[#1f2937]
+                      dark:hover:bg-[#1e293b]
+                    "
                     onClick={() =>
                       navigate(`/product/${product.id}?source=dummy`)
                     }
@@ -123,12 +135,18 @@ export default function Products() {
                       <WishlistButton product={product} />
                     </div>
 
-                    {/* 🖼️ IMAGE CONTAINER (FIXED) */}
+                    {/* 🖼️ IMAGE CONTAINER */}
                     <div
-                      className="h-40 w-full rounded-lg
-                                 bg-gradient-to-br from-[#0b1220] to-[#111827]
-                                 border border-[#1f2937]
-                                 flex items-center justify-center p-3"
+                      className="
+                        h-40 w-full rounded-lg flex items-center justify-center p-3
+
+                        /* LIGHT MODE */
+                        bg-white border border-gray-200
+
+                        /* DARK MODE */
+                        dark:bg-[#0b1220]
+                        dark:border-[#1f2937]
+                      "
                     >
                       <img
                         src={product.thumbnail}
@@ -137,11 +155,11 @@ export default function Products() {
                       />
                     </div>
 
-                    <h3 className="mt-3 text-sm font-medium text-gray-100 line-clamp-2">
+                    <h3 className="mt-3 text-sm font-medium line-clamp-2 text-gray-900 dark:text-gray-100">
                       {product.title}
                     </h3>
 
-                    <p className="font-bold mt-1 text-yellow-400">
+                    <p className="font-bold mt-1 text-yellow-500 dark:text-yellow-400">
                       ₹ {Math.round(product.price * 80)}
                     </p>
                   </div>
@@ -160,7 +178,7 @@ export default function Products() {
                       ${
                         page === p
                           ? "bg-yellow-400 text-black"
-                          : "border-[#1f2937] text-gray-300 hover:bg-[#1e293b]"
+                          : "border-gray-300 text-gray-700 hover:bg-gray-100 dark:border-[#1f2937] dark:text-gray-300 dark:hover:bg-[#1e293b]"
                       }`}
                   >
                     {p}
