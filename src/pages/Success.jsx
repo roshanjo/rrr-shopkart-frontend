@@ -8,17 +8,25 @@ export default function Success() {
   const [address, setAddress] = useState(null);
   const [total, setTotal] = useState(0);
 
-  // ✅ LOAD ORDER DATA FIRST
+  // ✅ LOAD ORDER DATA
   useEffect(() => {
-    setCart(JSON.parse(localStorage.getItem("cart")) || []);
+    // Try both keys (safe, non-breaking)
+    const storedCart =
+      JSON.parse(localStorage.getItem("cart")) ||
+      JSON.parse(localStorage.getItem("cart_items")) ||
+      [];
+
+    setCart(storedCart);
     setAddress(JSON.parse(localStorage.getItem("address_data")));
-    setTotal(localStorage.getItem("cart_total"));
+    setTotal(localStorage.getItem("cart_total") || 0);
   }, []);
 
-  // ✅ CLEAR CART AFTER STATE IS READY (MOBILE SAFE)
+  // ✅ CLEAR CART AFTER DISPLAY
   useEffect(() => {
     if (cart.length > 0) {
       localStorage.removeItem("cart");
+      localStorage.removeItem("cart_items");
+      localStorage.removeItem("cart_total");
     }
   }, [cart]);
 
@@ -41,11 +49,7 @@ export default function Success() {
               strokeWidth="4"
               viewBox="0 0 24 24"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M5 13l4 4L19 7"
-              />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
           </div>
         </div>
@@ -89,13 +93,15 @@ export default function Success() {
                            border-b py-2 last:border-b-0 gap-3"
               >
                 <div className="flex-1">
-                  <p className="font-medium break-words">{item.name}</p>
+                  <p className="font-medium break-words">
+                    {item.title || item.name}
+                  </p>
                   <p className="text-sm text-gray-500">
                     Qty: {item.qty || 1}
                   </p>
                 </div>
                 <p className="whitespace-nowrap">
-                  ₹{item.price * (item.qty || 1)}
+                  ₹{Math.round(item.price * 80) * (item.qty || 1)}
                 </p>
               </div>
             ))
@@ -118,15 +124,12 @@ export default function Success() {
             Continue Shopping
           </button>
         </div>
-
       </div>
 
-      {/* FOOTER */}
       <div className="mt-10 text-sm text-gray-500 dark:text-gray-400">
         Designed by Roshan © 2026
       </div>
 
-      {/* Animation */}
       <style>{`
         .animate-scale {
           animation: scaleIn 0.6s ease-out forwards;
