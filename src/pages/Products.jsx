@@ -11,7 +11,9 @@ export default function Products() {
   const page = Number(params.get("page") || 1);
   const category = params.get("cat") || "all";
 
-  // ✅ FIX: read search from localStorage (Navbar source)
+  /* ===============================
+     SEARCH (PERSIST + SYNC)
+     =============================== */
   const [search, setSearch] = useState(
     (localStorage.getItem("search") || "").toLowerCase()
   );
@@ -33,6 +35,14 @@ export default function Products() {
 
     return () => window.removeEventListener("storage", syncSearch);
   }, []);
+
+  /* ===============================
+     ❌ AUTO-CLEAR SEARCH ON CATEGORY CHANGE
+     =============================== */
+  useEffect(() => {
+    localStorage.removeItem("search");
+    setSearch("");
+  }, [category]);
 
   /* ===============================
      FETCH PRODUCTS
@@ -99,7 +109,7 @@ export default function Products() {
   ];
 
   /* ===============================
-     SEARCH FILTER (WORKING)
+     SEARCH FILTER
      =============================== */
   const filtered = useMemo(() => {
     if (!search) return products;
@@ -124,11 +134,33 @@ export default function Products() {
   };
 
   /* ===============================
+     ❌ CLEAR SEARCH BUTTON HANDLER
+     =============================== */
+  const clearSearch = () => {
+    localStorage.removeItem("search");
+    setSearch("");
+  };
+
+  /* ===============================
      UI
      =============================== */
   return (
     <div className="min-h-screen bg-white dark:bg-[#0b1220]">
       <div className="max-w-7xl mx-auto px-4 py-6">
+
+        {/* CLEAR SEARCH */}
+        {search && (
+          <div className="mb-4">
+            <button
+              onClick={clearSearch}
+              className="text-sm px-4 py-2 rounded
+                bg-gray-200 text-gray-800
+                dark:bg-[#1e293b] dark:text-gray-200"
+            >
+              Clear search ✕
+            </button>
+          </div>
+        )}
 
         {/* MOBILE FILTER */}
         <div className="lg:hidden sticky top-16 z-30 bg-white dark:bg-[#0b1220] py-3">
