@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import WishlistButton from "../components/WishlistButton";
 
@@ -12,12 +12,12 @@ export default function Products() {
   const category = params.get("cat") || "all";
   const search = (params.get("search") || "").trim().toLowerCase();
 
-  const [products, setProducts] = useState([]);
-  const [totalPages, setTotalPages] = useState(1);
+  const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [totalPages, setTotalPages] = useState(1);
 
   /* ===============================
-     FETCH PRODUCTS (FIXED)
+     FETCH (SEARCH OR NORMAL)
      =============================== */
   useEffect(() => {
     async function load() {
@@ -25,41 +25,62 @@ export default function Products() {
 
       let url = "";
 
-      // ✅ SEARCH MODE (GLOBAL SEARCH)
       if (search) {
         url = `https://dummyjson.com/products/search?q=${encodeURIComponent(
           search
-        )}`;
-      }
-      // ✅ NORMAL CATEGORY + PAGINATION MODE
-      else if (category === "all") {
-        const skip = (page - 1) * PAGE_SIZE;
-        url = `https://dummyjson.com/products?limit=${PAGE_SIZE}&skip=${skip}`;
-      }
-      // ✅ CATEGORY MODE
-      else {
-        url = `https://dummyjson.com/products/category/${category}`;
+        )}&limit=100`;
+      } else {
+        url = `https://dummyjson.com/products?limit=100`;
       }
 
       const res = await fetch(url);
       const data = await res.json();
 
-      setProducts(data.products || []);
-
-      if (!search && category === "all") {
-        setTotalPages(Math.ceil(data.total / PAGE_SIZE));
-      } else {
-        setTotalPages(1);
-      }
-
+      setAllProducts(data.products || []);
       setLoading(false);
     }
 
     load();
-  }, [page, category, search]);
+  }, [search]);
 
   /* ===============================
-     CATEGORIES (UNCHANGED)
+     CATEGORY FILTER (CLIENT SIDE)
+     =============================== */
+  const filtered = useMemo(() => {
+    if (category === "all") return allProducts;
+    return allProducts.filter((p) => p.category === category);
+  }, [allProducts, category]);
+
+  /* ===============================
+     PAGINATION (WORKS FOR SEARCH TOO)
+     =============================== */
+  useEffect(() => {
+    setTotalPages(Math.max(1, Math.ceil(filtered.length / PAGE_SIZE)));
+  }, [filtered]);
+
+  const paginated = useMemo(() => {
+    const start = (page - 1) * PAGE_SIZE;
+    return filtered.slice(start, start + PAGE_SIZE);
+  }, [filtered, page]);
+
+  /* ===============================
+     HELPERS (PRESERVE PARAMS)
+     =============================== */
+  const updateParams = (next) => {
+    const obj = Object.fromEntries(params.entries());
+    setParams({ ...obj, ...next });
+  };
+
+  const changeCategory = (c) => {
+    updateParams({ cat: c, page: 1 });
+  };
+
+  const changePage = (p) => {
+    updateParams({ page: p });
+  };
+
+  /* ===============================
+     CATEGORIES
      =============================== */
   const categories = [
     "all",
@@ -90,36 +111,24 @@ export default function Products() {
   ];
 
   /* ===============================
-     PARAM HELPERS (SAFE)
-     =============================== */
-  const changeCategory = (c) => {
-    setParams(c === "all" ? {} : { cat: c });
-  };
-
-  const changePage = (p) => {
-    setParams({ page: p });
-  };
-
-  /* ===============================
      UI
      =============================== */
   return (
     <div className="min-h-screen bg-white dark:bg-[#0b1220]">
       <div className="max-w-7xl mx-auto px-4 py-6">
 
-        {/* MOBILE FILTER */}
+        {/* MOBILE CATEGORY */}
         <div className="lg:hidden sticky top-16 z-30 bg-white dark:bg-[#0b1220] py-3">
           <div className="flex gap-2 overflow-x-auto">
             {categories.map((c) => (
               <button
                 key={c}
                 onClick={() => changeCategory(c)}
-                className={`px-4 py-2 rounded-full text-sm whitespace-nowrap
-                  ${
-                    category === c
-                      ? "bg-yellow-400 text-black"
-                      : "bg-gray-100 text-gray-700 dark:bg-[#1e293b] dark:text-gray-200"
-                  }`}
+                className={`px-4 py-2 rounded-full text-sm whitespace-nowrap ${
+                  category === c
+                    ? "bg-yellow-400 text-black"
+                    : "bg-gray-100 dark:bg-[#1e293b]"
+                }`}
               >
                 {c.toUpperCase()}
               </button>
@@ -129,23 +138,19 @@ export default function Products() {
 
         <div className="flex gap-6 mt-6">
 
-          {/* DESKTOP FILTER */}
+          {/* DESKTOP CATEGORY */}
           <aside className="hidden lg:block w-64">
-            <div className="bg-white dark:bg-[#111827] border border-gray-200 dark:border-[#1f2937] p-4 rounded-lg">
-              <h3 className="font-semibold mb-4 text-gray-900 dark:text-gray-100">
-                Category
-              </h3>
-
+            <div className="bg-white dark:bg-[#111827] p-4 rounded-lg border">
+              <h3 className="font-semibold mb-4">Category</h3>
               {categories.map((c) => (
                 <button
                   key={c}
                   onClick={() => changeCategory(c)}
-                  className={`block w-full text-left px-3 py-2 rounded mb-1
-                    ${
-                      category === c
-                        ? "bg-yellow-400 text-black"
-                        : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-[#1e293b]"
-                    }`}
+                  className={`block w-full text-left px-3 py-2 rounded mb-1 ${
+                    category === c
+                      ? "bg-yellow-400 text-black"
+                      : "hover:bg-gray-100 dark:hover:bg-[#1e293b]"
+                  }`}
                 >
                   {c.toUpperCase()}
                 </button>
@@ -153,52 +158,39 @@ export default function Products() {
             </div>
           </aside>
 
-          {/* PRODUCTS GRID */}
+          {/* PRODUCTS */}
           <main className="flex-1">
             {loading ? (
-              <p className="text-gray-500 dark:text-gray-400">Loading...</p>
-            ) : products.length === 0 ? (
-              <p className="text-gray-500 dark:text-gray-400">
-                No products found
-              </p>
+              <p>Loading...</p>
+            ) : paginated.length === 0 ? (
+              <p>No products found</p>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                {products.map((product) => (
+                {paginated.map((product) => (
                   <div
                     key={product.id}
-                    className="relative rounded-xl p-3 cursor-pointer transition
-                      bg-white border border-gray-200 hover:shadow-md
-                      dark:bg-[#111827]
-                      dark:border-[#1f2937]
-                      dark:hover:bg-[#1e293b]"
                     onClick={() =>
                       navigate(`/product/${product.id}?source=dummy`)
                     }
+                    className="relative rounded-xl p-3 cursor-pointer border hover:shadow-md dark:bg-[#111827]"
                   >
                     <div
-                      className="absolute top-2 right-2 z-10"
+                      className="absolute top-2 right-2"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <WishlistButton product={product} />
                     </div>
 
-                    <div className="h-40 w-full rounded-lg flex items-center justify-center p-3
-                      bg-white border border-gray-200
-                      dark:bg-[#0b1220]
-                      dark:border-[#1f2937]"
-                    >
-                      <img
-                        src={product.thumbnail}
-                        alt={product.title}
-                        className="max-h-full max-w-full object-contain"
-                      />
-                    </div>
+                    <img
+                      src={product.thumbnail}
+                      className="h-40 w-full object-contain"
+                    />
 
-                    <h3 className="mt-3 text-sm font-medium line-clamp-2 text-gray-900 dark:text-gray-100">
+                    <h3 className="mt-2 text-sm line-clamp-2">
                       {product.title}
                     </h3>
 
-                    <p className="font-bold mt-1 text-yellow-500 dark:text-yellow-400">
+                    <p className="font-bold text-yellow-500">
                       ₹ {Math.round(product.price * 80)}
                     </p>
                   </div>
@@ -206,19 +198,16 @@ export default function Products() {
               </div>
             )}
 
-            {/* PAGINATION (ONLY WHEN NOT SEARCHING) */}
-            {!search && category === "all" && (
+            {/* PAGINATION (ALWAYS WORKS) */}
+            {totalPages > 1 && (
               <div className="flex justify-center gap-2 mt-10 flex-wrap">
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
                   <button
                     key={p}
                     onClick={() => changePage(p)}
-                    className={`px-4 py-2 rounded border
-                      ${
-                        page === p
-                          ? "bg-yellow-400 text-black"
-                          : "border-gray-300 text-gray-700 hover:bg-gray-100 dark:border-[#1f2937] dark:text-gray-300 dark:hover:bg-[#1e293b]"
-                      }`}
+                    className={`px-4 py-2 rounded border ${
+                      page === p ? "bg-yellow-400" : ""
+                    }`}
                   >
                     {p}
                   </button>

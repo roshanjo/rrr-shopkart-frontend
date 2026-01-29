@@ -106,11 +106,20 @@ export default function Navbar() {
     }
   };
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (!search.trim()) return;
-    localStorage.setItem("search", search);
-    navigate(`/products?search=${encodeURIComponent(search)}`);
+  /* ===============================
+     🔍 INSTANT SEARCH (AMAZON STYLE)
+     =============================== */
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearch(value);
+    localStorage.setItem("search", value);
+
+    navigate(
+      value.trim()
+        ? `/products?search=${encodeURIComponent(value)}`
+        : "/products",
+      { replace: true }
+    );
   };
 
   if (!isLoggedIn) return null;
@@ -136,14 +145,12 @@ export default function Navbar() {
             {/* DESKTOP SEARCH */}
             <div className="flex-1 mx-6 hidden sm:block">
               {showSearch && (
-                <form onSubmit={handleSearch}>
-                  <input
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Search products…"
-                    className="w-full px-6 py-2 rounded-full bg-white text-black placeholder-gray-400 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
-                  />
-                </form>
+                <input
+                  value={search}
+                  onChange={handleSearchChange}
+                  placeholder="Search products…"
+                  className="w-full px-6 py-2 rounded-full bg-white text-black placeholder-gray-400 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
+                />
               )}
             </div>
 
@@ -160,6 +167,7 @@ export default function Navbar() {
                 <img src={avatar} className="h-8 w-8 rounded-full" />
                 <span className="text-xs sm:text-sm">Hi, {username}</span>
               </button>
+
               {/* DROPDOWN */}
               <div
                 className={`absolute right-0 top-12 w-screen sm:w-64
@@ -268,17 +276,15 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* MOBILE SEARCH (INSIDE NAVBAR, NO GAP) */}
+          {/* MOBILE SEARCH */}
           {showSearch && (
             <div className="sm:hidden mt-3">
-              <form onSubmit={handleSearch}>
-                <input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search products…"
-                  className="w-full px-4 py-2 rounded-full bg-white text-black placeholder-gray-400 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
-                />
-              </form>
+              <input
+                value={search}
+                onChange={handleSearchChange}
+                placeholder="Search products…"
+                className="w-full px-4 py-2 rounded-full bg-white text-black placeholder-gray-400 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
+              />
             </div>
           )}
         </div>
