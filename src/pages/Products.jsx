@@ -51,7 +51,7 @@ export default function Products() {
   // cosmetics
   "beauty",
   "fragrances",
-  "skincare",
+  
 
   // electronics
   "smartphones",
@@ -61,7 +61,7 @@ export default function Products() {
   "groceries",
   "home-decoration",
   "furniture",
-  "lighting",
+  
 
   // fashion (men)
   "mens-shirts",
@@ -78,7 +78,7 @@ export default function Products() {
 
   // accessories & others
   "sunglasses",
-  "automotive",
+  
   "motorcycle"
 ];
 
