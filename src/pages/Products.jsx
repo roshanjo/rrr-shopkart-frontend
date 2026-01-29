@@ -10,42 +10,14 @@ export default function Products() {
 
   const page = Number(params.get("page") || 1);
   const category = params.get("cat") || "all";
-
-  /* ===============================
-     SEARCH (PERSIST + SYNC)
-     =============================== */
-  const [search, setSearch] = useState(
-    (localStorage.getItem("search") || "").toLowerCase()
-  );
+  const search = (params.get("search") || "").trim().toLowerCase();
 
   const [products, setProducts] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
 
   /* ===============================
-     🔁 SYNC SEARCH FROM NAVBAR
-     =============================== */
-  useEffect(() => {
-    const syncSearch = () => {
-      setSearch((localStorage.getItem("search") || "").toLowerCase());
-    };
-
-    syncSearch();
-    window.addEventListener("storage", syncSearch);
-
-    return () => window.removeEventListener("storage", syncSearch);
-  }, []);
-
-  /* ===============================
-     ❌ AUTO-CLEAR SEARCH ON CATEGORY CHANGE
-     =============================== */
-  useEffect(() => {
-    localStorage.removeItem("search");
-    setSearch("");
-  }, [category]);
-
-  /* ===============================
-     FETCH PRODUCTS
+     FETCH PRODUCTS (FIXED)
      =============================== */
   useEffect(() => {
     async function load() {
@@ -53,10 +25,19 @@ export default function Products() {
 
       let url = "";
 
-      if (category === "all") {
+      // ✅ SEARCH MODE (GLOBAL SEARCH)
+      if (search) {
+        url = `https://dummyjson.com/products/search?q=${encodeURIComponent(
+          search
+        )}`;
+      }
+      // ✅ NORMAL CATEGORY + PAGINATION MODE
+      else if (category === "all") {
         const skip = (page - 1) * PAGE_SIZE;
         url = `https://dummyjson.com/products?limit=${PAGE_SIZE}&skip=${skip}`;
-      } else {
+      }
+      // ✅ CATEGORY MODE
+      else {
         url = `https://dummyjson.com/products/category/${category}`;
       }
 
@@ -65,7 +46,7 @@ export default function Products() {
 
       setProducts(data.products || []);
 
-      if (category === "all") {
+      if (!search && category === "all") {
         setTotalPages(Math.ceil(data.total / PAGE_SIZE));
       } else {
         setTotalPages(1);
@@ -75,10 +56,10 @@ export default function Products() {
     }
 
     load();
-  }, [page, category]);
+  }, [page, category, search]);
 
   /* ===============================
-     CATEGORIES
+     CATEGORIES (UNCHANGED)
      =============================== */
   const categories = [
     "all",
@@ -109,36 +90,14 @@ export default function Products() {
   ];
 
   /* ===============================
-     SEARCH FILTER
+     PARAM HELPERS (SAFE)
      =============================== */
-  const filtered = useMemo(() => {
-    if (!search) return products;
-
-    return products.filter(
-      p =>
-        p.title.toLowerCase().includes(search) ||
-        p.brand?.toLowerCase().includes(search) ||
-        p.category?.toLowerCase().includes(search)
-    );
-  }, [products, search]);
-
-  /* ===============================
-     PARAM HELPERS (UNCHANGED)
-     =============================== */
-  const changeCategory = c => {
+  const changeCategory = (c) => {
     setParams(c === "all" ? {} : { cat: c });
   };
 
-  const changePage = p => {
-    setParams(category === "all" ? { page: p } : { cat: category });
-  };
-
-  /* ===============================
-     ❌ CLEAR SEARCH BUTTON HANDLER
-     =============================== */
-  const clearSearch = () => {
-    localStorage.removeItem("search");
-    setSearch("");
+  const changePage = (p) => {
+    setParams({ page: p });
   };
 
   /* ===============================
@@ -148,24 +107,10 @@ export default function Products() {
     <div className="min-h-screen bg-white dark:bg-[#0b1220]">
       <div className="max-w-7xl mx-auto px-4 py-6">
 
-        {/* CLEAR SEARCH */}
-        {search && (
-          <div className="mb-4">
-            <button
-              onClick={clearSearch}
-              className="text-sm px-4 py-2 rounded
-                bg-gray-200 text-gray-800
-                dark:bg-[#1e293b] dark:text-gray-200"
-            >
-              Clear search ✕
-            </button>
-          </div>
-        )}
-
         {/* MOBILE FILTER */}
         <div className="lg:hidden sticky top-16 z-30 bg-white dark:bg-[#0b1220] py-3">
           <div className="flex gap-2 overflow-x-auto">
-            {categories.map(c => (
+            {categories.map((c) => (
               <button
                 key={c}
                 onClick={() => changeCategory(c)}
@@ -191,7 +136,7 @@ export default function Products() {
                 Category
               </h3>
 
-              {categories.map(c => (
+              {categories.map((c) => (
                 <button
                   key={c}
                   onClick={() => changeCategory(c)}
@@ -212,13 +157,13 @@ export default function Products() {
           <main className="flex-1">
             {loading ? (
               <p className="text-gray-500 dark:text-gray-400">Loading...</p>
-            ) : filtered.length === 0 ? (
+            ) : products.length === 0 ? (
               <p className="text-gray-500 dark:text-gray-400">
                 No products found
               </p>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                {filtered.map(product => (
+                {products.map((product) => (
                   <div
                     key={product.id}
                     className="relative rounded-xl p-3 cursor-pointer transition
@@ -232,7 +177,7 @@ export default function Products() {
                   >
                     <div
                       className="absolute top-2 right-2 z-10"
-                      onClick={e => e.stopPropagation()}
+                      onClick={(e) => e.stopPropagation()}
                     >
                       <WishlistButton product={product} />
                     </div>
@@ -261,10 +206,10 @@ export default function Products() {
               </div>
             )}
 
-            {/* PAGINATION */}
-            {category === "all" && !search && (
+            {/* PAGINATION (ONLY WHEN NOT SEARCHING) */}
+            {!search && category === "all" && (
               <div className="flex justify-center gap-2 mt-10 flex-wrap">
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
                   <button
                     key={p}
                     onClick={() => changePage(p)}
