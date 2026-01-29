@@ -65,7 +65,6 @@ export default function Products() {
   "home-decoration",
   "furniture",
   "kitchen-accessories",
-  "home-interior",
   
 
   // fashion (men)
@@ -86,7 +85,6 @@ export default function Products() {
   "sports-accessories",
   "vehicle",
   "motorcycle",
-  "other misc categories",
 
 ];
 
