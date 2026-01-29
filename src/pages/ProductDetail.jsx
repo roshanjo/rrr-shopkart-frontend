@@ -31,6 +31,11 @@ export default function ProductDetail() {
     }
   };
 
+  const handleBuyNow = () => {
+    addToCart(product);      // ✅ FIX: ensure cart has item
+    navigate("/address");    // then continue checkout
+  };
+
   if (!product) {
     return (
       <div
@@ -65,11 +70,7 @@ export default function ProductDetail() {
               src={product.thumbnail}
               className="
                 w-full h-96 object-contain rounded
-
-                /* LIGHT */
                 bg-white border border-gray-200
-
-                /* DARK */
                 dark:bg-[#111827]
                 dark:border-[#1f2937]
               "
@@ -83,11 +84,7 @@ export default function ProductDetail() {
                   src={img}
                   className="
                     w-20 h-20 object-contain rounded border
-
-                    /* LIGHT */
                     bg-white border-gray-200
-
-                    /* DARK */
                     dark:bg-[#0b1220]
                     dark:border-[#1f2937]
                   "
@@ -119,11 +116,7 @@ export default function ProductDetail() {
           <div
             className="
               sticky top-24 h-fit p-6 rounded border
-
-              /* LIGHT */
               bg-white border-gray-200
-
-              /* DARK */
               dark:bg-[#111827]
               dark:border-[#1f2937]
             "
@@ -144,7 +137,7 @@ export default function ProductDetail() {
             </button>
 
             <button
-              onClick={() => navigate("/address")}
+              onClick={handleBuyNow}
               className="w-full bg-orange-500 py-3 mt-2 rounded text-white font-bold"
             >
               Buy Now
