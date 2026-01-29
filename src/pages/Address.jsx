@@ -19,9 +19,6 @@ export default function Address() {
 
   const [loading, setLoading] = useState(false);
 
-  /* ===============================
-     LOAD SAVED ADDRESS
-     =============================== */
   useEffect(() => {
     if (!token) {
       navigate("/login");
@@ -46,7 +43,7 @@ export default function Address() {
             pincode: res.data.pincode || "",
           });
         }
-      } catch (err) {
+      } catch {
         console.log("No saved address found");
       }
     };
@@ -58,13 +55,9 @@ export default function Address() {
     setAddress({ ...address, [e.target.name]: e.target.value });
   };
 
-  /* ===============================
-     SAVE ADDRESS → STRIPE
-     =============================== */
   const handleSubmit = async () => {
     if (loading) return;
 
-    // 1️⃣ Validate address
     if (
       !address.fullName.trim() ||
       !address.phone.trim() ||
@@ -77,18 +70,9 @@ export default function Address() {
       return;
     }
 
-    // 2️⃣ Validate cart total (Stripe minimum)
-    const total = Number(localStorage.getItem("cart_total"));
-
-    if (!total || total < 50) {
-      alert("Cart total must be at least ₹50 to proceed to payment.");
-      return;
-    }
-
     try {
       setLoading(true);
 
-      // 3️⃣ Save address
       const payload = {
         full_name: address.fullName,
         phone: address.phone,
@@ -107,7 +91,8 @@ export default function Address() {
 
       localStorage.setItem("address_data", JSON.stringify(address));
 
-      // 4️⃣ Create Stripe checkout session
+      const total = Number(localStorage.getItem("cart_total")) || 1;
+
       const stripeRes = await axios.post(
         `${API}/api/create-checkout-session/`,
         { total },
@@ -119,13 +104,11 @@ export default function Address() {
         }
       );
 
-      // 5️⃣ Redirect to Stripe
       if (stripeRes.data?.url) {
         window.location.href = stripeRes.data.url;
       } else {
         throw new Error("Stripe URL not received");
       }
-
     } catch (err) {
       console.error("Stripe / Address error:", err.response?.data || err.message);
       alert(
@@ -139,7 +122,7 @@ export default function Address() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 px-4">
       <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
-        <h2 className="text-2xl font-bold text-center text-gray-800 dark:text-white mb-6">
+        <h2 className="text-2xl font-bold text-center mb-6">
           Step 1: Delivery Address
         </h2>
 
@@ -158,41 +141,22 @@ export default function Address() {
               placeholder={placeholder}
               value={address[name]}
               onChange={handleChange}
-              className="w-full rounded-lg px-4 py-2
-                bg-gray-100 dark:bg-gray-700
-                text-gray-900 dark:text-white
-                placeholder-gray-500 dark:placeholder-gray-400
-                border border-gray-300 dark:border-gray-600
-                focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full rounded-lg px-4 py-2 bg-gray-100 dark:bg-gray-700"
             />
           ))}
         </div>
 
         <div className="flex justify-between items-center mt-6">
-          <button
-            onClick={() => navigate("/cart")}
-            className="text-gray-600 dark:text-gray-300 hover:underline"
-            disabled={loading}
-          >
-            ← Back
-          </button>
+          <button onClick={() => navigate("/cart")}>← Back</button>
 
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className={`${
-              loading
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-purple-600 hover:bg-purple-700"
-            } text-white font-semibold px-6 py-2 rounded-lg`}
+            className="bg-purple-600 text-white px-6 py-2 rounded-lg"
           >
             {loading ? "Redirecting..." : "Continue →"}
           </button>
         </div>
-
-        <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
-          Step 2: Secure Payment (Stripe)
-        </p>
       </div>
     </div>
   );
