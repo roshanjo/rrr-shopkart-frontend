@@ -51,16 +51,21 @@ export default function Products() {
   // cosmetics
   "beauty",
   "fragrances",
+  "skin-care",
   
 
   // electronics
   "smartphones",
   "laptops",
+  "tablets",
+  "mobile-accessories",
 
   // groceries & home
   "groceries",
   "home-decoration",
   "furniture",
+  "kitchen-accessories",
+  "home-interior",
   
 
   // fashion (men)
@@ -78,8 +83,11 @@ export default function Products() {
 
   // accessories & others
   "sunglasses",
-  
-  "motorcycle"
+  "sports-accessories",
+  "vehicle",
+  "motorcycle",
+  "other misc categories",
+
 ];
 
 
