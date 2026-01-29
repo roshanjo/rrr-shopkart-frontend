@@ -10,11 +10,29 @@ export default function Products() {
 
   const page = Number(params.get("page") || 1);
   const category = params.get("cat") || "all";
-  const search = (params.get("search") || "").toLowerCase();
+
+  // ✅ FIX: read search from localStorage (Navbar source)
+  const [search, setSearch] = useState(
+    (localStorage.getItem("search") || "").toLowerCase()
+  );
 
   const [products, setProducts] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
+
+  /* ===============================
+     🔁 SYNC SEARCH FROM NAVBAR
+     =============================== */
+  useEffect(() => {
+    const syncSearch = () => {
+      setSearch((localStorage.getItem("search") || "").toLowerCase());
+    };
+
+    syncSearch();
+    window.addEventListener("storage", syncSearch);
+
+    return () => window.removeEventListener("storage", syncSearch);
+  }, []);
 
   /* ===============================
      FETCH PRODUCTS
@@ -81,41 +99,28 @@ export default function Products() {
   ];
 
   /* ===============================
-     SEARCH FILTER (FIX)
+     SEARCH FILTER (WORKING)
      =============================== */
   const filtered = useMemo(() => {
     if (!search) return products;
 
-    return products.filter(p =>
-      p.title.toLowerCase().includes(search) ||
-      p.brand?.toLowerCase().includes(search) ||
-      p.category?.toLowerCase().includes(search)
+    return products.filter(
+      p =>
+        p.title.toLowerCase().includes(search) ||
+        p.brand?.toLowerCase().includes(search) ||
+        p.category?.toLowerCase().includes(search)
     );
   }, [products, search]);
 
   /* ===============================
-     PARAM HELPERS
+     PARAM HELPERS (UNCHANGED)
      =============================== */
   const changeCategory = c => {
-    setParams(
-      c === "all"
-        ? search
-          ? { search }
-          : {}
-        : search
-        ? { cat: c, search }
-        : { cat: c }
-    );
+    setParams(c === "all" ? {} : { cat: c });
   };
 
   const changePage = p => {
-    setParams(
-      category === "all"
-        ? search
-          ? { page: p, search }
-          : { page: p }
-        : { cat: category }
-    );
+    setParams(category === "all" ? { page: p } : { cat: category });
   };
 
   /* ===============================
