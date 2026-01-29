@@ -8,9 +8,8 @@ export default function Success() {
   const [address, setAddress] = useState(null);
   const [total, setTotal] = useState(0);
 
-  // ✅ LOAD ORDER DATA
+  // ✅ LOAD ORDER DATA (ONCE)
   useEffect(() => {
-    // Try both keys (safe, non-breaking)
     const storedCart =
       JSON.parse(localStorage.getItem("cart")) ||
       JSON.parse(localStorage.getItem("cart_items")) ||
@@ -19,16 +18,14 @@ export default function Success() {
     setCart(storedCart);
     setAddress(JSON.parse(localStorage.getItem("address_data")));
     setTotal(localStorage.getItem("cart_total") || 0);
-  }, []);
 
-  // ✅ CLEAR CART AFTER DISPLAY
-  useEffect(() => {
-    if (cart.length > 0) {
+    // ✅ CLEANUP ONLY WHEN LEAVING SUCCESS PAGE
+    return () => {
       localStorage.removeItem("cart");
       localStorage.removeItem("cart_items");
       localStorage.removeItem("cart_total");
-    }
-  }, [cart]);
+    };
+  }, []);
 
   return (
     <div
