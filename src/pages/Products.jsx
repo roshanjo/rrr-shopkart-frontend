@@ -46,13 +46,42 @@ export default function Products() {
   }, [page, category]);
 
   const categories = [
-    "all",
-    "beauty",
-    "smartphones",
-    "laptops",
-    "groceries",
-    "home-decoration"
-  ];
+  "all",
+
+  // cosmetics
+  "beauty",
+  "fragrances",
+  "skincare",
+
+  // electronics
+  "smartphones",
+  "laptops",
+
+  // groceries & home
+  "groceries",
+  "home-decoration",
+  "furniture",
+  "lighting",
+
+  // fashion (men)
+  "mens-shirts",
+  "mens-shoes",
+  "mens-watches",
+
+  // fashion (women)
+  "womens-dresses",
+  "womens-shoes",
+  "womens-watches",
+  "womens-bags",
+  "womens-jewellery",
+  "tops",
+
+  // accessories & others
+  "sunglasses",
+  "automotive",
+  "motorcycle"
+];
+
 
   const filtered = useMemo(() => {
     return products;
