@@ -22,9 +22,7 @@ export default function Success() {
 
   // 🔑 CENTRALIZED SAFE CLEANUP
   const clearOrderData = () => {
-    localStorage.removeItem("cart");
-    localStorage.removeItem("cart_items");
-    localStorage.removeItem("cart_total");
+    
     localStorage.removeItem("address_data");
   };
 
