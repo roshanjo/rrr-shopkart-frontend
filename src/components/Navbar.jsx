@@ -110,7 +110,7 @@ export default function Navbar() {
     e.preventDefault();
     if (!search.trim()) return;
     localStorage.setItem("search", search);
-    navigate("/products");
+    navigate(`/products?search=${encodeURIComponent(search)}`);
   };
 
   if (!isLoggedIn) return null;
