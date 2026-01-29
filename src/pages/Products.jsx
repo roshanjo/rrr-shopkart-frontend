@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import WishlistButton from "../components/WishlistButton";
 
 const PAGE_SIZE = 12;
+const FETCH_LIMIT = 100;
 
 export default function Products() {
   const navigate = useNavigate();
@@ -17,34 +18,40 @@ export default function Products() {
   const [totalPages, setTotalPages] = useState(1);
 
   /* ===============================
-     FETCH (SEARCH OR NORMAL)
+     FETCH ALL PRODUCTS (SAFE)
      =============================== */
   useEffect(() => {
-    async function load() {
+    async function loadAll() {
       setLoading(true);
 
-      let url = "";
+      let products = [];
+      let skip = 0;
+      let total = 0;
 
-      if (search) {
-        url = `https://dummyjson.com/products/search?q=${encodeURIComponent(
-          search
-        )}&limit=100`;
-      } else {
-        url = `https://dummyjson.com/products?limit=100`;
-      }
+      do {
+        const url = search
+          ? `https://dummyjson.com/products/search?q=${encodeURIComponent(
+              search
+            )}&limit=${FETCH_LIMIT}&skip=${skip}`
+          : `https://dummyjson.com/products?limit=${FETCH_LIMIT}&skip=${skip}`;
 
-      const res = await fetch(url);
-      const data = await res.json();
+        const res = await fetch(url);
+        const data = await res.json();
 
-      setAllProducts(data.products || []);
+        products = products.concat(data.products || []);
+        total = data.total || products.length;
+        skip += FETCH_LIMIT;
+      } while (products.length < total);
+
+      setAllProducts(products);
       setLoading(false);
     }
 
-    load();
+    loadAll();
   }, [search]);
 
   /* ===============================
-     CATEGORY FILTER (CLIENT SIDE)
+     CATEGORY FILTER
      =============================== */
   const filtered = useMemo(() => {
     if (category === "all") return allProducts;
@@ -52,7 +59,7 @@ export default function Products() {
   }, [allProducts, category]);
 
   /* ===============================
-     PAGINATION (WORKS FOR SEARCH TOO)
+     PAGINATION
      =============================== */
   useEffect(() => {
     setTotalPages(Math.max(1, Math.ceil(filtered.length / PAGE_SIZE)));
@@ -64,7 +71,7 @@ export default function Products() {
   }, [filtered, page]);
 
   /* ===============================
-     HELPERS (PRESERVE PARAMS)
+     PARAM HELPERS
      =============================== */
   const updateParams = (next) => {
     const obj = Object.fromEntries(params.entries());
@@ -184,6 +191,7 @@ export default function Products() {
                     <img
                       src={product.thumbnail}
                       className="h-40 w-full object-contain"
+                      alt={product.title}
                     />
 
                     <h3 className="mt-2 text-sm line-clamp-2">
@@ -198,7 +206,7 @@ export default function Products() {
               </div>
             )}
 
-            {/* PAGINATION (ALWAYS WORKS) */}
+            {/* PAGINATION */}
             {totalPages > 1 && (
               <div className="flex justify-center gap-2 mt-10 flex-wrap">
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
@@ -206,7 +214,7 @@ export default function Products() {
                     key={p}
                     onClick={() => changePage(p)}
                     className={`px-4 py-2 rounded border ${
-                      page === p ? "bg-yellow-400" : ""
+                      page === p ? "bg-yellow-400 text-black" : ""
                     }`}
                   >
                     {p}
