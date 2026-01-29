@@ -1,4 +1,4 @@
-import { Link, useNavigate, useLocation, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { useTheme } from "../context/ThemeContext";
 
@@ -12,7 +12,6 @@ const avatars = [
 export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [params] = useSearchParams();
   const dropdownRef = useRef(null);
   const { theme, toggleTheme } = useTheme();
 
@@ -27,19 +26,10 @@ export default function Navbar() {
   const [password, setPassword] = useState("");
 
   const [successMsg, setSuccessMsg] = useState("");
+  const [search, setSearch] = useState(localStorage.getItem("search") || "");
 
+  const isLoggedIn = !!token;
   const showSearch = location.pathname === "/products";
-
-  // 🔑 SOURCE OF TRUTH = URL
-  const searchFromUrl = params.get("search") || "";
-  const [search, setSearch] = useState(searchFromUrl);
-
-  /* ===============================
-     KEEP SEARCH IN SYNC WITH URL
-     =============================== */
-  useEffect(() => {
-    setSearch(searchFromUrl);
-  }, [searchFromUrl]);
 
   /* ===============================
      🔁 SYNC USER
@@ -116,17 +106,14 @@ export default function Navbar() {
     }
   };
 
-  /* ===============================
-     🔍 FIXED SEARCH HANDLER
-     =============================== */
   const handleSearch = (e) => {
     e.preventDefault();
     if (!search.trim()) return;
-
-    navigate(`/products?search=${encodeURIComponent(search)}`);
+    localStorage.setItem("search", search);
+    navigate("/products");
   };
 
-  if (!token) return null;
+  if (!isLoggedIn) return null;
 
   return (
     <>
@@ -136,9 +123,11 @@ export default function Navbar() {
         </div>
       )}
 
+      {/* NAVBAR */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-gray-900 text-white">
         <div className="max-w-7xl mx-auto p-4">
 
+          {/* TOP ROW */}
           <div className="flex items-center justify-between gap-3">
             <Link to="/products" className="shrink-0">
               <img src="/logo.png" alt="Logo" className="h-12" />
@@ -152,7 +141,7 @@ export default function Navbar() {
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Search products…"
-                    className="w-full px-6 py-2 rounded-full bg-white text-black"
+                    className="w-full px-6 py-2 rounded-full bg-white text-black placeholder-gray-400 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
                   />
                 </form>
               )}
@@ -171,13 +160,115 @@ export default function Navbar() {
                 <img src={avatar} className="h-8 w-8 rounded-full" />
                 <span className="text-xs sm:text-sm">Hi, {username}</span>
               </button>
+              {/* DROPDOWN */}
+              <div
+                className={`absolute right-0 top-12 w-screen sm:w-64
+                bg-white dark:bg-gray-800 text-black dark:text-white
+                shadow-lg p-4 transition
+                ${
+                  menuOpen
+                    ? "opacity-100 scale-100"
+                    : "opacity-0 scale-95 pointer-events-none"
+                }`}
+              >
+                {!settingsOpen ? (
+                  <>
+                    <Link to="/my-orders" className="block py-2 text-center sm:text-left">
+                      My Orders
+                    </Link>
+                    <Link to="/wishlist" className="block py-2 text-center sm:text-left">
+                      My Wishlist
+                    </Link>
+                    <button
+                      onClick={() => setSettingsOpen(true)}
+                      className="w-full py-2 text-center sm:text-left"
+                    >
+                      Settings
+                    </button>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full py-2 text-red-600 text-center sm:text-left"
+                    >
+                      Logout
+                    </button>
+                  </>
+                ) : !editProfileOpen ? (
+                  <>
+                    <p className="font-semibold mb-2 text-center">Settings</p>
 
-              {/* DROPDOWN (unchanged) */}
-              {/* ... your dropdown code stays exactly the same ... */}
+                    <button
+                      onClick={() => setEditProfileOpen(true)}
+                      className="w-full py-2 text-center"
+                    >
+                      Edit Profile
+                    </button>
+
+                    <button
+                      onClick={toggleTheme}
+                      className="w-full py-2 text-center"
+                    >
+                      Switch to {theme === "light" ? "Dark" : "Light"} Mode
+                    </button>
+
+                    <button
+                      onClick={handleSaveSettings}
+                      className="w-full bg-green-600 text-white py-2 rounded mt-2"
+                    >
+                      Save Changes
+                    </button>
+
+                    <button
+                      onClick={() => setSettingsOpen(false)}
+                      className="w-full py-2 text-center"
+                    >
+                      ← Back
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <p className="font-semibold mb-3 text-center">Edit Profile</p>
+
+                    <div className="flex justify-center gap-3 mb-3">
+                      {avatars.map((a) => (
+                        <img
+                          key={a}
+                          src={a}
+                          onClick={() => setAvatar(a)}
+                          className={`h-10 w-10 rounded-full cursor-pointer ${
+                            avatar === a ? "ring-2 ring-green-500" : ""
+                          }`}
+                        />
+                      ))}
+                    </div>
+
+                    <input
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      className="w-full p-2 rounded mb-2 bg-white dark:bg-gray-700"
+                      placeholder="Change username"
+                    />
+
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full p-2 rounded mb-2 bg-white dark:bg-gray-700"
+                      placeholder="New password (optional)"
+                    />
+
+                    <button
+                      onClick={() => setEditProfileOpen(false)}
+                      className="w-full py-2 text-center"
+                    >
+                      ← Back
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* MOBILE SEARCH */}
+          {/* MOBILE SEARCH (INSIDE NAVBAR, NO GAP) */}
           {showSearch && (
             <div className="sm:hidden mt-3">
               <form onSubmit={handleSearch}>
@@ -185,7 +276,7 @@ export default function Navbar() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search products…"
-                  className="w-full px-4 py-2 rounded-full bg-white text-black"
+                  className="w-full px-4 py-2 rounded-full bg-white text-black placeholder-gray-400 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
                 />
               </form>
             </div>
@@ -193,6 +284,7 @@ export default function Navbar() {
         </div>
       </nav>
 
+      {/* SPACER */}
       <div className="h-28 sm:h-20" />
     </>
   );
