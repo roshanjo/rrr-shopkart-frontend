@@ -18,14 +18,15 @@ export default function Success() {
     setCart(storedCart);
     setAddress(JSON.parse(localStorage.getItem("address_data")));
     setTotal(localStorage.getItem("cart_total") || 0);
-
-    // ✅ CLEANUP ONLY WHEN LEAVING SUCCESS PAGE
-    return () => {
-      localStorage.removeItem("cart");
-      localStorage.removeItem("cart_items");
-      localStorage.removeItem("cart_total");
-    };
   }, []);
+
+  // 🔑 CENTRALIZED SAFE CLEANUP
+  const clearOrderData = () => {
+    localStorage.removeItem("cart");
+    localStorage.removeItem("cart_items");
+    localStorage.removeItem("cart_total");
+    localStorage.removeItem("address_data");
+  };
 
   return (
     <div
@@ -108,14 +109,20 @@ export default function Success() {
         {/* ACTION BUTTONS */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
           <button
-            onClick={() => navigate("/my-orders")}
+            onClick={() => {
+              clearOrderData();
+              navigate("/my-orders");
+            }}
             className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg"
           >
             View My Orders
           </button>
 
           <button
-            onClick={() => navigate("/products")}
+            onClick={() => {
+              clearOrderData();
+              navigate("/products");
+            }}
             className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg"
           >
             Continue Shopping
