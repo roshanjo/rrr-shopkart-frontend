@@ -12,6 +12,7 @@ export default function Products() {
   const category = params.get("cat") || "all";
 
   const [products, setProducts] = useState([]);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -25,6 +26,7 @@ export default function Products() {
       const data = await res.json();
 
       setProducts(data.products);
+      setTotalPages(Math.ceil(data.total / PAGE_SIZE));
       setLoading(false);
     }
 
@@ -114,11 +116,7 @@ export default function Products() {
                     key={product.id}
                     className="
                       relative rounded-xl p-3 cursor-pointer transition
-
-                      /* LIGHT MODE (Amazon-like) */
                       bg-white border border-gray-200 hover:shadow-md
-
-                      /* DARK MODE (UNCHANGED) */
                       dark:bg-[#111827]
                       dark:border-[#1f2937]
                       dark:hover:bg-[#1e293b]
@@ -127,7 +125,6 @@ export default function Products() {
                       navigate(`/product/${product.id}?source=dummy`)
                     }
                   >
-                    {/* ❤️ Wishlist */}
                     <div
                       className="absolute top-2 right-2 z-10"
                       onClick={e => e.stopPropagation()}
@@ -135,19 +132,12 @@ export default function Products() {
                       <WishlistButton product={product} />
                     </div>
 
-                    {/* 🖼️ IMAGE CONTAINER */}
-                    <div
-                      className="
+                    <div className="
                         h-40 w-full rounded-lg flex items-center justify-center p-3
-
-                        /* LIGHT MODE */
                         bg-white border border-gray-200
-
-                        /* DARK MODE */
                         dark:bg-[#0b1220]
                         dark:border-[#1f2937]
-                      "
-                    >
+                      ">
                       <img
                         src={product.thumbnail}
                         alt={product.title}
@@ -169,8 +159,8 @@ export default function Products() {
 
             {/* PAGINATION */}
             {category === "all" && (
-              <div className="flex justify-center gap-2 mt-10">
-                {[1, 2, 3, 4].map(p => (
+              <div className="flex justify-center gap-2 mt-10 flex-wrap">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
                   <button
                     key={p}
                     onClick={() => changePage(p)}
