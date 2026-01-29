@@ -10,11 +10,15 @@ export default function Products() {
 
   const page = Number(params.get("page") || 1);
   const category = params.get("cat") || "all";
+  const search = (params.get("search") || "").toLowerCase();
 
   const [products, setProducts] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
 
+  /* ===============================
+     FETCH PRODUCTS
+     =============================== */
   useEffect(() => {
     async function load() {
       setLoading(true);
@@ -31,7 +35,7 @@ export default function Products() {
       const res = await fetch(url);
       const data = await res.json();
 
-      setProducts(data.products);
+      setProducts(data.products || []);
 
       if (category === "all") {
         setTotalPages(Math.ceil(data.total / PAGE_SIZE));
@@ -45,62 +49,78 @@ export default function Products() {
     load();
   }, [page, category]);
 
+  /* ===============================
+     CATEGORIES
+     =============================== */
   const categories = [
-  "all",
+    "all",
+    "beauty",
+    "fragrances",
+    "skin-care",
+    "smartphones",
+    "laptops",
+    "tablets",
+    "mobile-accessories",
+    "groceries",
+    "home-decoration",
+    "furniture",
+    "kitchen-accessories",
+    "mens-shirts",
+    "mens-shoes",
+    "mens-watches",
+    "womens-dresses",
+    "womens-shoes",
+    "womens-watches",
+    "womens-bags",
+    "womens-jewellery",
+    "tops",
+    "sunglasses",
+    "sports-accessories",
+    "vehicle",
+    "motorcycle",
+  ];
 
-  // cosmetics
-  "beauty",
-  "fragrances",
-  "skin-care",
-  
-
-  // electronics
-  "smartphones",
-  "laptops",
-  "tablets",
-  "mobile-accessories",
-
-  // groceries & home
-  "groceries",
-  "home-decoration",
-  "furniture",
-  "kitchen-accessories",
-  
-
-  // fashion (men)
-  "mens-shirts",
-  "mens-shoes",
-  "mens-watches",
-
-  // fashion (women)
-  "womens-dresses",
-  "womens-shoes",
-  "womens-watches",
-  "womens-bags",
-  "womens-jewellery",
-  "tops",
-
-  // accessories & others
-  "sunglasses",
-  "sports-accessories",
-  "vehicle",
-  "motorcycle",
-
-];
-
-
+  /* ===============================
+     SEARCH FILTER (FIX)
+     =============================== */
   const filtered = useMemo(() => {
-    return products;
-  }, [products]);
+    if (!search) return products;
 
+    return products.filter(p =>
+      p.title.toLowerCase().includes(search) ||
+      p.brand?.toLowerCase().includes(search) ||
+      p.category?.toLowerCase().includes(search)
+    );
+  }, [products, search]);
+
+  /* ===============================
+     PARAM HELPERS
+     =============================== */
   const changeCategory = c => {
-    setParams(c === "all" ? {} : { cat: c });
+    setParams(
+      c === "all"
+        ? search
+          ? { search }
+          : {}
+        : search
+        ? { cat: c, search }
+        : { cat: c }
+    );
   };
 
   const changePage = p => {
-    setParams(category === "all" ? { page: p } : { cat: category });
+    setParams(
+      category === "all"
+        ? search
+          ? { page: p, search }
+          : { page: p }
+        : { cat: category }
+    );
   };
 
+  /* ===============================
+     UI
+     =============================== */
   return (
     <div className="min-h-screen bg-white dark:bg-[#0b1220]">
       <div className="max-w-7xl mx-auto px-4 py-6">
@@ -155,18 +175,20 @@ export default function Products() {
           <main className="flex-1">
             {loading ? (
               <p className="text-gray-500 dark:text-gray-400">Loading...</p>
+            ) : filtered.length === 0 ? (
+              <p className="text-gray-500 dark:text-gray-400">
+                No products found
+              </p>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                 {filtered.map(product => (
                   <div
                     key={product.id}
-                    className="
-                      relative rounded-xl p-3 cursor-pointer transition
+                    className="relative rounded-xl p-3 cursor-pointer transition
                       bg-white border border-gray-200 hover:shadow-md
                       dark:bg-[#111827]
                       dark:border-[#1f2937]
-                      dark:hover:bg-[#1e293b]
-                    "
+                      dark:hover:bg-[#1e293b]"
                     onClick={() =>
                       navigate(`/product/${product.id}?source=dummy`)
                     }
@@ -178,12 +200,11 @@ export default function Products() {
                       <WishlistButton product={product} />
                     </div>
 
-                    <div className="
-                        h-40 w-full rounded-lg flex items-center justify-center p-3
-                        bg-white border border-gray-200
-                        dark:bg-[#0b1220]
-                        dark:border-[#1f2937]
-                      ">
+                    <div className="h-40 w-full rounded-lg flex items-center justify-center p-3
+                      bg-white border border-gray-200
+                      dark:bg-[#0b1220]
+                      dark:border-[#1f2937]"
+                    >
                       <img
                         src={product.thumbnail}
                         alt={product.title}
@@ -204,7 +225,7 @@ export default function Products() {
             )}
 
             {/* PAGINATION */}
-            {category === "all" && (
+            {category === "all" && !search && (
               <div className="flex justify-center gap-2 mt-10 flex-wrap">
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
                   <button
