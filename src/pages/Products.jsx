@@ -12,9 +12,21 @@ export default function Products() {
   const category = params.get("cat") || "all";
 
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState(["all"]);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
 
+  // ✅ LOAD ALL CATEGORIES (ONCE)
+  useEffect(() => {
+    async function loadCategories() {
+      const res = await fetch("https://dummyjson.com/products/categories");
+      const data = await res.json();
+      setCategories(["all", ...data]);
+    }
+    loadCategories();
+  }, []);
+
+  // ✅ LOAD PRODUCTS
   useEffect(() => {
     async function load() {
       setLoading(true);
@@ -31,7 +43,7 @@ export default function Products() {
       const res = await fetch(url);
       const data = await res.json();
 
-      setProducts(data.products);
+      setProducts(data.products || []);
 
       if (category === "all") {
         setTotalPages(Math.ceil(data.total / PAGE_SIZE));
@@ -44,15 +56,6 @@ export default function Products() {
 
     load();
   }, [page, category]);
-
-  const categories = [
-    "all",
-    "beauty",
-    "smartphones",
-    "laptops",
-    "groceries",
-    "home-decoration"
-  ];
 
   const filtered = useMemo(() => {
     return products;
