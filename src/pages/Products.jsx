@@ -18,20 +18,32 @@ export default function Products() {
   useEffect(() => {
     async function load() {
       setLoading(true);
-      const skip = (page - 1) * PAGE_SIZE;
 
-      const res = await fetch(
-        `https://dummyjson.com/products?limit=${PAGE_SIZE}&skip=${skip}`
-      );
+      let url = "";
+
+      if (category === "all") {
+        const skip = (page - 1) * PAGE_SIZE;
+        url = `https://dummyjson.com/products?limit=${PAGE_SIZE}&skip=${skip}`;
+      } else {
+        url = `https://dummyjson.com/products/category/${category}`;
+      }
+
+      const res = await fetch(url);
       const data = await res.json();
 
       setProducts(data.products);
-      setTotalPages(Math.ceil(data.total / PAGE_SIZE));
+
+      if (category === "all") {
+        setTotalPages(Math.ceil(data.total / PAGE_SIZE));
+      } else {
+        setTotalPages(1);
+      }
+
       setLoading(false);
     }
 
     load();
-  }, [page]);
+  }, [page, category]);
 
   const categories = [
     "all",
@@ -43,9 +55,8 @@ export default function Products() {
   ];
 
   const filtered = useMemo(() => {
-    if (category === "all") return products;
-    return products.filter(p => p.category === category);
-  }, [products, category]);
+    return products;
+  }, [products]);
 
   const changeCategory = c => {
     setParams(c === "all" ? {} : { cat: c });
