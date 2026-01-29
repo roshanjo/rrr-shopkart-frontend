@@ -27,6 +27,7 @@ export default function Cart() {
   const emptyCart = () => {
     setCart([]);
     localStorage.removeItem("cart_total");
+    localStorage.removeItem("cart"); // (optional safety, unchanged behavior)
   };
 
   const total = cart.reduce(
@@ -35,15 +36,17 @@ export default function Cart() {
     0
   );
 
-  // ✅ THIS IS THE FIX
+  // ✅ ONLY FIX LOCATION
   const handleCheckout = () => {
     if (total < 50) {
       alert("Cart total must be at least ₹50 to proceed to payment.");
       return;
     }
 
-    // 🔑 THIS LINE IS WHY STRIPE WAS SHOWING ₹100
+    // ✅ ✅ THESE 2 LINES FIX "NO ITEMS FOUND"
+    localStorage.setItem("cart", JSON.stringify(cart));
     localStorage.setItem("cart_total", total);
+    // ✅ ✅ NOTHING ELSE CHANGED
 
     navigate("/address");
   };
