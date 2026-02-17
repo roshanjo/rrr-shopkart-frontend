@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 export default function Login() {
   const navigate = useNavigate();
 
+  const API = import.meta.env.VITE_API_URL; // ✅ use environment variable
+  console.log(API);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -13,14 +15,11 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const res = await fetch(
-        "https://rrr-shopkart-backend.onrender.com/api/login/",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        }
-      );
+      const res = await fetch(`${API}/api/login/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
       const data = await res.json();
 
@@ -34,7 +33,7 @@ export default function Login() {
         JSON.parse(localStorage.getItem("user")) || {};
 
       const updatedUser = {
-        ...existingUser,          // keeps avatar
+        ...existingUser, // keeps avatar
         id: data.id,
         username: data.username,
         email: data.email,
@@ -45,8 +44,9 @@ export default function Login() {
       localStorage.setItem("user", JSON.stringify(updatedUser));
 
       navigate("/products");
-    } catch {
+    } catch (error) {
       alert("Server error");
+      console.error(error);
     } finally {
       setLoading(false);
     }
