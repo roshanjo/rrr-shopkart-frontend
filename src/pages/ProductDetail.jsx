@@ -4,6 +4,7 @@ import { useCart } from "../context/CartContext";
 import WishlistButton from "../components/WishlistButton";
 
 export default function ProductDetail() {
+
   const { id } = useParams();
   const [params] = useSearchParams();
   const navigate = useNavigate();
@@ -12,7 +13,10 @@ export default function ProductDetail() {
   const source = params.get("source");
   const [product, setProduct] = useState(null);
 
+
+  // ================= Fetch Product =================
   useEffect(() => {
+
     if (source !== "dummy") {
       navigate("/products");
       return;
@@ -20,9 +24,14 @@ export default function ProductDetail() {
 
     fetch(`https://dummyjson.com/products/${id}`)
       .then((res) => res.json())
-      .then(setProduct);
+      .then((data) => {
+        setProduct(data);
+      });
+
   }, [id, source, navigate]);
 
+
+  // ================= Back Button Logic =================
   const handleBack = () => {
     if (window.history.length > 1) {
       navigate(-1);
@@ -31,96 +40,141 @@ export default function ProductDetail() {
     }
   };
 
+
+  // ================= Buy Now =================
   const handleBuyNow = () => {
-    addToCart(product);      // ✅ FIX: ensure cart has item
-    navigate("/address");    // then continue checkout
+    addToCart(product);   // ✅ Ensure cart has item
+    navigate("/address"); // Continue checkout
   };
 
+
+  // ================= Loading State =================
   if (!product) {
     return (
       <div
-        className="min-h-screen flex items-center justify-center
-                   text-gray-900 dark:text-gray-200
-                   bg-white dark:bg-[#0b1220]"
+        className="
+          min-h-screen
+          flex
+          items-center
+          justify-center
+          text-gray-900
+          dark:text-gray-200
+          bg-white
+          dark:bg-[#0b1220]
+        "
       >
         Loading product...
       </div>
     );
   }
 
+
   return (
     <div className="min-h-screen bg-white dark:bg-[#0b1220]">
+
       <div className="max-w-7xl mx-auto p-6 pb-32">
 
-        {/* BACK BUTTON */}
+        {/* ================= Back Button ================= */}
         <button
           onClick={handleBack}
-          className="mb-4 text-sm font-medium
-                     text-blue-600 dark:text-blue-400
-                     hover:underline"
+          className="
+            mb-4
+            text-sm
+            font-medium
+            text-blue-600
+            dark:text-blue-400
+            hover:underline
+          "
         >
           ← Back
         </button>
 
+
         <div className="grid lg:grid-cols-3 gap-8">
 
-          {/* IMAGE + DETAILS */}
+          {/* ================= IMAGE + DETAILS ================= */}
           <div className="lg:col-span-2">
+
+            {/* Main Image */}
             <img
               src={product.thumbnail}
+              alt={product.title}
               className="
-                w-full h-96 object-contain rounded
-                bg-white border border-gray-200
+                w-full
+                h-96
+                object-contain
+                rounded
+                bg-white
+                border
+                border-gray-200
                 dark:bg-[#111827]
                 dark:border-[#1f2937]
               "
-              alt={product.title}
             />
 
+            {/* Thumbnail Images */}
             <div className="flex gap-2 mt-4">
               {product.images.map((img) => (
                 <img
                   key={img}
                   src={img}
+                  alt=""
                   className="
-                    w-20 h-20 object-contain rounded border
-                    bg-white border-gray-200
+                    w-20
+                    h-20
+                    object-contain
+                    rounded
+                    border
+                    bg-white
+                    border-gray-200
                     dark:bg-[#0b1220]
                     dark:border-[#1f2937]
                   "
-                  alt=""
                 />
               ))}
             </div>
 
-            {/* PRICE + WISHLIST */}
+
+            {/* Price + Wishlist */}
             <div className="flex justify-between items-center mt-4">
               <p className="text-2xl font-bold text-green-600">
                 ₹ {Math.round(product.price * 80)}
               </p>
+
               <WishlistButton product={product} />
             </div>
 
-            {/* DESCRIPTION */}
+
+            {/* Description */}
             <div className="mt-6">
               <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                 About this item
               </h2>
+
               <p className="mt-2 text-gray-600 dark:text-gray-300">
                 {product.description}
               </p>
             </div>
+
           </div>
 
-          {/* BUY BOX */}
+
+          {/* ================= BUY BOX ================= */}
           <div
             className="
-              sticky top-24 h-fit p-6 rounded border
-              bg-white border-gray-200
+              sticky
+              top-24
+              h-fit
+              p-6
+              rounded
+              border
+              bg-white
+              border-gray-200
               dark:bg-[#111827]
               dark:border-[#1f2937]
             "
           >
+
             <p className="text-2xl font-bold text-green-600">
               ₹ {Math.round(product.price * 80)}
             </p>
@@ -129,6 +183,8 @@ export default function ProductDetail() {
               Inclusive of all taxes
             </p>
 
+
+            {/* Add to Cart */}
             <button
               onClick={() => addToCart(product)}
               className="w-full bg-yellow-400 py-3 mt-4 rounded font-bold text-black"
@@ -136,6 +192,8 @@ export default function ProductDetail() {
               Add to Cart
             </button>
 
+
+            {/* Buy Now */}
             <button
               onClick={handleBuyNow}
               className="w-full bg-orange-500 py-3 mt-2 rounded text-white font-bold"
@@ -143,16 +201,19 @@ export default function ProductDetail() {
               Buy Now
             </button>
 
-            {/* OFFERS */}
+
+            {/* Offers */}
             <div className="mt-4 text-sm">
               <p className="font-semibold text-gray-900 dark:text-gray-100">
                 Offers
               </p>
+
               <ul className="list-disc pl-5 text-gray-700 dark:text-gray-300">
                 <li>No Cost EMI available</li>
                 <li>10% Instant Discount</li>
               </ul>
             </div>
+
           </div>
 
         </div>

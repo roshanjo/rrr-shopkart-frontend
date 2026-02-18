@@ -1,12 +1,36 @@
+// ==================================================
+// IMPORTS
+// ==================================================
+
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
+
+// ==================================================
+// API BASE URL
+// ==================================================
+
 const API = import.meta.env.VITE_API_URL;
 
+
+// ==================================================
+// ADDRESS PAGE
+// ==================================================
+
 export default function Address() {
+
+  // ------------------------------------------------
+  // Hooks
+  // ------------------------------------------------
+
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
+
+
+  // ------------------------------------------------
+  // State
+  // ------------------------------------------------
 
   const [address, setAddress] = useState({
     fullName: "",
@@ -19,21 +43,33 @@ export default function Address() {
 
   const [loading, setLoading] = useState(false);
 
+
+  // ==================================================
+  // FETCH SAVED ADDRESS (IF EXISTS)
+  // ==================================================
+
   useEffect(() => {
+
     if (!token) {
       navigate("/login");
       return;
     }
 
     const fetchAddress = async () => {
+
       try {
-        const res = await axios.get(`${API}/api/address/`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+
+        const res = await axios.get(
+          `${API}/api/address/`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         if (res.data && res.data.street) {
+
           setAddress({
             fullName: res.data.full_name || "",
             phone: res.data.phone || "",
@@ -43,21 +79,41 @@ export default function Address() {
             pincode: res.data.pincode || "",
           });
         }
+
       } catch {
+
         console.log("No saved address found");
+
       }
     };
 
     fetchAddress();
+
   }, [token, navigate]);
 
+
+  // ==================================================
+  // HANDLE INPUT CHANGE
+  // ==================================================
+
   const handleChange = (e) => {
-    setAddress({ ...address, [e.target.name]: e.target.value });
+
+    setAddress({
+      ...address,
+      [e.target.name]: e.target.value,
+    });
   };
 
+
+  // ==================================================
+  // HANDLE SUBMIT
+  // ==================================================
+
   const handleSubmit = async () => {
+
     if (loading) return;
 
+    // Basic Validation
     if (
       !address.fullName.trim() ||
       !address.phone.trim() ||
@@ -71,8 +127,10 @@ export default function Address() {
     }
 
     try {
+
       setLoading(true);
 
+      // Prepare Payload for Backend
       const payload = {
         full_name: address.fullName,
         phone: address.phone,
@@ -82,17 +140,29 @@ export default function Address() {
         pincode: address.pincode,
       };
 
-      await axios.post(`${API}/api/address/`, payload, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+      // Save Address
+      await axios.post(
+        `${API}/api/address/`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-      localStorage.setItem("address_data", JSON.stringify(address));
+      // Save locally for later use
+      localStorage.setItem(
+        "address_data",
+        JSON.stringify(address)
+      );
 
-      const total = Number(localStorage.getItem("cart_total")) || 1;
+      // Get Cart Total
+      const total =
+        Number(localStorage.getItem("cart_total")) || 1;
 
+      // Create Stripe Checkout Session
       const stripeRes = await axios.post(
         `${API}/api/create-checkout-session/`,
         { total },
@@ -104,29 +174,48 @@ export default function Address() {
         }
       );
 
+      // Redirect to Stripe
       if (stripeRes.data?.url) {
         window.location.href = stripeRes.data.url;
       } else {
         throw new Error("Stripe URL not received");
       }
+
     } catch (err) {
-      console.error("Stripe / Address error:", err.response?.data || err.message);
+
+      console.error(
+        "Stripe / Address error:",
+        err.response?.data || err.message
+      );
+
       alert(
         err.response?.data?.error ||
         "Failed to continue. Please try again."
       );
+
       setLoading(false);
     }
   };
 
+
+  // ==================================================
+  // UI
+  // ==================================================
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 px-4">
+
       <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+
+        {/* Title */}
         <h2 className="text-2xl font-bold text-center mb-6">
           Step 1: Delivery Address
         </h2>
 
+
+        {/* Input Fields */}
         <div className="space-y-4">
+
           {[
             ["fullName", "Full Name"],
             ["phone", "Phone"],
@@ -135,29 +224,46 @@ export default function Address() {
             ["state", "State"],
             ["pincode", "Pincode"],
           ].map(([name, placeholder]) => (
+
             <input
               key={name}
               name={name}
               placeholder={placeholder}
               value={address[name]}
               onChange={handleChange}
-              className="w-full rounded-lg px-4 py-2 bg-gray-100 dark:bg-gray-700"
+              className="
+                w-full rounded-lg px-4 py-2
+                bg-gray-100 dark:bg-gray-700
+              "
             />
+
           ))}
+
         </div>
 
+
+        {/* Buttons */}
         <div className="flex justify-between items-center mt-6">
-          <button onClick={() => navigate("/cart")}>← Back</button>
+
+          <button onClick={() => navigate("/cart")}>
+            ← Back
+          </button>
 
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="bg-purple-600 text-white px-6 py-2 rounded-lg"
+            className="
+              bg-purple-600 text-white
+              px-6 py-2 rounded-lg
+            "
           >
             {loading ? "Redirecting..." : "Continue →"}
           </button>
+
         </div>
+
       </div>
+
     </div>
   );
 }

@@ -1,6 +1,15 @@
+// ==================================================
+// IMPORTS
+// ==================================================
+
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { useTheme } from "../context/ThemeContext";
+
+
+// ==================================================
+// STATIC AVATARS
+// ==================================================
 
 const avatars = [
   "/avatars/a1.png",
@@ -9,7 +18,17 @@ const avatars = [
   "/avatars/a4.png",
 ];
 
+
+// ==================================================
+// NAVBAR COMPONENT
+// ==================================================
+
 export default function Navbar() {
+
+  // ------------------------------------------------
+  // Hooks
+  // ------------------------------------------------
+
   const navigate = useNavigate();
   const location = useLocation();
   const dropdownRef = useRef(null);
@@ -26,52 +45,86 @@ export default function Navbar() {
   const [password, setPassword] = useState("");
 
   const [successMsg, setSuccessMsg] = useState("");
-  const [search, setSearch] = useState(localStorage.getItem("search") || "");
+  const [search, setSearch] = useState(
+    localStorage.getItem("search") || ""
+  );
 
   const isLoggedIn = !!token;
   const showSearch = location.pathname === "/products";
 
-  /* ===============================
-     🔁 SYNC USER
-     =============================== */
+
+  // ==================================================
+  // 🔁 SYNC USER DATA
+  // ==================================================
+
   useEffect(() => {
+
     if (!token) return;
 
     fetch("https://rrr-shopkart-backend.onrender.com/api/me/", {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     })
       .then((res) => res.ok && res.json())
       .then((data) => {
+
         if (!data) return;
+
         setUsername(data.username || "User");
         setAvatar(data.avatar || avatars[0]);
       })
       .catch(() => {});
+
   }, [token]);
 
-  /* ===============================
-     CLOSE DROPDOWN
-     =============================== */
+
+  // ==================================================
+  // CLOSE DROPDOWN ON OUTSIDE CLICK
+  // ==================================================
+
   useEffect(() => {
+
     const close = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target)
+      ) {
         setMenuOpen(false);
         setSettingsOpen(false);
         setEditProfileOpen(false);
       }
     };
+
     document.addEventListener("mousedown", close);
-    return () => document.removeEventListener("mousedown", close);
+
+    return () =>
+      document.removeEventListener("mousedown", close);
+
   }, []);
 
+
+  // ==================================================
+  // LOGOUT
+  // ==================================================
+
   const handleLogout = () => {
+
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+
     navigate("/");
   };
 
+
+  // ==================================================
+  // SAVE PROFILE SETTINGS
+  // ==================================================
+
   const handleSaveSettings = async () => {
+
     try {
+
       const res = await fetch(
         "https://rrr-shopkart-backend.onrender.com/api/profile/",
         {
@@ -91,26 +144,35 @@ export default function Navbar() {
       if (!res.ok) throw new Error("Save failed");
 
       const data = await res.json();
+
       setUsername(data.username);
       setAvatar(data.avatar);
       setPassword("");
 
       setSuccessMsg("Profile updated successfully");
+
       setTimeout(() => setSuccessMsg(""), 2000);
 
       setEditProfileOpen(false);
       setSettingsOpen(false);
       setMenuOpen(false);
+
     } catch (err) {
+
       console.error("Profile save error", err);
+
     }
   };
 
-  /* ===============================
-     🔍 INSTANT SEARCH (AMAZON STYLE)
-     =============================== */
+
+  // ==================================================
+  // 🔍 INSTANT SEARCH (AMAZON STYLE)
+  // ==================================================
+
   const handleSearchChange = (e) => {
+
     const value = e.target.value;
+
     setSearch(value);
     localStorage.setItem("search", value);
 
@@ -122,28 +184,53 @@ export default function Navbar() {
     );
   };
 
+
+  // ==================================================
+  // IF NOT LOGGED IN → HIDE NAVBAR
+  // ==================================================
+
   if (!isLoggedIn) return null;
+
+
+  // ==================================================
+  // UI
+  // ==================================================
 
   return (
     <>
+
+      {/* SUCCESS MESSAGE */}
       {successMsg && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded z-[9999] text-sm">
           {successMsg}
         </div>
       )}
 
+
       {/* NAVBAR */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-gray-900 text-white">
+
         <div className="max-w-7xl mx-auto p-4">
 
           {/* TOP ROW */}
           <div className="flex items-center justify-between gap-3">
-            <Link to="/products" className="shrink-0">
-              <img src="/logo.png" alt="Logo" className="h-12" />
+
+            {/* LOGO */}
+            <Link
+              to="/products"
+              className="shrink-0"
+            >
+              <img
+                src="/logo.png"
+                alt="Logo"
+                className="h-12"
+              />
             </Link>
+
 
             {/* DESKTOP SEARCH */}
             <div className="flex-1 mx-6 hidden sm:block">
+
               {showSearch && (
                 <input
                   value={search}
@@ -152,10 +239,16 @@ export default function Navbar() {
                   className="w-full px-6 py-2 rounded-full bg-white text-black placeholder-gray-400 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
                 />
               )}
+
             </div>
 
-            {/* PROFILE */}
-            <div ref={dropdownRef} className="relative shrink-0">
+
+            {/* PROFILE SECTION */}
+            <div
+              ref={dropdownRef}
+              className="relative shrink-0"
+            >
+
               <button
                 onClick={() => {
                   setMenuOpen(!menuOpen);
@@ -164,35 +257,57 @@ export default function Navbar() {
                 }}
                 className="flex items-center gap-2"
               >
-                <img src={avatar} className="h-8 w-8 rounded-full" />
-                <span className="text-xs sm:text-sm">Hi, {username}</span>
+                <img
+                  src={avatar}
+                  className="h-8 w-8 rounded-full"
+                />
+
+                <span className="text-xs sm:text-sm">
+                  Hi, {username}
+                </span>
               </button>
+
 
               {/* DROPDOWN */}
               <div
-                className={`absolute right-0 top-12 w-screen sm:w-64
-                bg-white dark:bg-gray-800 text-black dark:text-white
-                shadow-lg p-4 transition
-                ${
-                  menuOpen
-                    ? "opacity-100 scale-100"
-                    : "opacity-0 scale-95 pointer-events-none"
-                }`}
+                className={`
+                  absolute right-0 top-12 w-screen sm:w-64
+                  bg-white dark:bg-gray-800
+                  text-black dark:text-white
+                  shadow-lg p-4 transition
+                  ${
+                    menuOpen
+                      ? "opacity-100 scale-100"
+                      : "opacity-0 scale-95 pointer-events-none"
+                  }
+                `}
               >
+
+                {/* ---- MAIN MENU ---- */}
                 {!settingsOpen ? (
+
                   <>
-                    <Link to="/my-orders" className="block py-2 text-center sm:text-left">
+                    <Link
+                      to="/my-orders"
+                      className="block py-2 text-center sm:text-left"
+                    >
                       My Orders
                     </Link>
-                    <Link to="/wishlist" className="block py-2 text-center sm:text-left">
+
+                    <Link
+                      to="/wishlist"
+                      className="block py-2 text-center sm:text-left"
+                    >
                       My Wishlist
                     </Link>
+
                     <button
                       onClick={() => setSettingsOpen(true)}
                       className="w-full py-2 text-center sm:text-left"
                     >
                       Settings
                     </button>
+
                     <button
                       onClick={handleLogout}
                       className="w-full py-2 text-red-600 text-center sm:text-left"
@@ -200,9 +315,13 @@ export default function Navbar() {
                       Logout
                     </button>
                   </>
+
                 ) : !editProfileOpen ? (
+
                   <>
-                    <p className="font-semibold mb-2 text-center">Settings</p>
+                    <p className="font-semibold mb-2 text-center">
+                      Settings
+                    </p>
 
                     <button
                       onClick={() => setEditProfileOpen(true)}
@@ -232,9 +351,13 @@ export default function Navbar() {
                       ← Back
                     </button>
                   </>
+
                 ) : (
+
                   <>
-                    <p className="font-semibold mb-3 text-center">Edit Profile</p>
+                    <p className="font-semibold mb-3 text-center">
+                      Edit Profile
+                    </p>
 
                     <div className="flex justify-center gap-3 mb-3">
                       {avatars.map((a) => (
@@ -243,7 +366,9 @@ export default function Navbar() {
                           src={a}
                           onClick={() => setAvatar(a)}
                           className={`h-10 w-10 rounded-full cursor-pointer ${
-                            avatar === a ? "ring-2 ring-green-500" : ""
+                            avatar === a
+                              ? "ring-2 ring-green-500"
+                              : ""
                           }`}
                         />
                       ))}
@@ -251,7 +376,9 @@ export default function Navbar() {
 
                     <input
                       value={username}
-                      onChange={(e) => setUsername(e.target.value)}
+                      onChange={(e) =>
+                        setUsername(e.target.value)
+                      }
                       className="w-full p-2 rounded mb-2 bg-white dark:bg-gray-700"
                       placeholder="Change username"
                     />
@@ -259,22 +386,30 @@ export default function Navbar() {
                     <input
                       type="password"
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={(e) =>
+                        setPassword(e.target.value)
+                      }
                       className="w-full p-2 rounded mb-2 bg-white dark:bg-gray-700"
                       placeholder="New password (optional)"
                     />
 
                     <button
-                      onClick={() => setEditProfileOpen(false)}
+                      onClick={() =>
+                        setEditProfileOpen(false)
+                      }
                       className="w-full py-2 text-center"
                     >
                       ← Back
                     </button>
                   </>
                 )}
+
               </div>
+
             </div>
+
           </div>
+
 
           {/* MOBILE SEARCH */}
           {showSearch && (
@@ -287,11 +422,14 @@ export default function Navbar() {
               />
             </div>
           )}
+
         </div>
       </nav>
 
+
       {/* SPACER */}
       <div className="h-28 sm:h-20" />
+
     </>
   );
 }

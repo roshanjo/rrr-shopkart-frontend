@@ -1,15 +1,46 @@
+/* =====================================================
+   INITIALIZE THEME
+   - Loads saved theme from localStorage
+   - Falls back to system preference if not set
+===================================================== */
 export function initTheme() {
+
   const savedTheme = localStorage.getItem("theme");
 
   if (savedTheme) {
-    document.documentElement.classList.toggle("dark", savedTheme === "dark");
+
+    document.documentElement.classList.toggle(
+      "dark",
+      savedTheme === "dark"
+    );
+
   } else {
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    document.documentElement.classList.toggle("dark", prefersDark);
+
+    const prefersDark = window
+      .matchMedia("(prefers-color-scheme: dark)")
+      .matches;
+
+    document.documentElement.classList.toggle(
+      "dark",
+      prefersDark
+    );
   }
+
 }
 
+
+/* =====================================================
+   TOGGLE THEME
+   - Switches between light and dark
+   - Saves preference to localStorage
+===================================================== */
 export function toggleTheme() {
+
   const isDark = document.documentElement.classList.toggle("dark");
-  localStorage.setItem("theme", isDark ? "dark" : "light");
+
+  localStorage.setItem(
+    "theme",
+    isDark ? "dark" : "light"
+  );
+
 }

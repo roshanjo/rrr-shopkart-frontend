@@ -4,6 +4,8 @@ import { requireAuth } from "../utils/auth";
 const API = import.meta.env.VITE_API_URL;
 
 export default function AdminOrders() {
+
+  // Protect this page (only logged-in users can access)
   requireAuth();
 
   const [orders, setOrders] = useState([]);
@@ -15,24 +17,38 @@ export default function AdminOrders() {
       },
     })
       .then((res) => res.json())
-      .then(setOrders);
+      .then((data) => {
+        setOrders(data);
+      });
+
   }, []);
 
   return (
     <div className="p-6 max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Admin Orders</h1>
 
-      {orders.length === 0 && <p>No orders yet</p>}
+      <h1 className="text-2xl font-bold mb-4">
+        Admin Orders
+      </h1>
+
+      {orders.length === 0 && (
+        <p>No orders yet</p>
+      )}
 
       {orders.map((order) => (
         <div
           key={order.id}
           className="border p-3 rounded mb-3"
         >
-          <p><b>User:</b> {order.user}</p>
-          <p><b>Total:</b> ₹{order.total}</p>
+          <p>
+            <b>User:</b> {order.user}
+          </p>
+
+          <p>
+            <b>Total:</b> ₹{order.total}
+          </p>
         </div>
       ))}
+
     </div>
   );
 }

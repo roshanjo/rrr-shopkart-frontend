@@ -1,29 +1,83 @@
+// ==================================================
+// IMPORTS
+// ==================================================
+
 import { products } from "../data/products";
 import { useNavigate } from "react-router-dom";
 
+
+// ==================================================
+// RECOMMENDED PRODUCTS COMPONENT
+// ==================================================
+
 export default function Recommended({ category, currentId }) {
+
+  // ------------------------------------------------
+  // Navigation Hook
+  // ------------------------------------------------
+
   const navigate = useNavigate();
 
-  const list = products.filter(
-    p => p.category === category && p.id !== currentId
-  ).slice(0, 4);
+
+  // ------------------------------------------------
+  // Filter Products (Same Category, Exclude Current)
+  // ------------------------------------------------
+
+  const list = products
+    .filter(
+      (product) =>
+        product.category === category &&
+        product.id !== currentId
+    )
+    .slice(0, 4);
+
+
+  // ==================================================
+  // UI
+  // ==================================================
 
   return (
     <div className="mt-10">
-      <h3 className="font-bold mb-4">Recommended for you</h3>
 
+      {/* Section Title */}
+      <h3 className="font-bold mb-4">
+        Recommended for you
+      </h3>
+
+
+      {/* Products Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {list.map(p => (
+
+        {list.map((product) => (
+
           <div
-            key={p.id}
-            onClick={() => navigate(`/product/${p.id}`)}
-            className="cursor-pointer bg-white dark:bg-gray-800 p-3 rounded shadow"
+            key={product.id}
+            onClick={() => navigate(`/product/${product.id}`)}
+            className="
+              cursor-pointer
+              bg-white dark:bg-gray-800
+              p-3 rounded shadow
+            "
           >
-            <img src={p.image} className="h-24 object-contain mx-auto" />
-            <p className="text-sm line-clamp-2">{p.name}</p>
+
+            {/* Product Image */}
+            <img
+              src={product.image}
+              alt={product.name}
+              className="h-24 object-contain mx-auto"
+            />
+
+            {/* Product Name */}
+            <p className="text-sm line-clamp-2">
+              {product.name}
+            </p>
+
           </div>
+
         ))}
+
       </div>
+
     </div>
   );
 }

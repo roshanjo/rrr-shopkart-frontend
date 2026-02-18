@@ -3,20 +3,25 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
 export default function Wishlist() {
+
   const navigate = useNavigate();
 
   const [wishlist, setWishlist] = useState(
     JSON.parse(localStorage.getItem("wishlist")) || []
   );
+
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  /* ===============================
+
+  /* =====================================================
      FETCH WISHLIST PRODUCTS
      (FakeStore + DummyJSON)
-     =============================== */
+  ===================================================== */
   useEffect(() => {
+
     const loadWishlist = async () => {
+
       if (wishlist.length === 0) {
         setItems([]);
         setLoading(false);
@@ -24,16 +29,24 @@ export default function Wishlist() {
       }
 
       setLoading(true);
+
       const results = [];
 
       for (const wid of wishlist) {
+
         try {
-          // 🔹 FakeStore
+
+          /* -------------------------------
+             FakeStore Products
+          -------------------------------- */
           if (wid.startsWith("fs-")) {
+
             const id = wid.replace("fs-", "");
+
             const res = await fetch(
               `https://fakestoreapi.com/products/${id}`
             );
+
             const p = await res.json();
 
             results.push({
@@ -45,12 +58,17 @@ export default function Wishlist() {
             });
           }
 
-          // 🔹 DummyJSON
+          /* -------------------------------
+             DummyJSON Products
+          -------------------------------- */
           if (wid.startsWith("dj-")) {
+
             const id = wid.replace("dj-", "");
+
             const res = await fetch(
               `https://dummyjson.com/products/${id}`
             );
+
             const p = await res.json();
 
             results.push({
@@ -61,6 +79,7 @@ export default function Wishlist() {
               category: p.category,
             });
           }
+
         } catch {
           console.error("Wishlist item failed:", wid);
         }
@@ -71,90 +90,160 @@ export default function Wishlist() {
     };
 
     loadWishlist();
+
   }, [wishlist]);
 
-  /* ===============================
+
+  /* =====================================================
      REMOVE FROM WISHLIST
-     =============================== */
+  ===================================================== */
   const removeFromWishlist = (id) => {
-    const updated = wishlist.filter(i => i !== id);
+
+    const updated = wishlist.filter((i) => i !== id);
+
     setWishlist(updated);
     localStorage.setItem("wishlist", JSON.stringify(updated));
+
     toast("Removed from wishlist");
   };
 
-  /* EMPTY STATE */
+
+  /* =====================================================
+     EMPTY STATE
+  ===================================================== */
   if (!loading && items.length === 0) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-        <p className="text-lg font-semibold">No items in wishlist ❤️</p>
+
+        <p className="text-lg font-semibold">
+          No items in wishlist ❤️
+        </p>
+
         <button
           onClick={() => navigate("/products")}
           className="bg-green-600 text-white px-6 py-2 rounded"
         >
           Browse Products
         </button>
+
       </div>
     );
   }
 
+
+  /* =====================================================
+     MAIN UI
+  ===================================================== */
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6">
+
       <div className="max-w-6xl mx-auto">
-        {/* HEADER */}
+
+        {/* ================= HEADER ================= */}
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold">❤️ My Wishlist</h1>
+
+          <h1 className="text-2xl font-bold">
+            ❤️ My Wishlist
+          </h1>
+
           <button
             onClick={() => navigate("/products")}
-            className="bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-700"
+            className="
+              bg-gray-800
+              text-white
+              px-4 py-2
+              rounded
+              hover:bg-gray-700
+            "
           >
             ← Back to Products
           </button>
+
         </div>
 
-        {/* LOADING */}
+
+        {/* ================= LOADING ================= */}
         {loading ? (
           <p>Loading wishlist...</p>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            {items.map(p => (
+
+            {items.map((p) => (
               <div
                 key={p.id}
-                className="bg-white dark:bg-gray-800 p-4 rounded shadow hover:shadow-lg"
+                className="
+                  bg-white dark:bg-gray-800
+                  p-4
+                  rounded
+                  shadow
+                  hover:shadow-lg
+                  transition
+                "
               >
                 <img
                   src={p.image}
-                  className="h-32 w-full object-contain mb-2"
                   alt={p.title}
+                  className="
+                    h-32
+                    w-full
+                    object-contain
+                    mb-2
+                  "
                 />
 
-                <p className="text-sm font-semibold line-clamp-2 mb-1">
+                <p className="
+                  text-sm
+                  font-semibold
+                  line-clamp-2
+                  mb-1
+                ">
                   {p.title}
                 </p>
 
-                <p className="text-green-600 font-bold mb-3">
+                <p className="
+                  text-green-600
+                  font-bold
+                  mb-3
+                ">
                   ₹ {Math.round(p.price * 80)}
                 </p>
 
                 <div className="flex gap-2">
+
                   <button
                     onClick={() => navigate(`/product/${p.id}`)}
-                    className="flex-1 bg-green-600 text-white py-1 rounded"
+                    className="
+                      flex-1
+                      bg-green-600
+                      text-white
+                      py-1
+                      rounded
+                    "
                   >
                     View
                   </button>
 
                   <button
                     onClick={() => removeFromWishlist(p.id)}
-                    className="flex-1 bg-red-500 text-white py-1 rounded"
+                    className="
+                      flex-1
+                      bg-red-500
+                      text-white
+                      py-1
+                      rounded
+                    "
                   >
                     Remove
                   </button>
+
                 </div>
+
               </div>
             ))}
+
           </div>
         )}
+
       </div>
     </div>
   );

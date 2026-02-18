@@ -1,41 +1,89 @@
+// ==================================================
+// IMPORTS
+// ==================================================
+
 import { createContext, useContext, useState } from "react";
+
+
+// ==================================================
+// CREATE CART CONTEXT
+// ==================================================
 
 const CartContext = createContext();
 
+
+// ==================================================
+// CART PROVIDER COMPONENT
+// ==================================================
+
 export function CartProvider({ children }) {
+
+  // ------------------------------------------------
+  // State
+  // ------------------------------------------------
+
   const [cart, setCart] = useState([]);
   const [open, setOpen] = useState(false);
 
-  const addToCart = (product) => {
-    setCart(prev => {
-      const index = prev.findIndex(p => p.id === product.id);
 
+  // ==================================================
+  // ADD TO CART FUNCTION
+  // ==================================================
+
+  const addToCart = (product) => {
+
+    setCart((prevCart) => {
+
+      const index = prevCart.findIndex(
+        (item) => item.id === product.id
+      );
+
+      // If product already exists → increase quantity
       if (index !== -1) {
-        const updated = [...prev];
-        updated[index].qty = (updated[index].qty || 1) + 1;
-        return updated;
+
+        const updatedCart = [...prevCart];
+
+        updatedCart[index].qty =
+          (updatedCart[index].qty || 1) + 1;
+
+        return updatedCart;
       }
 
-      return [...prev, { ...product, qty: 1 }];
+      // If product does not exist → add new item
+      return [
+        ...prevCart,
+        { ...product, qty: 1 },
+      ];
     });
 
+    // Open cart drawer/modal automatically
     setOpen(true);
   };
+
+
+  // ==================================================
+  // PROVIDER
+  // ==================================================
 
   return (
     <CartContext.Provider
       value={{
         cart,
-        setCart,     // 🔥 THIS WAS MISSING
+        setCart,   // 🔥 Exposed for manual updates
         addToCart,
         open,
-        setOpen
+        setOpen,
       }}
     >
       {children}
     </CartContext.Provider>
   );
 }
+
+
+// ==================================================
+// CUSTOM HOOK
+// ==================================================
 
 export function useCart() {
   return useContext(CartContext);

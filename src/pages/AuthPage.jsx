@@ -4,20 +4,30 @@ import Signup from "./Signup";
 import logo from "/logo.png";
 
 export default function AuthPage() {
+
   const [mode, setMode] = useState("welcome");
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 relative">
-      {/* FIXED LOGO HEADER */}
+
+      {/* ================= FIXED LOGO HEADER ================= */}
       <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50">
-        <img src={logo} alt="Ai-Kart Logo" className="w-52" />
+        <img
+          src={logo}
+          alt="Ai-Kart Logo"
+          className="w-52"
+        />
       </div>
 
-      {/* MAIN CONTENT (PERFECT CENTER) */}
+
+      {/* ================= MAIN CONTENT (CENTERED) ================= */}
       <div className="min-h-screen flex items-center justify-center px-4">
         <div className="mt-24">
+
+          {/* -------- Welcome Screen -------- */}
           {mode === "welcome" && (
             <div className="bg-white dark:bg-gray-800 p-6 rounded shadow w-80 text-center">
+
               <h1 className="text-2xl font-bold mb-3 text-gray-900 dark:text-white">
                 Welcome to <span className="text-green-600">Ai-Kart</span>
               </h1>
@@ -39,19 +49,27 @@ export default function AuthPage() {
               >
                 Create Account
               </button>
+
             </div>
           )}
 
+
+          {/* -------- Login Screen -------- */}
           {mode === "login" && (
             <>
               <Login />
+
               <p className="text-sm mt-3 text-gray-800 dark:text-gray-300 text-center">
                 No account?{" "}
                 <span
                   onClick={() => setMode("signup")}
-                  className="font-medium cursor-pointer
-                             text-black dark:text-white
-                             hover:text-green-600"
+                  className="
+                    font-medium
+                    cursor-pointer
+                    text-black
+                    dark:text-white
+                    hover:text-green-600
+                  "
                 >
                   Sign up
                 </span>
@@ -59,29 +77,39 @@ export default function AuthPage() {
             </>
           )}
 
+
+          {/* -------- Signup Screen -------- */}
           {mode === "signup" && (
             <>
               <Signup onSuccess={() => setMode("login")} />
+
               <p className="text-sm mt-3 text-gray-800 dark:text-gray-300 text-center">
                 Already have an account?{" "}
                 <span
                   onClick={() => setMode("login")}
-                  className="font-medium cursor-pointer
-                             text-black dark:text-white
-                             hover:text-green-600"
+                  className="
+                    font-medium
+                    cursor-pointer
+                    text-black
+                    dark:text-white
+                    hover:text-green-600
+                  "
                 >
                   Sign in
                 </span>
               </p>
             </>
           )}
+
         </div>
       </div>
 
-      {/* FOOTER */}
+
+      {/* ================= FOOTER ================= */}
       <p className="fixed bottom-4 w-full text-center text-sm text-gray-400">
         Designed by Roshan © 2026
       </p>
+
     </div>
   );
 }

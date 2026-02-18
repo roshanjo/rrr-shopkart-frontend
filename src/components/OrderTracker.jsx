@@ -1,19 +1,49 @@
+// ==================================================
+// ORDER TRACKER COMPONENT
+// ==================================================
+
 export default function OrderTracker({ status }) {
-  const steps = ["Placed", "Packed", "Shipped", "Delivered"];
+
+  // ------------------------------------------------
+  // Order Steps
+  // ------------------------------------------------
+
+  const steps = [
+    "Placed",
+    "Packed",
+    "Shipped",
+    "Delivered",
+  ];
+
+  // Find current step index
   const current = steps.indexOf(status);
+
+
+  // ==================================================
+  // UI
+  // ==================================================
 
   return (
     <div className="flex gap-4 mt-4">
-      {steps.map((s, i) => (
+
+      {steps.map((step, index) => (
+
         <div
-          key={s}
-          className={`px-3 py-1 rounded-full text-sm ${
-            i <= current ? "bg-green-600 text-white" : "bg-gray-300"
-          }`}
+          key={step}
+          className={`
+            px-3 py-1 rounded-full text-sm
+            ${
+              index <= current
+                ? "bg-green-600 text-white"
+                : "bg-gray-300"
+            }
+          `}
         >
-          {s}
+          {step}
         </div>
+
       ))}
+
     </div>
   );
 }

@@ -1,21 +1,58 @@
+// ==================================================
+// IMPORTS
+// ==================================================
+
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 
+
+// ==================================================
+// CART DRAWER COMPONENT
+// ==================================================
+
 export default function CartDrawer() {
+
+  // ----------------------------------------------
+  // Get cart data and drawer state from context
+  // ----------------------------------------------
+
   const { cart, open, setOpen } = useCart();
+
+  // ----------------------------------------------
+  // React Router navigation
+  // ----------------------------------------------
+
   const navigate = useNavigate();
+
+
+  // ----------------------------------------------
+  // If drawer is closed → render nothing
+  // ----------------------------------------------
 
   if (!open) return null;
 
+
+  // ==================================================
+  // UI
+  // ==================================================
+
   return (
     <div className="fixed inset-0 z-50 flex">
-      {/* OVERLAY */}
+
+      {/* ========================================== */}
+      {/* OVERLAY (click to close) */}
+      {/* ========================================== */}
+
       <div
         className="flex-1 bg-black/40"
         onClick={() => setOpen(false)}
       />
 
-      {/* DRAWER */}
+
+      {/* ========================================== */}
+      {/* DRAWER PANEL */}
+      {/* ========================================== */}
+
       <div
         className="
           w-96 p-4
@@ -24,17 +61,31 @@ export default function CartDrawer() {
           border-l border-gray-200 dark:border-[#1f2937]
         "
       >
+        {/* Title */}
         <h3 className="font-bold text-lg mb-4">
           Shopping Cart
         </h3>
 
+
+        {/* ========================================== */}
+        {/* EMPTY CART */}
+        {/* ========================================== */}
+
         {cart.length === 0 ? (
+
           <p className="text-sm text-gray-500 dark:text-gray-400">
             Your cart is empty
           </p>
+
         ) : (
+
           <>
+            {/* ====================================== */}
+            {/* CART ITEMS */}
+            {/* ====================================== */}
+
             {cart.map((item, i) => (
+
               <div
                 key={i}
                 className="
@@ -42,6 +93,7 @@ export default function CartDrawer() {
                   hover:bg-gray-100 dark:hover:bg-[#1e293b]
                 "
               >
+                {/* Product Image */}
                 <img
                   src={item.thumbnail}
                   className="
@@ -50,7 +102,9 @@ export default function CartDrawer() {
                   "
                 />
 
+                {/* Product Details */}
                 <div className="flex-1">
+
                   <p className="text-sm font-medium">
                     {item.title}
                   </p>
@@ -58,9 +112,16 @@ export default function CartDrawer() {
                   <p className="font-bold text-yellow-500">
                     ₹ {Math.round(item.price * 80)}
                   </p>
+
                 </div>
+
               </div>
             ))}
+
+
+            {/* ====================================== */}
+            {/* GO TO CART BUTTON */}
+            {/* ====================================== */}
 
             <button
               onClick={() => {
@@ -75,8 +136,10 @@ export default function CartDrawer() {
             >
               Go to Cart
             </button>
+
           </>
         )}
+
       </div>
     </div>
   );

@@ -2,14 +2,19 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function Login() {
+
   const navigate = useNavigate();
 
-  const API = import.meta.env.VITE_API_URL; // ✅ use environment variable
+  // ✅ Use environment variable
+  const API = import.meta.env.VITE_API_URL;
   console.log(API);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+
+  // ================= Handle Login =================
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -17,7 +22,9 @@ export default function Login() {
     try {
       const res = await fetch(`${API}/api/login/`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({ email, password }),
       });
 
@@ -44,47 +51,76 @@ export default function Login() {
       localStorage.setItem("user", JSON.stringify(updatedUser));
 
       navigate("/products");
+
     } catch (error) {
       alert("Server error");
       console.error(error);
+
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <form
       onSubmit={handleLogin}
       className="bg-white dark:bg-gray-800 p-6 rounded shadow w-80"
     >
+
+      {/* ================= Heading ================= */}
       <h2 className="text-xl font-bold mb-4 text-center text-gray-900 dark:text-white">
         Sign In
       </h2>
 
+
+      {/* ================= Email Input ================= */}
       <input
         type="email"
         placeholder="Email"
-        className="w-full mb-3 p-2 rounded
-                   bg-white dark:bg-gray-700
-                   text-gray-900 dark:text-white
-                   border border-gray-300 dark:border-gray-600"
+        className="
+          w-full
+          mb-3
+          p-2
+          rounded
+          bg-white
+          dark:bg-gray-700
+          text-gray-900
+          dark:text-white
+          border
+          border-gray-300
+          dark:border-gray-600
+        "
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         required
       />
 
+
+      {/* ================= Password Input ================= */}
       <input
         type="password"
         placeholder="Password"
-        className="w-full mb-4 p-2 rounded
-                   bg-white dark:bg-gray-700
-                   text-gray-900 dark:text-white
-                   border border-gray-300 dark:border-gray-600"
+        className="
+          w-full
+          mb-4
+          p-2
+          rounded
+          bg-white
+          dark:bg-gray-700
+          text-gray-900
+          dark:text-white
+          border
+          border-gray-300
+          dark:border-gray-600
+        "
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         required
       />
 
+
+      {/* ================= Submit Button ================= */}
       <button
         type="submit"
         disabled={loading}
@@ -92,6 +128,7 @@ export default function Login() {
       >
         {loading ? "Signing in..." : "Sign In"}
       </button>
+
     </form>
   );
 }

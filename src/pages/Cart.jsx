@@ -2,43 +2,57 @@ import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 
 export default function Cart() {
+
   const navigate = useNavigate();
   const { cart, setCart } = useCart();
 
+
+  // ================= Increase Quantity =================
   const increaseQty = (index) => {
     const updated = [...cart];
     updated[index].qty = (updated[index].qty || 1) + 1;
     setCart(updated);
   };
 
+
+  // ================= Decrease Quantity =================
   const decreaseQty = (index) => {
     const updated = [...cart];
+
     if ((updated[index].qty || 1) > 1) {
       updated[index].qty -= 1;
       setCart(updated);
     }
   };
 
+
+  // ================= Remove Single Item =================
   const removeItem = (index) => {
     const updated = cart.filter((_, i) => i !== index);
     setCart(updated);
   };
 
+
+  // ================= Empty Cart =================
   const emptyCart = () => {
     setCart([]);
     localStorage.removeItem("cart_total");
     localStorage.removeItem("cart");
   };
 
+
+  // ================= Calculate Total =================
   const total = cart.reduce(
     (sum, item) =>
       sum + Math.round(item.price * 80) * (item.qty || 1),
     0
   );
 
-  // ✅ ONLY CHANGE IS HERE
+
+  // ================= Checkout =================
   const handleCheckout = () => {
-    // ❌ removed minimum ₹50 restriction
+
+    // ❌ Minimum ₹50 restriction removed
 
     localStorage.setItem("cart", JSON.stringify(cart));
     localStorage.setItem("cart_total", total || 1);
@@ -46,19 +60,27 @@ export default function Cart() {
     navigate("/address");
   };
 
+
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 px-4 py-8">
+
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        {/* LEFT */}
+        {/* ================= LEFT SECTION ================= */}
         <div className="lg:col-span-2 space-y-6">
+
           <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
             Your Cart ({cart.length} item{cart.length !== 1 && "s"})
           </h1>
 
+
+          {/* -------- If Cart is Empty -------- */}
           {cart.length === 0 ? (
             <div className="text-center py-20">
-              <p className="text-gray-500 mb-6">Your cart is empty</p>
+              <p className="text-gray-500 mb-6">
+                Your cart is empty
+              </p>
+
               <button
                 onClick={() => navigate("/products")}
                 className="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600"
@@ -68,26 +90,40 @@ export default function Cart() {
             </div>
           ) : (
             <>
+              {/* -------- Cart Items -------- */}
               {cart.map((item, index) => (
                 <div
                   key={index}
-                  className="bg-white dark:bg-gray-800 rounded-xl shadow p-4
-                             flex flex-col sm:flex-row gap-4"
+                  className="
+                    bg-white
+                    dark:bg-gray-800
+                    rounded-xl
+                    shadow
+                    p-4
+                    flex
+                    flex-col
+                    sm:flex-row
+                    gap-4
+                  "
                 >
+                  {/* Product Image */}
                   <img
                     src={item.thumbnail}
                     alt={item.title}
                     className="h-24 w-24 object-contain rounded bg-white"
                   />
 
+                  {/* Product Details */}
                   <div className="flex-1">
                     <h3 className="font-semibold text-lg">
                       {item.title}
                     </h3>
+
                     <p className="text-gray-500">
                       ₹ {Math.round(item.price * 80)}
                     </p>
 
+                    {/* Quantity Controls */}
                     <div className="flex items-center gap-3 mt-3">
                       <button
                         onClick={() => decreaseQty(index)}
@@ -96,7 +132,9 @@ export default function Cart() {
                         −
                       </button>
 
-                      <span>{item.qty || 1}</span>
+                      <span>
+                        {item.qty || 1}
+                      </span>
 
                       <button
                         onClick={() => increaseQty(index)}
@@ -107,6 +145,7 @@ export default function Cart() {
                     </div>
                   </div>
 
+                  {/* Price + Remove */}
                   <div className="flex sm:flex-col items-end justify-between gap-3 min-w-[120px]">
                     <p className="font-semibold">
                       ₹ {Math.round(item.price * 80) * (item.qty || 1)}
@@ -114,9 +153,18 @@ export default function Cart() {
 
                     <button
                       onClick={() => removeItem(index)}
-                      className="border border-red-500 text-red-500
-                                 px-4 py-1 rounded text-sm
-                                 hover:bg-red-500 hover:text-white transition"
+                      className="
+                        border
+                        border-red-500
+                        text-red-500
+                        px-4
+                        py-1
+                        rounded
+                        text-sm
+                        hover:bg-red-500
+                        hover:text-white
+                        transition
+                      "
                     >
                       Remove
                     </button>
@@ -126,6 +174,8 @@ export default function Cart() {
             </>
           )}
 
+
+          {/* -------- Bottom Buttons -------- */}
           {cart.length > 0 && (
             <div className="flex flex-wrap gap-3">
               <button
@@ -143,11 +193,14 @@ export default function Cart() {
               </button>
             </div>
           )}
+
         </div>
 
-        {/* RIGHT */}
+
+        {/* ================= RIGHT SECTION (ORDER SUMMARY) ================= */}
         {cart.length > 0 && (
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-5 h-fit">
+
             <h2 className="text-xl font-semibold mb-4">
               Order Summary
             </h2>
@@ -164,13 +217,22 @@ export default function Cart() {
 
             <button
               onClick={handleCheckout}
-              className="w-full mt-4 bg-purple-600 hover:bg-purple-700
-                         text-white py-2 rounded-lg"
+              className="
+                w-full
+                mt-4
+                bg-purple-600
+                hover:bg-purple-700
+                text-white
+                py-2
+                rounded-lg
+              "
             >
               Checkout
             </button>
+
           </div>
         )}
+
       </div>
     </div>
   );
