@@ -2,7 +2,7 @@
 // BASE URL (Loaded from Vite Environment Variable)
 // ==================================================
 
-const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
+const API_BASE_URL = (import.meta.env.VITE_API_URL || import.meta.env.VITE_BACKEND_URL || "https://rrr-shopkart-backend.onrender.com") + "/api";
 
 
 // ==================================================

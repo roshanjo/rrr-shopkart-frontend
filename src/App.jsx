@@ -4,6 +4,7 @@ import {
   Route,
   useLocation,
 } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -130,6 +131,9 @@ export default function App() {
 
         {/* 🔥 AMAZON-STYLE CART DRAWER */}
         <CartDrawer />
+
+        {/* 🍞 TOAST NOTIFICATIONS */}
+        <Toaster position="top-center" reverseOrder={false} />
 
       </BrowserRouter>
     </CartProvider>

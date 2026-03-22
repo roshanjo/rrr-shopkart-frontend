@@ -5,6 +5,20 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { useTheme } from "../context/ThemeContext";
+import { useCart } from "../context/CartContext";
+import { 
+  ShoppingBag, 
+  Search, 
+  Menu, 
+  X, 
+  ChevronDown, 
+  LogOut, 
+  Settings, 
+  User, 
+  Heart, 
+  Sun, 
+  Moon 
+} from "lucide-react";
 
 
 // ==================================================
@@ -33,6 +47,7 @@ export default function Navbar() {
   const location = useLocation();
   const dropdownRef = useRef(null);
   const { theme, toggleTheme } = useTheme();
+  const { cart, setOpen } = useCart();
 
   const token = localStorage.getItem("token");
 
@@ -50,7 +65,7 @@ export default function Navbar() {
   );
 
   const isLoggedIn = !!token;
-  const showSearch = location.pathname === "/products";
+  const showSearch = location.pathname !== "/";
 
 
   // ==================================================
@@ -198,238 +213,150 @@ export default function Navbar() {
 
   return (
     <>
-
       {/* SUCCESS MESSAGE */}
       {successMsg && (
-        <div className="fixed top-20 left-1/2 -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded z-[9999] text-sm">
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-5 py-2.5 rounded-xl shadow-premium z-[9999] text-sm font-medium animate-bounce-short flex items-center gap-2">
           {successMsg}
         </div>
       )}
 
-
       {/* NAVBAR */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-gray-900 text-white">
-
-        <div className="max-w-7xl mx-auto p-4">
-
-          {/* TOP ROW */}
-          <div className="flex items-center justify-between gap-3">
-
+      <nav className="fixed top-0 left-0 right-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-100 dark:border-slate-800/80 text-slate-800 dark:text-slate-100 shadow-soft transition-all">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 gap-4">
+            
             {/* LOGO */}
-            <Link
-              to="/products"
-              className="shrink-0"
-            >
-              <img
-                src="/logo.png"
-                alt="Logo"
-                className="h-12"
-              />
+            <Link to="/products" className="flex items-center gap-2 shrink-0 group">
+              <img src="/logo.png" alt="Logo" className="h-9 w-auto group-hover:scale-105 transition-transform" />
+              <span className="font-bold text-xl bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent hidden sm:block">Ai-Kart</span>
             </Link>
 
-
-            {/* DESKTOP SEARCH */}
-            <div className="flex-1 mx-6 hidden sm:block">
-
+            {/* SEARCH */}
+            <div className="flex-1 max-w-2xl mx-4 hidden sm:block">
               {showSearch && (
-                <input
-                  value={search}
-                  onChange={handleSearchChange}
-                  placeholder="Search products…"
-                  className="w-full px-6 py-2 rounded-full bg-white text-black placeholder-gray-400 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
-                />
+                <div className="relative group">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-violet-600 transition-colors" />
+                  <input
+                    value={search}
+                    onChange={handleSearchChange}
+                    placeholder="Search premium products..."
+                    className="w-full pl-11 pr-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/50 text-sm placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-violet-500 dark:focus:border-violet-500 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-violet-500/10 dark:focus:ring-violet-500/10 transition-all shadow-sm"
+                  />
+                </div>
               )}
-
             </div>
 
-
-            {/* PROFILE SECTION */}
-            <div
-              ref={dropdownRef}
-              className="relative shrink-0"
-            >
-
-              <button
-                onClick={() => {
-                  setMenuOpen(!menuOpen);
-                  setSettingsOpen(false);
-                  setEditProfileOpen(false);
-                }}
-                className="flex items-center gap-2"
+            {/* ACTIONS */}
+            <div className="flex items-center gap-2 sm:gap-4">
+              
+              {/* THEME TOGGLE */}
+              <button 
+                onClick={toggleTheme}
+                className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 transition-colors hidden sm:flex"
               >
-                <img
-                  src={avatar}
-                  className="h-8 w-8 rounded-full"
-                />
-
-                <span className="text-xs sm:text-sm">
-                  Hi, {username}
-                </span>
+                {theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
               </button>
 
-
-              {/* DROPDOWN */}
-              <div
-                className={`
-                  absolute right-0 top-12 w-screen sm:w-64
-                  bg-white dark:bg-gray-800
-                  text-black dark:text-white
-                  shadow-lg p-4 transition
-                  ${
-                    menuOpen
-                      ? "opacity-100 scale-100"
-                      : "opacity-0 scale-95 pointer-events-none"
-                  }
-                `}
+              {/* CART */}
+              <button 
+                onClick={() => setOpen(true)}
+                className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 transition-colors relative"
               >
-
-                {/* ---- MAIN MENU ---- */}
-                {!settingsOpen ? (
-
-                  <>
-                    <Link
-                      to="/my-orders"
-                      className="block py-2 text-center sm:text-left"
-                    >
-                      My Orders
-                    </Link>
-
-                    <Link
-                      to="/wishlist"
-                      className="block py-2 text-center sm:text-left"
-                    >
-                      My Wishlist
-                    </Link>
-
-                    <button
-                      onClick={() => setSettingsOpen(true)}
-                      className="w-full py-2 text-center sm:text-left"
-                    >
-                      Settings
-                    </button>
-
-                    <button
-                      onClick={handleLogout}
-                      className="w-full py-2 text-red-600 text-center sm:text-left"
-                    >
-                      Logout
-                    </button>
-                  </>
-
-                ) : !editProfileOpen ? (
-
-                  <>
-                    <p className="font-semibold mb-2 text-center">
-                      Settings
-                    </p>
-
-                    <button
-                      onClick={() => setEditProfileOpen(true)}
-                      className="w-full py-2 text-center"
-                    >
-                      Edit Profile
-                    </button>
-
-                    <button
-                      onClick={toggleTheme}
-                      className="w-full py-2 text-center"
-                    >
-                      Switch to {theme === "light" ? "Dark" : "Light"} Mode
-                    </button>
-
-                    <button
-                      onClick={handleSaveSettings}
-                      className="w-full bg-green-600 text-white py-2 rounded mt-2"
-                    >
-                      Save Changes
-                    </button>
-
-                    <button
-                      onClick={() => setSettingsOpen(false)}
-                      className="w-full py-2 text-center"
-                    >
-                      ← Back
-                    </button>
-                  </>
-
-                ) : (
-
-                  <>
-                    <p className="font-semibold mb-3 text-center">
-                      Edit Profile
-                    </p>
-
-                    <div className="flex justify-center gap-3 mb-3">
-                      {avatars.map((a) => (
-                        <img
-                          key={a}
-                          src={a}
-                          onClick={() => setAvatar(a)}
-                          className={`h-10 w-10 rounded-full cursor-pointer ${
-                            avatar === a
-                              ? "ring-2 ring-green-500"
-                              : ""
-                          }`}
-                        />
-                      ))}
-                    </div>
-
-                    <input
-                      value={username}
-                      onChange={(e) =>
-                        setUsername(e.target.value)
-                      }
-                      className="w-full p-2 rounded mb-2 bg-white dark:bg-gray-700"
-                      placeholder="Change username"
-                    />
-
-                    <input
-                      type="password"
-                      value={password}
-                      onChange={(e) =>
-                        setPassword(e.target.value)
-                      }
-                      className="w-full p-2 rounded mb-2 bg-white dark:bg-gray-700"
-                      placeholder="New password (optional)"
-                    />
-
-                    <button
-                      onClick={() =>
-                        setEditProfileOpen(false)
-                      }
-                      className="w-full py-2 text-center"
-                    >
-                      ← Back
-                    </button>
-                  </>
+                <ShoppingBag className="w-5 h-5" />
+                {cart.length > 0 && (
+                  <span className="absolute top-1 right-1 bg-violet-600 text-white text-[10px] font-bold h-4 w-4 rounded-full flex items-center justify-center animate-pulse">
+                    {cart.reduce((total, item) => total + (item.qty || 1), 0)}
+                  </span>
                 )}
+              </button>
 
+              <div className="h-6 w-px bg-slate-200 dark:bg-slate-800 hidden sm:block" />
+
+              {/* PROFILE */}
+              <div ref={dropdownRef} className="relative">
+                <button
+                  onClick={() => {
+                    setMenuOpen(!menuOpen);
+                    setSettingsOpen(false);
+                    setEditProfileOpen(false);
+                  }}
+                  className="flex items-center gap-2 p-1 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                >
+                  <img src={avatar} className="h-7 w-7 rounded-full shadow-sm" alt="Avatar" />
+                  <span className="text-sm font-medium hidden sm:block">{username}</span>
+                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${menuOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {/* DROPDOWN */}
+                <div className={`absolute right-0 top-12 w-64 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 rounded-2xl shadow-premium p-2 mt-2 transition-all origin-top-right ${menuOpen ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"}`}>
+                  
+                  {!settingsOpen ? (
+                    <div className="space-y-1">
+                      <Link to="/my-orders" className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                        <ShoppingBag className="w-4 h-4" /> My Orders
+                      </Link>
+                      <Link to="/wishlist" className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                        <Heart className="w-4 h-4" /> Wishlist
+                      </Link>
+                      <button onClick={() => setSettingsOpen(true)} className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                        <Settings className="w-4 h-4" /> Settings
+                      </button>
+                      <div className="h-px bg-slate-100 dark:bg-slate-800 my-1" />
+                      <button onClick={handleLogout} className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50 transition-colors">
+                        <LogOut className="w-4 h-4" /> Logout
+                      </button>
+                    </div>
+                  ) : !editProfileOpen ? (
+                    <div className="space-y-3 p-2">
+                       <p className="font-semibold text-slate-800 dark:text-slate-100 px-1">Settings</p>
+                       <button onClick={() => setEditProfileOpen(true)} className="w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">Edit Profile</button>
+                       <button onClick={toggleTheme} className="w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                         {theme === "light" ? "Dark Mode" : "Light Mode"}
+                       </button>
+                       <button onClick={handleSaveSettings} className="w-full bg-violet-600 hover:bg-violet-700 text-white py-2 rounded-xl text-sm font-medium transition-colors">Save</button>
+                       <button onClick={() => setSettingsOpen(false)} className="w-full text-center text-sm text-slate-500 hover:text-slate-700">← Back</button>
+                    </div>
+                  ) : (
+                    <div className="space-y-3 p-2">
+                       <p className="font-semibold text-slate-800 dark:text-slate-100 px-1">Edit Profile</p>
+                       <div className="flex justify-center gap-3 py-2">
+                         {avatars.map((a) => (
+                           <img key={a} src={a} onClick={() => setAvatar(a)} className={`h-10 w-10 rounded-full cursor-pointer transition-all ${avatar === a ? "ring-2 ring-violet-600 ring-offset-2 scale-110" : "opacity-75 hover:opacity-100"}`} />
+                         ))}
+                       </div>
+                       <input value={username} onChange={(e) => setUsername(e.target.value)} className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm focus:outline-none focus:border-violet-500" placeholder="Username" />
+                       <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent text-sm focus:outline-none focus:border-violet-500" placeholder="New password" />
+                       <button onClick={() => setEditProfileOpen(false)} className="w-full text-center text-sm text-slate-500 hover:text-slate-700">← Back</button>
+                    </div>
+                  )}
+
+                </div>
               </div>
 
             </div>
 
           </div>
 
-
           {/* MOBILE SEARCH */}
           {showSearch && (
-            <div className="sm:hidden mt-3">
-              <input
-                value={search}
-                onChange={handleSearchChange}
-                placeholder="Search products…"
-                className="w-full px-4 py-2 rounded-full bg-white text-black placeholder-gray-400 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
-              />
+            <div className="sm:hidden pb-4">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input
+                  value={search}
+                  onChange={handleSearchChange}
+                  placeholder="Search products..."
+                  className="w-full pl-11 pr-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm focus:outline-none focus:border-violet-500 focus:bg-white focus:ring-4 focus:ring-violet-500/10 transition-all"
+                />
+              </div>
             </div>
           )}
-
         </div>
       </nav>
 
-
       {/* SPACER */}
-      <div className="h-28 sm:h-20" />
-
+      <div className={`h-16 ${showSearch ? 'h-28 sm:h-16' : 'h-16'}`} />
     </>
   );
+
 }

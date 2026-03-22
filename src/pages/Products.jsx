@@ -1,89 +1,59 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import WishlistButton from "../components/WishlistButton";
+import ProductSkeleton from "../components/ProductSkeleton";
+import { getProducts } from "../services/api";
+import toast from "react-hot-toast";
+import { useCart } from "../context/CartContext";
+import { ShoppingBag, ChevronLeft, ChevronRight, Grid } from "lucide-react";
+import { motion } from "framer-motion";
+
 
 const PAGE_SIZE = 12;
-const FETCH_LIMIT = 100;
 
 export default function Products() {
 
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
+  const { addToCart } = useCart();
 
   const page = Number(params.get("page") || 1);
   const category = params.get("cat") || "all";
   const search = (params.get("search") || "").trim().toLowerCase();
 
-  const [allProducts, setAllProducts] = useState([]);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(1);
 
 
   /* =====================================================
-     FETCH ALL PRODUCTS (SAFE PAGINATED FETCH)
+     FETCH PRODUCTS (PAGINATED SERVER-SIDE)
   ===================================================== */
   useEffect(() => {
 
-    async function loadAll() {
-
+    async function load() {
       setLoading(true);
+      try {
+        const data = await getProducts({
+          search,
+          category,
+          limit: PAGE_SIZE,
+          skip: (page - 1) * PAGE_SIZE
+        });
 
-      let products = [];
-      let skip = 0;
-      let total = 0;
-
-      do {
-        const url = search
-          ? `https://dummyjson.com/products/search?q=${encodeURIComponent(search)}&limit=${FETCH_LIMIT}&skip=${skip}`
-          : `https://dummyjson.com/products?limit=${FETCH_LIMIT}&skip=${skip}`;
-
-        const res = await fetch(url);
-        const data = await res.json();
-
-        products = products.concat(data.products || []);
-        total = data.total || products.length;
-        skip += FETCH_LIMIT;
-
-      } while (products.length < total);
-
-      setAllProducts(products);
-      setLoading(false);
+        setProducts(data.products || []);
+        setTotalPages(Math.max(1, Math.ceil((data.total || 0) / PAGE_SIZE)));
+      } catch (error) {
+        console.error("Load products error:", error);
+        toast.error("Failed to load products");
+      } finally {
+        setLoading(false);
+      }
     }
 
-    loadAll();
+    load();
 
-  }, [search]);
-
-
-  /* =====================================================
-     CATEGORY FILTER
-  ===================================================== */
-  const filtered = useMemo(() => {
-
-    if (category === "all") return allProducts;
-
-    return allProducts.filter((p) => p.category === category);
-
-  }, [allProducts, category]);
-
-
-  /* =====================================================
-     PAGINATION CALCULATION
-  ===================================================== */
-  useEffect(() => {
-    setTotalPages(
-      Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
-    );
-  }, [filtered]);
-
-
-  const paginated = useMemo(() => {
-
-    const start = (page - 1) * PAGE_SIZE;
-
-    return filtered.slice(start, start + PAGE_SIZE);
-
-  }, [filtered, page]);
+  }, [search, category, page]);
 
 
   /* =====================================================
@@ -139,54 +109,52 @@ export default function Products() {
      UI
   ===================================================== */
   return (
-    <div className="min-h-screen bg-white dark:bg-[#0b1220]">
+    <div className="min-h-screen bg-transparent">
 
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         {/* ================= MOBILE CATEGORY ================= */}
-        <div className="lg:hidden sticky top-16 z-30 bg-white dark:bg-[#0b1220] py-3">
-          <div className="flex gap-2 overflow-x-auto">
-
+        <div className="lg:hidden sticky top-16 z-30 bg-white dark:bg-slate-950 py-4 -mx-4 px-4 border-b border-slate-100 dark:border-slate-800/50 mb-6">
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
             {categories.map((c) => (
               <button
                 key={c}
                 onClick={() => changeCategory(c)}
-                className={`px-4 py-2 rounded-full text-sm whitespace-nowrap ${
+                className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${
                   category === c
-                    ? "bg-yellow-400 text-black"
-                    : "bg-gray-100 dark:bg-[#1e293b]"
+                    ? "bg-violet-600 text-white shadow-sm shadow-violet-500/20"
+                    : "bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800"
                 }`}
               >
-                {c.toUpperCase()}
+                {c.charAt(0).toUpperCase() + c.slice(1).replace('-', ' ')}
               </button>
             ))}
-
           </div>
         </div>
 
-
-        <div className="flex gap-6 mt-6">
+        <div className="flex gap-8">
 
           {/* ================= DESKTOP CATEGORY ================= */}
-          <aside className="hidden lg:block w-64">
-            <div className="bg-white dark:bg-[#111827] p-4 rounded-lg border">
-
-              <h3 className="font-semibold mb-4">Category</h3>
-
-              {categories.map((c) => (
-                <button
-                  key={c}
-                  onClick={() => changeCategory(c)}
-                  className={`block w-full text-left px-3 py-2 rounded mb-1 ${
-                    category === c
-                      ? "bg-yellow-400 text-black"
-                      : "hover:bg-gray-100 dark:hover:bg-[#1e293b]"
-                  }`}
-                >
-                  {c.toUpperCase()}
-                </button>
-              ))}
-
+          <aside className="hidden lg:block w-30 shrink-0">
+            <div className="sticky top-24 bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800/80 shadow-soft">
+              <h3 className="font-semibold text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2 px-2">
+                <Grid className="w-4 h-4 text-violet-600" /> Categories
+              </h3>
+              <div className="space-y-1 max-h-[calc(100vh-160px)] overflow-y-auto pr-2 custom-scrollbar">
+                {categories.map((c) => (
+                  <button
+                    key={c}
+                    onClick={() => changeCategory(c)}
+                    className={`block w-full text-left px-3 py-2 rounded-xl text-sm transition-all ${
+                      category === c
+                        ? "bg-violet-600 text-white font-medium shadow-sm shadow-violet-500/20"
+                        : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-slate-100"
+                    }`}
+                  >
+                    {c.charAt(0).toUpperCase() + c.slice(1).replace('-', ' ')}
+                  </button>
+                ))}
+              </div>
             </div>
           </aside>
 
@@ -195,53 +163,73 @@ export default function Products() {
           <main className="flex-1">
 
             {loading ? (
-              <p>Loading...</p>
-            ) : paginated.length === 0 ? (
-              <p>No products found</p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                {Array.from({ length: PAGE_SIZE }).map((_, i) => (
+                  <ProductSkeleton key={i} />
+                ))}
+              </div>
+            ) : products.length === 0 ? (
+              <div className="text-center py-20 flex-1 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-soft">
+                <p className="text-slate-400">No products found</p>
+              </div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
 
-                {paginated.map((product) => (
-                  <div
+                {products.map((product) => (
+                  <motion.div
                     key={product.id}
-                    onClick={() =>
-                      navigate(`/product/${product.id}?source=dummy`)
-                    }
-                    className="
-                      relative
-                      rounded-xl
-                      p-3
-                      cursor-pointer
-                      border
-                      hover:shadow-md
-                      dark:bg-[#111827]
-                    "
+                    onClick={() => navigate(`/product/${product.id}?source=dummy`)}
+                    whileHover={{ y: -4 }}
+                    className="relative bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 rounded-2xl p-4 cursor-pointer shadow-soft hover:shadow-premium group flex flex-col justify-between h-full transition-all duration-300"
                   >
-
                     {/* Wishlist Button */}
                     <div
-                      className="absolute top-2 right-2"
+                      className="absolute top-3 right-3 z-10"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <WishlistButton product={product} />
                     </div>
 
-                    <img
-                      src={product.thumbnail}
-                      alt={product.title}
-                      className="h-40 w-full object-contain"
-                    />
+                    {/* Image Container */}
+                    <div className="aspect-square bg-slate-50 dark:bg-slate-800/30 rounded-xl flex items-center justify-center p-3 mb-4 group-hover:bg-slate-100 dark:group-hover:bg-slate-800/50 transition-colors">
+                      <img
+                        src={product.thumbnail}
+                        alt={product.title}
+                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300 mix-blend-multiply dark:mix-blend-normal"
+                      />
+                    </div>
 
-                    <h3 className="mt-2 text-sm line-clamp-2">
-                      {product.title}
-                    </h3>
+                    {/* Content */}
+                    <div className="flex-1 flex flex-col justify-between">
+                      <div>
+                        <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100 line-clamp-2 mb-1 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
+                          {product.title}
+                        </h3>
+                        <p className="text-xs text-slate-400 dark:text-slate-500 mb-2 capitalize">{product.category}</p>
+                      </div>
 
-                    <p className="font-bold text-yellow-500">
-                      ₹ {Math.round(product.price * 80)}
-                    </p>
+                      <div>
+                        <p className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                          ₹ {Math.round(product.price * 80)}
+                        </p>
 
-                  </div>
+                        <motion.button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            addToCart(product);
+                            toast.success("Added to cart!");
+                          }}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          className="mt-4 w-full border border-slate-200 dark:border-slate-800 hover:border-violet-600 dark:hover:border-violet-500 bg-transparent hover:bg-violet-50 dark:hover:bg-violet-900/10 text-slate-800 dark:text-slate-200 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-colors duration-200 shadow-sm"
+                        >
+                          <ShoppingBag className="w-4 h-4" /> Add to Cart
+                        </motion.button>
+                      </div>
+                    </div>
+                  </motion.div>
                 ))}
+
 
               </div>
             )}
@@ -249,22 +237,24 @@ export default function Products() {
 
             {/* ================= PAGINATION ================= */}
             {totalPages > 1 && (
-              <div className="flex justify-center gap-2 mt-10 flex-wrap">
+              <div className="flex justify-center items-center gap-2 mt-12 flex-wrap">
 
                 {Array.from(
                   { length: totalPages },
                   (_, i) => i + 1
-                ).map((p) => (
+                 ).map((p) => (
                   <button
                     key={p}
                     onClick={() => changePage(p)}
-                    className={`px-4 py-2 rounded border ${
-                      page === p ? "bg-yellow-400 text-black" : ""
+                    className={`h-10 w-10 rounded-xl border text-sm font-medium flex items-center justify-center transition-all ${
+                      page === p 
+                        ? "bg-violet-600 border-violet-600 text-white shadow-sm shadow-violet-500/20" 
+                        : "border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
                     }`}
                   >
                     {p}
                   </button>
-                ))}
+                 ))}
 
               </div>
             )}

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { CheckCircle2, Calendar, ShoppingBag, ArrowRight, MapPin, Package } from "lucide-react";
 
 export default function Success() {
 
@@ -44,131 +45,97 @@ export default function Success() {
      UI
   ===================================================== */
   return (
-    <div
-      className="
-        fixed inset-0 z-[9999]
-        bg-green-50 dark:bg-gray-900
-        overflow-y-auto
-        px-4 py-10 text-center
-      "
-    >
-      <div className="max-w-3xl mx-auto space-y-6">
+    <div className="fixed inset-0 z-[9999] bg-slate-50 dark:bg-slate-950 overflow-y-auto px-4 py-12 flex flex-col items-center justify-center">
+      <div className="max-w-xl w-full space-y-6">
 
         {/* ================= SUCCESS ICON ================= */}
-        <div className="mb-4 animate-scale">
-          <div className="w-28 h-28 rounded-full bg-green-100 flex items-center justify-center mx-auto">
-            <svg
-              className="w-16 h-16 text-green-600"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="4"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
+        <div className="mb-2 animate-scale flex justify-center">
+          <div className="w-24 h-24 rounded-3xl bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center shadow-lg shadow-emerald-500/10 border border-emerald-100 dark:border-emerald-800">
+            <CheckCircle2 className="w-12 h-12 text-emerald-500" />
           </div>
         </div>
 
-        <h1 className="text-4xl font-bold text-green-600">
-          Payment Successful 🎉
-        </h1>
-
-
-        {/* ================= ORDER SUMMARY ================= */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-5 text-left">
-          <h2 className="text-xl font-semibold mb-2">
-            Order Summary
-          </h2>
-
-          <p><strong>Status:</strong> Paid</p>
-          <p><strong>Total:</strong> ₹{total}</p>
-          <p>
-            <strong>Date:</strong>{" "}
-            {new Date().toLocaleString()}
-          </p>
+        <div className="text-center">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">
+            Payment Successful
+          </h1>
+          <p className="text-sm text-slate-500 mt-1">Thank you for shopping with us!</p>
         </div>
 
+        {/* ================= ORDER SUMMARY ================= */}
+        <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-5 text-left shadow-soft">
+          <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">
+            Order Details
+          </h2>
+          <div className="space-y-2 text-sm text-slate-700 dark:text-slate-300">
+            <div className="flex justify-between">
+              <span className="text-slate-400">Status</span>
+              <span className="font-medium text-emerald-500">Paid</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-slate-400">Total Amount</span>
+              <span className="font-bold text-slate-900 dark:text-slate-100">₹{total}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-slate-400">Date</span>
+              <span>{new Date().toLocaleDateString(undefined, { dateStyle: "medium" })}</span>
+            </div>
+          </div>
+        </div>
 
         {/* ================= DELIVERY ADDRESS ================= */}
         {address && (
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-5 text-left">
-            <h2 className="text-xl font-semibold mb-2">
-              Delivery Address
+          <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-5 text-left shadow-soft">
+            <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-1">
+              <MapPin className="w-4 h-4" /> Delivery Address
             </h2>
-
-            <p>{address.fullName}</p>
-            <p>{address.phone}</p>
-            <p>
-              {address.street}, {address.city},{" "}
-              {address.state} - {address.pincode}
-            </p>
+            <div className="text-sm text-slate-700 dark:text-slate-300 space-y-1">
+              <p className="font-semibold text-slate-900 dark:text-slate-100">{address.fullName}</p>
+              <p className="text-slate-400">{address.phone}</p>
+              <p className="leading-relaxed">
+                {address.street}, {address.city}, {address.state} - {address.pincode}
+              </p>
+            </div>
           </div>
         )}
 
-
         {/* ================= ITEMS PURCHASED ================= */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-5 text-left">
-          <h2 className="text-xl font-semibold mb-3">
-            Items Purchased
+        <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-5 text-left shadow-soft">
+          <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-1">
+            <Package className="w-4 h-4" /> Items Purchased
           </h2>
 
-          {cart.length === 0 ? (
-            <p className="text-gray-500 text-sm">
-              No items found
-            </p>
-          ) : (
-            cart.map((item, index) => (
-              <div
-                key={index}
-                className="
-                  flex justify-between items-start
-                  border-b py-2
-                  last:border-b-0
-                  gap-3
-                "
-              >
-                <div className="flex-1">
-                  <p className="font-medium break-words">
-                    {item.title || item.name}
-                  </p>
-
-                  <p className="text-sm text-gray-500">
-                    Qty: {item.qty || 1}
+          <div className="divide-y divide-slate-100 dark:divide-slate-800 max-h-48 overflow-y-auto custom-scrollbar">
+            {cart.length === 0 ? (
+              <p className="text-slate-400 text-sm py-2">No items found</p>
+            ) : (
+              cart.map((item, index) => (
+                <div key={index} className="flex justify-between items-center py-2.5 gap-3">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-slate-800 dark:text-slate-100 line-clamp-1">
+                      {item.title || item.name}
+                    </p>
+                    <p className="text-xs text-slate-400">Qty: {item.qty || 1}</p>
+                  </div>
+                  <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                    ₹{Math.round(item.price * 80) * (item.qty || 1)}
                   </p>
                 </div>
-
-                <p className="whitespace-nowrap">
-                  ₹
-                  {Math.round(item.price * 80) *
-                    (item.qty || 1)}
-                </p>
-              </div>
-            ))
-          )}
+              ))
+            )}
+          </div>
         </div>
 
-
         {/* ================= ACTION BUTTONS ================= */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
-
+        <div className="flex flex-col sm:flex-row gap-3 justify-center mt-4">
           <button
             onClick={() => {
               clearOrderData();
               navigate("/my-orders");
             }}
-            className="
-              bg-purple-600
-              hover:bg-purple-700
-              text-white
-              px-6 py-2
-              rounded-lg
-            "
+            className="bg-violet-600 hover:bg-violet-700 text-white px-6 py-3 rounded-xl font-semibold shadow-md shadow-violet-500/10 transition-all flex items-center justify-center gap-2 text-sm"
           >
-            View My Orders
+            <Package className="w-4 h-4" /> View My Orders
           </button>
 
           <button
@@ -176,17 +143,10 @@ export default function Success() {
               clearOrderData();
               navigate("/products");
             }}
-            className="
-              bg-gray-600
-              hover:bg-gray-700
-              text-white
-              px-6 py-2
-              rounded-lg
-            "
+            className="border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 text-slate-700 dark:text-slate-300 px-6 py-3 rounded-xl font-semibold transition-all hover:bg-slate-100 dark:hover:bg-slate-800/50 flex items-center justify-center gap-2 text-sm"
           >
-            Continue Shopping
+            Continue Shopping <ArrowRight className="w-4 h-4" />
           </button>
-
         </div>
       </div>
 

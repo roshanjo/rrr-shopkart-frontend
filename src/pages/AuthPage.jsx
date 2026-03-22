@@ -12,11 +12,11 @@ export default function AuthPage() {
 
       {/* ================= FIXED LOGO HEADER ================= */}
       <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50">
-        <img
-          src={logo}
-          alt="Ai-Kart Logo"
-          className="w-52"
-        />
+        <div className="flex items-center gap-2">
+          <span className="text-2xl font-black bg-gradient-to-r from-violet-600 via-indigo-600 to-fuchsia-600 bg-clip-text text-transparent tracking-tight">
+            AI-KART
+          </span>
+        </div>
       </div>
 
 
@@ -26,30 +26,31 @@ export default function AuthPage() {
 
           {/* -------- Welcome Screen -------- */}
           {mode === "welcome" && (
-            <div className="bg-white dark:bg-gray-800 p-6 rounded shadow w-80 text-center">
+            <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-8 rounded-3xl shadow-premium w-80 text-center space-y-6">
+              <div>
+                <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                  Welcome to <span className="bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">Ai-Kart</span>
+                </h1>
+                <p className="text-sm text-slate-500 mt-1 leading-relaxed">
+                  Your premium shopping destination
+                </p>
+              </div>
 
-              <h1 className="text-2xl font-bold mb-3 text-gray-900 dark:text-white">
-                Welcome to <span className="text-green-600">Ai-Kart</span>
-              </h1>
+              <div className="space-y-3">
+                <button
+                  onClick={() => setMode("login")}
+                  className="w-full bg-violet-600 hover:bg-violet-700 text-white py-2.5 rounded-xl font-semibold shadow-md shadow-violet-500/10 transition-all"
+                >
+                  Sign In
+                </button>
 
-              <p className="mb-5 text-gray-600 dark:text-gray-300">
-                Your one-stop shopping destination
-              </p>
-
-              <button
-                onClick={() => setMode("login")}
-                className="w-full bg-green-600 text-white py-2 rounded mb-3"
-              >
-                Sign In
-              </button>
-
-              <button
-                onClick={() => setMode("signup")}
-                className="w-full border border-green-600 text-green-600 py-2 rounded"
-              >
-                Create Account
-              </button>
-
+                <button
+                  onClick={() => setMode("signup")}
+                  className="w-full border border-slate-200 dark:border-slate-700 hover:border-violet-600 dark:hover:border-violet-500 text-slate-700 dark:text-slate-300 py-2.5 rounded-xl font-semibold transition-all hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                >
+                  Create Account
+                </button>
+              </div>
             </div>
           )}
 
@@ -58,18 +59,11 @@ export default function AuthPage() {
           {mode === "login" && (
             <>
               <Login />
-
-              <p className="text-sm mt-3 text-gray-800 dark:text-gray-300 text-center">
+              <p className="text-sm mt-4 text-slate-500 dark:text-slate-400 text-center">
                 No account?{" "}
                 <span
                   onClick={() => setMode("signup")}
-                  className="
-                    font-medium
-                    cursor-pointer
-                    text-black
-                    dark:text-white
-                    hover:text-green-600
-                  "
+                  className="font-semibold cursor-pointer text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300 transition-colors"
                 >
                   Sign up
                 </span>
@@ -77,29 +71,22 @@ export default function AuthPage() {
             </>
           )}
 
-
           {/* -------- Signup Screen -------- */}
           {mode === "signup" && (
             <>
               <Signup onSuccess={() => setMode("login")} />
-
-              <p className="text-sm mt-3 text-gray-800 dark:text-gray-300 text-center">
+              <p className="text-sm mt-4 text-slate-500 dark:text-slate-400 text-center">
                 Already have an account?{" "}
                 <span
                   onClick={() => setMode("login")}
-                  className="
-                    font-medium
-                    cursor-pointer
-                    text-black
-                    dark:text-white
-                    hover:text-green-600
-                  "
+                  className="font-semibold cursor-pointer text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300 transition-colors"
                 >
                   Sign in
                 </span>
               </p>
             </>
           )}
+
 
         </div>
       </div>

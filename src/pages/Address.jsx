@@ -1,10 +1,10 @@
-// ==================================================
-// IMPORTS
-// ==================================================
-
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import { ArrowLeft, CreditCard, Ship, MapPin, Check } from "lucide-react";
+import { motion } from "framer-motion";
+
 
 
 // ==================================================
@@ -122,7 +122,7 @@ export default function Address() {
       !address.state.trim() ||
       !address.pincode.trim()
     ) {
-      alert("Please fill all address fields");
+      toast.error("Please fill all address fields");
       return;
     }
 
@@ -158,14 +158,20 @@ export default function Address() {
         JSON.stringify(address)
       );
 
-      // Get Cart Total
-      const total =
-        Number(localStorage.getItem("cart_total")) || 1;
+      // Get Cart from LocalStorage
+      const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+      const items = cart.map(item => ({ id: item.id, qty: item.qty || 1 }));
+
+      if (items.length === 0) {
+          toast.error("Cart is empty");
+          setLoading(false);
+          return;
+      }
 
       // Create Stripe Checkout Session
       const stripeRes = await axios.post(
         `${API}/api/create-checkout-session/`,
-        { total },
+        { items },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -173,6 +179,7 @@ export default function Address() {
           },
         }
       );
+
 
       // Redirect to Stripe
       if (stripeRes.data?.url) {
@@ -188,7 +195,7 @@ export default function Address() {
         err.response?.data || err.message
       );
 
-      alert(
+      toast.error(
         err.response?.data?.error ||
         "Failed to continue. Please try again."
       );
@@ -203,67 +210,91 @@ export default function Address() {
   // ==================================================
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 px-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-transparent px-4 py-12 space-y-6">
 
-      <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+      {/* ================= STEP PROGRESS ================= */}
+      <div className="flex justify-center">
+        <div className="flex items-center gap-4 text-sm font-medium">
+          <div className="flex items-center gap-2 text-emerald-500">
+            <span className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-semibold shadow-sm shadow-emerald-500/20"><Check className="w-3.5 h-3.5" /></span>
+            <span>Cart</span>
+          </div>
+          <div className="h-px w-12 bg-emerald-500" />
+          <div className="flex items-center gap-2 text-violet-600">
+            <span className="w-6 h-6 rounded-full bg-violet-600 text-white flex items-center justify-center text-xs font-semibold shadow-sm shadow-violet-500/20">2</span>
+            <span>Delivery</span>
+          </div>
+          <div className="h-px w-12 bg-slate-200 dark:bg-slate-800" />
+          <div className="flex items-center gap-2 text-slate-400">
+            <span className="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-xs">3</span>
+            <span>Payment</span>
+          </div>
+        </div>
+      </div>
 
-        {/* Title */}
-        <h2 className="text-2xl font-bold text-center mb-6">
-          Step 1: Delivery Address
-        </h2>
+      <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl shadow-premium p-8">
 
+
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="mx-auto w-12 h-12 bg-violet-50 dark:bg-violet-900/30 rounded-2xl flex items-center justify-center mb-3">
+            <MapPin className="w-6 h-6 text-violet-600 dark:text-violet-400" />
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+            Delivery Address
+          </h2>
+          <p className="text-sm text-slate-400 mt-1">Where should we deliver your order?</p>
+        </div>
 
         {/* Input Fields */}
         <div className="space-y-4">
-
           {[
-            ["fullName", "Full Name"],
-            ["phone", "Phone"],
-            ["street", "Street / House No"],
-            ["city", "City"],
-            ["state", "State"],
-            ["pincode", "Pincode"],
-          ].map(([name, placeholder]) => (
-
-            <input
-              key={name}
-              name={name}
-              placeholder={placeholder}
-              value={address[name]}
-              onChange={handleChange}
-              className="
-                w-full rounded-lg px-4 py-2
-                bg-gray-100 dark:bg-gray-700
-              "
-            />
-
+            ["fullName", "Full Name", "text"],
+            ["phone", "Phone Number", "tel"],
+            ["street", "Street / House No", "text"],
+            ["city", "City", "text"],
+            ["state", "State", "text"],
+            ["pincode", "Pincode", "text"],
+          ].map(([name, placeholder, type]) => (
+            <div key={name} className="space-y-1">
+              <label className="text-xs font-medium text-slate-500 dark:text-slate-400 px-1">{placeholder}</label>
+              <input
+                type={type}
+                name={name}
+                placeholder={placeholder}
+                value={address[name]}
+                onChange={handleChange}
+                className="w-full rounded-xl px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 text-sm focus:outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 transition-all"
+              />
+            </div>
           ))}
-
         </div>
 
-
         {/* Buttons */}
-        <div className="flex justify-between items-center mt-6">
-
-          <button onClick={() => navigate("/cart")}>
-            ← Back
+        <div className="flex justify-between items-center mt-8 pt-4 border-t border-slate-100 dark:border-slate-800/50">
+          <button 
+            onClick={() => navigate("/cart")}
+            className="flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" /> Back to Cart
           </button>
 
-          <button
+          <motion.button
             onClick={handleSubmit}
             disabled={loading}
-            className="
-              bg-purple-600 text-white
-              px-6 py-2 rounded-lg
-            "
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="bg-violet-600 hover:bg-violet-700 text-white px-6 py-2.5 rounded-xl font-semibold flex items-center gap-2 shadow-md shadow-violet-500/10 transition-all disabled:opacity-70"
           >
-            {loading ? "Redirecting..." : "Continue →"}
-          </button>
+            {loading ? (
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            ) : <CreditCard className="w-4 h-4" />}
+            {loading ? "Processing..." : "Continue"}
+          </motion.button>
 
         </div>
 
       </div>
-
     </div>
   );
 }
