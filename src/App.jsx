@@ -16,6 +16,8 @@ import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
 import AdminOrders from "./pages/AdminOrders";
+import AdminPanel from "./pages/AdminPanel";
+import AdminRoute from "./components/AdminRoute";
 import Success from "./pages/Success";
 import Cancel from "./pages/Cancel";
 import MyOrders from "./pages/MyOrders";
@@ -32,10 +34,11 @@ function Layout({ children }) {
 
   const location = useLocation();
 
-  const hideNavbar = location.pathname === "/";
+  const hideNavbar = location.pathname === "/" || location.pathname === "/admin-panel";
   const hideFooter =
     location.pathname === "/" ||
-    location.pathname === "/success";
+    location.pathname === "/success" ||
+    location.pathname === "/admin-panel";
 
   return (
     <>
@@ -89,6 +92,15 @@ export default function App() {
             <Route
               path="/admin/orders"
               element={<AdminOrders />}
+            />
+
+            <Route
+              path="/admin-panel"
+              element={
+                <AdminRoute>
+                  <AdminPanel />
+                </AdminRoute>
+              }
             />
 
             {/* ================= PAYMENT ================= */}

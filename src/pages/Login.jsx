@@ -34,6 +34,7 @@ export default function Login() {
         id: data.id,
         username: data.username,
         email: data.email,
+        is_admin: data.is_admin, // Added is_admin
       };
 
       localStorage.setItem("token", data.token);
@@ -41,7 +42,12 @@ export default function Login() {
       localStorage.setItem("user", JSON.stringify(updatedUser));
 
       toast.success("Signed in successfully!");
-      navigate("/products");
+      
+      if (data.is_admin) {
+        navigate("/admin-panel");
+      } else {
+        navigate("/products");
+      }
 
     } catch (error) {
       toast.error(error.message || "Login failed");

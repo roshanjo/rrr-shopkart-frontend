@@ -25,6 +25,30 @@ export default function OrderDetails() {
       .catch((err) => console.error(err));
   }, [id, token]);
 
+  // ================= Handle Invoice Download =================
+  const handleDownloadInvoice = async () => {
+    try {
+      const res = await fetch(`${API}/api/orders/${id}/invoice/`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) throw new Error("Download failed");
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `invoice_${id}.pdf`;
+      document.body.appendChild(a); // Recommended for firefox
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to download invoice");
+    }
+  };
+
   // ================= Loading State =================
   if (!order) {
     return (
@@ -70,14 +94,12 @@ export default function OrderDetails() {
         </div>
 
         {/* ================= Invoice Download ================= */}
-        <a
-          href={`${API}/api/orders/${order.id}/invoice/`}
-          target="_blank"
-          rel="noopener noreferrer"
+        <button
+          onClick={handleDownloadInvoice}
           className="w-full bg-violet-600 hover:bg-violet-700 text-white rounded-xl py-3.5 font-semibold flex items-center justify-center gap-2 shadow-md shadow-violet-500/10 transition-all text-sm"
         >
           <FileText className="w-4 h-4" /> Download Invoice (PDF)
-        </a>
+        </button>
 
       </div>
     </div>

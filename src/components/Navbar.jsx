@@ -228,7 +228,6 @@ export default function Navbar() {
             {/* LOGO */}
             <Link to="/products" className="flex items-center gap-2 shrink-0 group">
               <img src="/logo.png" alt="Logo" className="h-9 w-auto group-hover:scale-105 transition-transform" />
-              <span className="font-bold text-xl bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent hidden sm:block">Ai-Kart</span>
             </Link>
 
             {/* SEARCH */}
