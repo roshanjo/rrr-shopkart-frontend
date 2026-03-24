@@ -69,14 +69,32 @@ export default function MyOrders() {
                 className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-6 shadow-soft hover:shadow-premium transition-all duration-300 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 cursor-pointer group"
                 onClick={() => navigate(`/orders/${order.id}`)}
               >
-                <div className="space-y-1.5 flex-1">
-                  <p className="font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                    <span className="text-sm text-slate-400 font-normal">Order ID:</span> #{order.id}
-                  </p>
-                  <p className="text-xs text-slate-400 flex items-center gap-1">
-                    <Calendar className="w-3.5 h-3.5" /> {new Date(order.created_at).toLocaleDateString(undefined, { dateStyle: "medium" })} at {new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </p>
+                <div className="space-y-2 flex-1 w-full">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                        <span className="text-sm text-slate-400 font-normal">Order ID:</span> #{order.id}
+                      </p>
+                      <p className="text-xs text-slate-400 flex items-center gap-1">
+                        <Calendar className="w-3.5 h-3.5" /> {new Date(order.created_at).toLocaleDateString(undefined, { dateStyle: "medium" })} at {new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                    <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${order.payment_status === 'paid' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20' : 'bg-amber-50 text-amber-600'}`}>
+                      {order.payment_status}
+                    </span>
+                  </div>
+
+                  {/* Items Snapshot */}
+                  <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/50 space-y-1">
+                    {order.items && order.items.map((item, idx) => (
+                      <div key={idx} className="flex justify-between text-xs text-slate-500 dark:text-slate-400">
+                        <span>{item.title} <span className="text-slate-400">x{item.quantity}</span></span>
+                        <span>₹{item.price * item.quantity}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
+
 
                 <div className="flex items-center gap-4 self-stretch sm:self-auto justify-between sm:justify-end">
                   <div>

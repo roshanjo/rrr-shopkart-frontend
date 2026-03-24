@@ -28,6 +28,8 @@ export default function AdminPanel() {
   const [users, setUsers] = useState([]);
   const [payments, setPayments] = useState([]);
   const [logs, setLogs] = useState([]);
+  const [products, setProducts] = useState([]);
+
 
   const token = localStorage.getItem("token");
 
@@ -37,17 +39,20 @@ export default function AdminPanel() {
     try {
       const headers = { Authorization: `Bearer ${token}` };
 
-      const [resAnal, resUsers, resPayments, resLogs] = await Promise.all([
+      const [resAnal, resUsers, resPayments, resLogs, resProducts] = await Promise.all([
         fetch(`${API}/api/admin/analytics/`, { headers }),
         fetch(`${API}/api/admin/users/`, { headers }),
         fetch(`${API}/api/admin/payments/`, { headers }),
-        fetch(`${API}/api/admin/logs/`, { headers })
+        fetch(`${API}/api/admin/logs/`, { headers }),
+        fetch(`${API}/api/admin/products/`, { headers })
       ]);
 
       if (resAnal.ok) setAnalytics(await resAnal.json());
       if (resUsers.ok) setUsers(await resUsers.json());
       if (resPayments.ok) setPayments(await resPayments.json());
       if (resLogs.ok) setLogs(await resLogs.json());
+      if (resProducts.ok) setProducts(await resProducts.json());
+
 
     } catch (err) {
       console.error(err);
@@ -65,7 +70,31 @@ export default function AdminPanel() {
   }, [token]);
 
 
+  // ================= UPDATE STOCK =================
+  const handleUpdateStock = async (productId, newStock) => {
+    try {
+      const res = await fetch(`${API}/api/admin/products/${productId}/`, {
+        method: "PATCH",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ stock: newStock })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Action failed");
+
+      toast.success(data.message);
+      setProducts(products.map(p => p.id === productId ? { ...p, stock: newStock } : p));
+
+    } catch (err) {
+      toast.error(err.message);
+    }
+  };
+
   // ================= USER ACTIONS =================
+
   const handleUserAction = async (userId, action) => {
     try {
       const res = await fetch(`${API}/api/admin/users/${userId}/action/`, {
@@ -139,6 +168,13 @@ export default function AdminPanel() {
           >
             <Clock className="w-4 h-4" /> Activity Logs
           </button>
+          <button 
+            onClick={() => setActiveTab("products")} 
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${activeTab === 'products' ? 'bg-violet-50 dark:bg-violet-950/50 text-violet-600 dark:text-violet-400' : 'hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-500'}`}
+          >
+            <ShoppingBag className="w-4 h-4" /> Stock Dashboard
+          </button>
+
         </nav>
 
         <div className="p-4 border-t border-slate-100 dark:border-slate-800">
@@ -301,6 +337,52 @@ export default function AdminPanel() {
             </table>
           </div>
         )}
+
+        {activeTab === "products" && (
+          <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 rounded-2xl shadow-soft overflow-hidden">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 text-xs text-slate-400 uppercase">
+                  <th className="px-6 py-4">ID</th>
+                  <th className="px-6 py-4">Product Name</th>
+                  <th className="px-6 py-4">Category</th>
+                  <th className="px-6 py-4">Price</th>
+                  <th className="px-6 py-4">Stock</th>
+                  <th className="px-6 py-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
+                {products.map((p) => (
+                  <tr key={p.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+                    <td className="px-6 py-4 font-mono text-xs">{p.id}</td>
+                    <td className="px-6 py-4 font-semibold text-slate-800 dark:text-slate-100">{p.title}</td>
+                    <td className="px-6 py-4 text-slate-400 capitalize">{p.category}</td>
+                    <td className="px-6 py-4">₹{p.price_inr}</td>
+                    <td className="px-6 py-4">
+                      <span className={`font-semibold ${p.stock < 5 ? 'text-red-500' : 'text-slate-700 dark:text-slate-300'}`}>
+                        {p.stock}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <button 
+                         onClick={() => {
+                            const newStock = prompt("Enter new stock level:", p.stock);
+                            if (newStock !== null && !isNaN(newStock)) {
+                               handleUpdateStock(p.id, parseInt(newStock));
+                            }
+                         }} 
+                         className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-violet-50 dark:hover:bg-violet-950/50 text-violet-600 transition-colors"
+                      >
+                         Edit
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
 
       </main>
     </div>
