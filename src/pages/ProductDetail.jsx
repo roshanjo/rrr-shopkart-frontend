@@ -46,7 +46,7 @@ export default function ProductDetail() {
 
   // ================= Buy Now =================
   const handleBuyNow = () => {
-    addToCart(product);   // ✅ Ensure cart has item
+    localStorage.setItem("buy_now", JSON.stringify(product));
     navigate("/address"); // Continue checkout
   };
 

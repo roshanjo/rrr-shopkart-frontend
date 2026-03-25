@@ -126,6 +126,7 @@ export default function CartDrawer() {
             <button
               onClick={() => {
                 setOpen(false);
+                localStorage.removeItem("buy_now");
                 navigate("/cart");
               }}
               className="

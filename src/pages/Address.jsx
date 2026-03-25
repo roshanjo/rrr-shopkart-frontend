@@ -158,9 +158,21 @@ export default function Address() {
         JSON.stringify(address)
       );
 
-      // Get Cart from LocalStorage
+      // 1. Check for Buy Now item
+      const buyNowItem = JSON.parse(localStorage.getItem("buy_now"));
+      
+      // 2. Get Cart from LocalStorage
       const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-      const items = cart.map(item => ({ id: item.id, qty: item.qty || 1 }));
+      
+      // 3. Ensure ONE source of truth
+      let rawItems = [];
+      if (buyNowItem) {
+          rawItems = [buyNowItem];
+      } else {
+          rawItems = cart;
+      }
+      
+      const items = rawItems.map(item => ({ id: item.id, qty: item.qty || 1 }));
 
       if (items.length === 0) {
           toast.error("Cart is empty");
@@ -273,7 +285,10 @@ export default function Address() {
         {/* Buttons */}
         <div className="flex justify-between items-center mt-8 pt-4 border-t border-slate-100 dark:border-slate-800/50">
           <button 
-            onClick={() => navigate("/cart")}
+            onClick={() => {
+              localStorage.removeItem("buy_now");
+              navigate("/cart");
+            }}
             className="flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" /> Back to Cart
